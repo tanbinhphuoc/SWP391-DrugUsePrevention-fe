@@ -49,7 +49,7 @@ const About = () => {
             <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Our Story</h3>
               <p className="text-gray-700 mb-4">
-                Founded in 2018 by a group of dedicated healthcare professionals and community leaders, our organization
+                Founded in 2025 by a group of dedicated healthcare professionals and community leaders, our organization
                 grew from a local support group into a comprehensive resource center for drug prevention education.
               </p>
               <p className="text-gray-700">
