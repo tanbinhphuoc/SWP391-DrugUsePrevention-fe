@@ -53,7 +53,7 @@ const About = () => {
                 grew from a local support group into a comprehensive resource center for drug prevention education.
               </p>
               <p className="text-gray-700">
-                Today, we collaborate with schools, community centers, and healthcare providers to deliver
+                Today , we collaborate with schools, community centers, and healthcare providers to deliver
                 programs that reach people of all ages and backgrounds, providing them with the tools they need
                 to make informed decisions.
               </p>
