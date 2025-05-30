@@ -4,6 +4,9 @@ import Hero from './Hero';
 import Footer from './Footer';
 import About from './About';
 import Services from './Services';
+import Blog from './Blog';
+import LienHe from './LienHe';
+import Testimonials from './Testimonials';
 
 
 const HomePage = () => {
@@ -14,6 +17,9 @@ const HomePage = () => {
         <Hero />
         <About />
         <Services />
+        <Blog />
+        <Testimonials />
+        <LienHe />
     </main>
       <Footer />
       
