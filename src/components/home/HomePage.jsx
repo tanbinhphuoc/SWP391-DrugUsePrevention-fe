@@ -7,7 +7,8 @@ import Services from './Services';
 import Blog from './Blog';
 import LienHe from './LienHe';
 import Testimonials from './Testimonials';
-
+import DangNhap from './DangNhap';
+import { Link } from "react-router-dom";
 
 const HomePage = () => {
   return (
