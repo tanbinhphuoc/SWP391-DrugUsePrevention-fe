@@ -1,5 +1,6 @@
 "use client"
 
+import { Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react"
 import { Menu, X, ChevronDown, User, Search } from "lucide-react"
 import Logo from '../../assets/medical_logo.jpg' // Đã thay đổi đường dẫn logo
@@ -48,13 +49,13 @@ const Header = () => {
             <NavLinks />
 
             <div className="flex items-center space-x-3">
-              <a
-                href="/login"
+              <Link
+                to="/DangNhap"
                 className="flex items-center text-sky-700 hover:text-orange-500 transition-colors duration-200"
               >
                 <User className="h-5 w-5 mr-1" />
                 <span className="text-sm sm:text-base">Đăng nhập</span>
-              </a>
+              </Link>
               <button className="bg-sky-600 hover:bg-emerald-500 text-white border-2 border-sky-600 hover:border-emerald-500 px-5 sm:px-7 py-1.5 sm:py-2 rounded-full transition-colors duration-300 font-semibold text-sm sm:text-base">
                 Bắt đầu
               </button>
@@ -78,13 +79,13 @@ const Header = () => {
           <nav className="flex flex-col space-y-4">
             <MobileNavLinks />
             <div className="pt-4 border-t border-gray-200">
-              <a
-                href="/login"
+              <Link
+                to="/DangNhap"
                 className="flex items-center text-sky-700 hover:text-orange-500 mb-4 transition-colors duration-200"
               >
                 <User className="h-5 w-5 mr-2" />
                 <span>Đăng nhập</span>
-              </a>
+              </Link>
               <button className="w-full bg-sky-600 hover:bg-emerald-500 text-white px-7 py-2 rounded-full transition-colors duration-300 font-semibold">
                 Bắt đầu
               </button>
