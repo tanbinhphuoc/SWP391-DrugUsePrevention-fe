@@ -50,7 +50,7 @@ const Header = () => {
 
             <div className="flex items-center space-x-3">
               <Link
-                to="/DangNhap"
+                to="/Login"
                 className="flex items-center text-sky-700 hover:text-orange-500 transition-colors duration-200"
               >
                 <User className="h-5 w-5 mr-1" />
@@ -80,7 +80,7 @@ const Header = () => {
             <MobileNavLinks />
             <div className="pt-4 border-t border-gray-200">
               <Link
-                to="/DangNhap"
+                to="/Login"
                 className="flex items-center text-sky-700 hover:text-orange-500 mb-4 transition-colors duration-200"
               >
                 <User className="h-5 w-5 mr-2" />
