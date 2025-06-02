@@ -1,9 +1,9 @@
 "use client"
 
-import { Link } from "react-router-dom";
+import { Link } from "react-router-dom"
 import { useState, useEffect, useRef } from "react"
 import { Menu, X, ChevronDown, User, Search } from "lucide-react"
-import Logo from '../../assets/medical_logo.jpg' // Đã thay đổi đường dẫn logo
+import Logo from "../../assets/medical_logo.jpg" // Đã thay đổi đường dẫn logo
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -33,16 +33,14 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <a href="/" className="flex items-center">
+            <Link to="/" className="flex items-center">
               <img
-                src={Logo}
-                alt="Medical Logo" // Cập nhật alt text cho phù hợp với logo y tế
+                src={Logo || "/placeholder.svg"}
+                alt="Medical Logo"
                 className="h-14 sm:h-16 md:h-18 w-auto rounded-md shadow-sm transition-transform duration-300 hover:scale-105"
               />
-              <span className="font-bold text-xl sm:text-2xl text-sky-700">
-                PreventionSupport
-              </span>
-            </a>
+              <span className="font-bold text-xl sm:text-2xl text-sky-700 ml-2">Prevention Support</span>
+            </Link>
           </div>
 
           <nav className="hidden md:flex items-center space-x-6">
@@ -50,15 +48,18 @@ const Header = () => {
 
             <div className="flex items-center space-x-3">
               <Link
-                to="/Login"
+                to="/login"
                 className="flex items-center text-sky-700 hover:text-orange-500 transition-colors duration-200"
               >
                 <User className="h-5 w-5 mr-1" />
                 <span className="text-sm sm:text-base">Đăng nhập</span>
               </Link>
-              <button className="bg-sky-600 hover:bg-emerald-500 text-white border-2 border-sky-600 hover:border-emerald-500 px-5 sm:px-7 py-1.5 sm:py-2 rounded-full transition-colors duration-300 font-semibold text-sm sm:text-base">
+              <Link
+                to="/register"
+                className="bg-sky-600 hover:bg-emerald-500 text-white border-2 border-sky-600 hover:border-emerald-500 px-5 sm:px-7 py-1.5 sm:py-2 rounded-full transition-colors duration-300 font-semibold text-sm sm:text-base"
+              >
                 Bắt đầu
-              </button>
+              </Link>
             </div>
           </nav>
 
@@ -80,15 +81,18 @@ const Header = () => {
             <MobileNavLinks />
             <div className="pt-4 border-t border-gray-200">
               <Link
-                to="/Login"
+                to="/login"
                 className="flex items-center text-sky-700 hover:text-orange-500 mb-4 transition-colors duration-200"
               >
                 <User className="h-5 w-5 mr-2" />
                 <span>Đăng nhập</span>
               </Link>
-              <button className="w-full bg-sky-600 hover:bg-emerald-500 text-white px-7 py-2 rounded-full transition-colors duration-300 font-semibold">
+              <Link
+                to="/register"
+                className="w-full bg-sky-600 hover:bg-emerald-500 text-white px-7 py-2 rounded-full transition-colors duration-300 font-semibold block text-center"
+              >
                 Bắt đầu
-              </button>
+              </Link>
             </div>
           </nav>
         </div>
@@ -117,12 +121,15 @@ const NavLinks = () => {
 
   return (
     <>
-      <a href="#" className="text-sky-700 hover:text-orange-500 transition-colors duration-200 text-sm sm:text-base">
+      <Link to="/" className="text-sky-700 hover:text-orange-500 transition-colors duration-200 text-sm sm:text-base">
         Trang chủ
-      </a>
-      <a href="#" className="text-sky-700 hover:text-orange-500 transition-colors duration-200 text-sm sm:text-base">
+      </Link>
+      <Link
+        to="/about"
+        className="text-sky-700 hover:text-orange-500 transition-colors duration-200 text-sm sm:text-base"
+      >
         Giới thiệu
-      </a>
+      </Link>
 
       <div className="relative" ref={dropdownRef}>
         <button
@@ -143,39 +150,45 @@ const NavLinks = () => {
             servicesOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
           }`}
         >
-          <a
-            href="#"
+          <Link
+            to="/services/education"
             className="block px-4 py-2 text-sky-800 hover:bg-sky-50 hover:text-orange-500 transition-colors duration-200 text-sm"
           >
             Khóa học giáo dục
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to="/services/assessment"
             className="block px-4 py-2 text-sky-800 hover:bg-sky-50 hover:text-orange-500 transition-colors duration-200 text-sm"
           >
             Đánh giá rủi ro
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to="/services/counseling"
             className="block px-4 py-2 text-sky-800 hover:bg-sky-50 hover:text-orange-500 transition-colors duration-200 text-sm"
           >
             Tư vấn
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to="/services/community"
             className="block px-4 py-2 text-sky-800 hover:bg-sky-50 hover:text-orange-500 transition-colors duration-200 text-sm"
           >
             Chương trình cộng đồng
-          </a>
+          </Link>
         </div>
       </div>
 
-      <a href="#" className="text-sky-700 hover:text-orange-500 transition-colors duration-200 text-sm sm:text-base">
+      <Link
+        to="/resources"
+        className="text-sky-700 hover:text-orange-500 transition-colors duration-200 text-sm sm:text-base"
+      >
         Tài nguyên
-      </a>
-      <a href="#" className="text-sky-700 hover:text-orange-500 transition-colors duration-200 text-sm sm:text-base">
+      </Link>
+      <Link
+        to="/contact"
+        className="text-sky-700 hover:text-orange-500 transition-colors duration-200 text-sm sm:text-base"
+      >
         Liên hệ
-      </a>
+      </Link>
     </>
   )
 }
@@ -185,12 +198,12 @@ const MobileNavLinks = () => {
 
   return (
     <>
-      <a href="#" className="text-sky-700 hover:text-orange-500 transition-colors duration-200">
+      <Link to="/" className="text-sky-700 hover:text-orange-500 transition-colors duration-200">
         Trang chủ
-      </a>
-      <a href="#" className="text-sky-700 hover:text-orange-500 transition-colors duration-200">
+      </Link>
+      <Link to="/about" className="text-sky-700 hover:text-orange-500 transition-colors duration-200">
         Giới thiệu
-      </a>
+      </Link>
 
       <div>
         <button
@@ -212,27 +225,39 @@ const MobileNavLinks = () => {
             servicesOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 overflow-hidden"
           }`}
         >
-          <a href="#" className="block text-sky-600 hover:text-orange-500 transition-colors duration-200">
+          <Link
+            to="/services/education"
+            className="block text-sky-600 hover:text-orange-500 transition-colors duration-200"
+          >
             Khóa học giáo dục
-          </a>
-          <a href="#" className="block text-sky-600 hover:text-orange-500 transition-colors duration-200">
+          </Link>
+          <Link
+            to="/services/assessment"
+            className="block text-sky-600 hover:text-orange-500 transition-colors duration-200"
+          >
             Đánh giá rủi ro
-          </a>
-          <a href="#" className="block text-sky-600 hover:text-orange-500 transition-colors duration-200">
+          </Link>
+          <Link
+            to="/services/counseling"
+            className="block text-sky-600 hover:text-orange-500 transition-colors duration-200"
+          >
             Tư vấn
-          </a>
-          <a href="#" className="block text-sky-600 hover:text-orange-500 transition-colors duration-200">
+          </Link>
+          <Link
+            to="/services/community"
+            className="block text-sky-600 hover:text-orange-500 transition-colors duration-200"
+          >
             Chương trình cộng đồng
-          </a>
+          </Link>
         </div>
       </div>
 
-      <a href="#" className="text-sky-700 hover:text-orange-500 transition-colors duration-200">
+      <Link to="/resources" className="text-sky-700 hover:text-orange-500 transition-colors duration-200">
         Tài nguyên
-      </a>
-      <a href="#" className="text-sky-700 hover:text-orange-500 transition-colors duration-200">
+      </Link>
+      <Link to="/contact" className="text-sky-700 hover:text-orange-500 transition-colors duration-200">
         Liên hệ
-      </a>
+      </Link>
 
       <div className="relative mt-2">
         <input
