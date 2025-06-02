@@ -1,31 +1,28 @@
-import React from 'react';
-import Header from './Header';
-import Hero from './Hero';
-import Footer from './Footer';
-import About from './About';
-import Services from './Services';
-import Blog from './Blog';
-import LienHe from './LienHe';
-import Testimonials from './Testimonials';
-import Login from './Login';
-import { Link } from "react-router-dom";
+import Header from "./Header.jsx"
+import Hero from "./Hero.jsx"
+import Footer from "./Footer.jsx"
+import About from "./About.jsx"
+import Services from "./Services.jsx"
+import Blog from "./Blog.jsx"
+import LienHe from "./LienHe.jsx"
+import Testimonials from "./Testimonials.jsx"
 
 const HomePage = () => {
   return (
     <div className="min-h-screen">
-    <Header />
-    <main>
+      <Header />
+      <main>
         <Hero />
         <About />
         <Services />
         <Blog />
         <Testimonials />
         <LienHe />
-    </main>
+      </main>
       <Footer />
       
     </div>
-  );
-};
+  )
+}
 
 export default HomePage;
