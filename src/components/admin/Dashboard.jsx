@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, BookOpen, Calendar, Settings, LogOut } from "lucide-react";
+import { Users, BookOpen, Calendar, Settings, LogOut, FileText } from "lucide-react";
 import AccountManagement from "./AccountManagement";
 import CourseManagement from "./CourseManagement";
 import AppointmentManagement from "./AppointmentManagement";
+import RiskAssessmentManagement from "./RiskAssessmentManagement";
 
 const Dashboard = () => {
   const [userInfo, setUserInfo] = useState(null);
@@ -57,6 +58,7 @@ const Dashboard = () => {
     { id: "accounts", label: "Quản lý tài khoản", icon: <Users className="w-5 h-5" /> },
     { id: "courses", label: "Quản lý khóa học", icon: <BookOpen className="w-5 h-5" /> },
     { id: "appointments", label: "Quản lý lịch hẹn", icon: <Calendar className="w-5 h-5" /> },
+    { id: "assessments", label: "Quản lý đánh giá", icon: <FileText className="w-5 h-5" /> },
   ];
 
   return (
@@ -106,6 +108,7 @@ const Dashboard = () => {
         {activeTab === "accounts" && <AccountManagement />}
         {activeTab === "courses" && <CourseManagement />}
         {activeTab === "appointments" && <AppointmentManagement />}
+        {activeTab === "assessments" && <RiskAssessmentManagement />}
       </div>
     </div>
   );
