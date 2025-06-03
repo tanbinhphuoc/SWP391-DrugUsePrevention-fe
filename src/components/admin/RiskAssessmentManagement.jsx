@@ -35,6 +35,40 @@ const RiskAssessmentManagement = () => {
     },
   ]);
 
+  // Thêm states mới
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  // Xử lý tìm kiếm
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Xử lý filter theo trạng thái
+  const handleStatusFilter = (e) => {
+    setStatusFilter(e.target.value);
+  };
+
+  // Xử lý xóa assessment
+  const handleDelete = (id) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa bài đánh giá này?")) {
+      setAssessments(assessments.filter(item => item.id !== id));
+    }
+  };
+
+  // Xử lý chỉnh sửa assessment
+  const handleEdit = (id) => {
+    // TODO: Implement edit functionality
+    console.log("Editing assessment:", id);
+  };
+
+  // Filter assessments dựa trên search và status
+  const filteredAssessments = assessments.filter(assessment => {
+    const matchesSearch = assessment.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter ? assessment.status === statusFilter : true;
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -45,27 +79,33 @@ const RiskAssessmentManagement = () => {
         </button>
       </div>
 
-      {/* Search and Filter */}
+      {/* Updated Search and Filter */}
       <div className="mb-6 flex space-x-4">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
+            value={searchTerm}
+            onChange={handleSearch}
             placeholder="Tìm kiếm bài đánh giá..."
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
-        <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <select 
+          value={statusFilter}
+          onChange={handleStatusFilter}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
           <option value="">Tất cả trạng thái</option>
-          <option value="active">Đang hoạt động</option>
-          <option value="development">Đang phát triển</option>
-          <option value="inactive">Không hoạt động</option>
+          <option value="Đang hoạt động">Đang hoạt động</option>
+          <option value="Đang phát triển">Đang phát triển</option>
+          <option value="Không hoạt động">Không hoạt động</option>
         </select>
       </div>
 
-      {/* Assessments Grid */}
+      {/* Updated Assessments Grid */}
       <div className="grid grid-cols-1 gap-6">
-        {assessments.map((assessment) => (
+        {filteredAssessments.map((assessment) => (
           <div
             key={assessment.id}
             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
@@ -127,10 +167,16 @@ const RiskAssessmentManagement = () => {
                 </div>
 
                 <div className="flex space-x-2">
-                  <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
+                  <button 
+                    onClick={() => handleEdit(assessment.id)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                  >
                     <Edit2 className="w-5 h-5" />
                   </button>
-                  <button className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors">
+                  <button 
+                    onClick={() => handleDelete(assessment.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                  >
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
@@ -142,3 +188,5 @@ const RiskAssessmentManagement = () => {
     </div>
   );
 };
+
+export default RiskAssessmentManagement;
