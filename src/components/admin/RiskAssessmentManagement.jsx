@@ -142,5 +142,3 @@ const RiskAssessmentManagement = () => {
     </div>
   );
 };
-
-export default RiskAssessmentManagement; 

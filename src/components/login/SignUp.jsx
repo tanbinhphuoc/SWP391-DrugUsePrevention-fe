@@ -3,7 +3,6 @@ import { User, Mail, Lock, Eye, EyeOff, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-
 const SignUp = () => {
   const [username, setUsername] = useState("");
   const [birthDate, setBirthDate] = useState("");
@@ -246,22 +245,35 @@ const SignUp = () => {
       const response = await axios.post("https://localhost:7092/api/Auth/register", registerData, {
         headers: {
           "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
         },
+        timeout: 10000,
+        withCredentials: false,
       });
 
       alert("Đăng ký thành công! 🎉");
       console.log("Register response:", response.data);
-      navigate("/login"); // Điều hướng đến trang LoginPage
+      navigate("/login");
     } catch (error) {
       console.error("Registration error:", error);
+      
+      let errorMessage = "Đăng ký thất bại. ";
+      
+      if (error.code === "ECONNABORTED") {
+        errorMessage += "Yêu cầu đã hết thời gian chờ. Vui lòng thử lại!";
+      } else if (!error.response) {
+        errorMessage += "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại!";
+      } else {
+        errorMessage += error.response?.data?.message || "Vui lòng thử lại sau!";
+      }
+
       setErrors((prev) => ({
         ...prev,
-        api: error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại!",
+        api: errorMessage,
       }));
     }
   };
 
-  // Back to Homepage Button
   const BackToHomeButton = () => (
     <button
       type="button"
