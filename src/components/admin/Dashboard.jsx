@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Users, BookOpen, Calendar, Settings, LogOut } from "lucide-react";
+import AccountManagement from "./AccountManagement";
+import CourseManagement from "./CourseManagement";
+import AppointmentManagement from "./AppointmentManagement";
 
 const Dashboard = () => {
   const [userInfo, setUserInfo] = useState(null);
+  const [activeTab, setActiveTab] = useState("accounts");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,7 +30,6 @@ const Dashboard = () => {
         };
       }
 
-      // Check if token has expired
       const currentTime = new Date();
       const expirationTime = new Date(userData.expiresAt);
       if (currentTime > expirationTime) {
@@ -49,31 +53,60 @@ const Dashboard = () => {
     navigate("/login", { replace: true });
   };
 
+  const menuItems = [
+    { id: "accounts", label: "Quản lý tài khoản", icon: <Users className="w-5 h-5" /> },
+    { id: "courses", label: "Quản lý khóa học", icon: <BookOpen className="w-5 h-5" /> },
+    { id: "appointments", label: "Quản lý lịch hẹn", icon: <Calendar className="w-5 h-5" /> },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-3xl font-bold mb-4">Quản lý tài khoản</h1>
-      {userInfo ? (
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <p>
-            <strong>Tên người dùng:</strong> {userInfo.userName}
-          </p>
-          <p>
-            <strong>Email:</strong> {userInfo.email}
-          </p>
-          <p>
-            <strong>Hết hạn token:</strong>{" "}
-            {new Date(userInfo.expiresAt).toLocaleString()}
-          </p>
+    <div className="min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <div className="fixed inset-y-0 left-0 w-64 bg-sky-800 text-white">
+        <div className="p-4">
+          <h2 className="text-2xl font-bold mb-8">Admin Dashboard</h2>
+          <nav>
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
+                  activeTab === item.id
+                    ? "bg-sky-700 text-white"
+                    : "hover:bg-sky-700/50 text-gray-300"
+                }`}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+        
+        {/* User Info & Logout */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-sky-900">
+          {userInfo && (
+            <div className="mb-4">
+              <p className="text-sm text-gray-300">{userInfo.email}</p>
+              <p className="text-xs text-gray-400">{userInfo.userName}</p>
+            </div>
+          )}
           <button
             onClick={handleLogout}
-            className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
           >
-            Đăng xuất
+            <LogOut className="w-4 h-4" />
+            <span>Đăng xuất</span>
           </button>
         </div>
-      ) : (
-        <p>Đang tải thông tin...</p>
-      )}
+      </div>
+
+      {/* Main Content */}
+      <div className="ml-64 p-8">
+        {activeTab === "accounts" && <AccountManagement />}
+        {activeTab === "courses" && <CourseManagement />}
+        {activeTab === "appointments" && <AppointmentManagement />}
+      </div>
     </div>
   );
 };
