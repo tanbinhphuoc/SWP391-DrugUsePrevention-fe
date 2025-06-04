@@ -1,5 +1,4 @@
 import React from 'react';
-import Hero from '../../common/Hero';
 
 const FeatureCard = ({ icon, title, description }) => {
   return (

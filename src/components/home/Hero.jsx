@@ -1,6 +1,6 @@
 import React from 'react';
 import { Heart, Book, Calendar, FileCheck } from 'lucide-react';
-import FeatureCard from '../features/home/FeatureCard';
+import FeatureCard from './FeatureCard';
 
 const Hero = () => {
   return (

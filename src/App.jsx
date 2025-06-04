@@ -1,30 +1,32 @@
-import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomePage from './pages/HomePage.jsx';
-import LoginPage from './pages/LoginPage.jsx';
-import ResourcesPage from "./pages/ResourcesPage.jsx";
-import EducationCoursesPage from "./pages/EducationCoursePage.jsx";
-import RiskAssessmentPage from "./pages/RiskAssessmentPage.jsx";
-import ConsultationPage from "./pages/ConsultantPage.jsx";
-import CommunityProgramsPage from "./pages/CommunityProgramPage.jsx";
+import HomePage from "./components/home/HomePage.jsx";
+import SignUp from "./components/login/SignUp.jsx";
+import SignIn from "./components/login/SignIn.jsx";
+import Dashboard from "./components/admin/Dashboard.jsx";
+import ResourcesPage from "./components/resource/ResourcesPage.jsx";
+import CommunityProgramsPage from "./components/dichvu/community/CommunityProgramPage.jsx";
+import ConsultationPage from "./components/dichvu/consultant/ConsultantPage.jsx";
+import EducationCoursesPage from "./components/dichvu/education/EducationCoursePage.jsx";
+import RiskAssessmentPage from "./components/dichvu/risk/RiskAssessmentPage.jsx";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <Router>
-        {/* Routes for navigation */}
+      <div className="App">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={<SignIn />} />
+          <Route path="/register" element={<SignUp />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/education-courses" element={<EducationCoursesPage />} />
           <Route path="/risk-assessment" element={<RiskAssessmentPage />} />
           <Route path="/consultation" element={<ConsultationPage />} />
           <Route path="/community-programs" element={<CommunityProgramsPage />} />
         </Routes>
+      </div>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;
