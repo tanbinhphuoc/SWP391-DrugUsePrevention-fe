@@ -3,6 +3,8 @@ import HomePage from "./components/home/HomePage.jsx";
 import SignUp from "./components/login/SignUp.jsx";
 import SignIn from "./components/login/SignIn.jsx";
 import Dashboard from "./components/admin/Dashboard.jsx";
+import UserDashboard from "./components/user/UserDashboard.jsx";
+
 
 function App() {
   return (
@@ -13,6 +15,7 @@ function App() {
           <Route path="/login" element={<SignIn />} />
           <Route path="/register" element={<SignUp />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/member-dashboard" element={<UserDashboard />} /> 
         </Routes>
       </div>
     </Router>
