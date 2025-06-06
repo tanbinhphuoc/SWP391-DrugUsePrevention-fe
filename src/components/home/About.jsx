@@ -1,13 +1,77 @@
 import React from 'react';
 import { Shield, Award, Users, Leaf, Heart, Sparkles, Star, ArrowRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const About = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [activeCard, setActiveCard] = useState(null);
+  const [scrollAnimations, setScrollAnimations] = useState({
+    title: false,
+    subtitle: false,
+    description: false,
+    values: false,
+    story: false,
+    stats: false,
+    cta: false
+  });
+
+  const sectionRef = useRef(null);
+  const titleRef = useRef(null);
+  const subtitleRef = useRef(null);
+  const descriptionRef = useRef(null);
+  const valuesRef = useRef(null);
+  const storyRef = useRef(null);
+  const statsRef = useRef(null);
+  const ctaRef = useRef(null);
 
   useEffect(() => {
-    setIsVisible(true);
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const target = entry.target;
+          
+          if (target === sectionRef.current) {
+            setIsVisible(true);
+          }
+          
+          // Trigger animations with staggered delays
+          if (target === titleRef.current) {
+            setTimeout(() => setScrollAnimations(prev => ({ ...prev, title: true })), 100);
+          }
+          if (target === subtitleRef.current) {
+            setTimeout(() => setScrollAnimations(prev => ({ ...prev, subtitle: true })), 300);
+          }
+          if (target === descriptionRef.current) {
+            setTimeout(() => setScrollAnimations(prev => ({ ...prev, description: true })), 500);
+          }
+          if (target === valuesRef.current) {
+            setTimeout(() => setScrollAnimations(prev => ({ ...prev, values: true })), 700);
+          }
+          if (target === storyRef.current) {
+            setTimeout(() => setScrollAnimations(prev => ({ ...prev, story: true })), 900);
+          }
+          if (target === statsRef.current) {
+            setTimeout(() => setScrollAnimations(prev => ({ ...prev, stats: true })), 1100);
+          }
+          if (target === ctaRef.current) {
+            setTimeout(() => setScrollAnimations(prev => ({ ...prev, cta: true })), 1300);
+          }
+        }
+      });
+    }, observerOptions);
+
+    // Observe all elements
+    const elements = [sectionRef, titleRef, subtitleRef, descriptionRef, valuesRef, storyRef, statsRef, ctaRef];
+    elements.forEach(ref => {
+      if (ref.current) observer.observe(ref.current);
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   const stats = [
@@ -39,7 +103,11 @@ const About = () => {
   ];
 
   return (
-    <div id="about" className="scroll-smooth min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 relative overflow-hidden">
+    <div 
+      ref={sectionRef}
+      id="about" 
+      className="scroll-smooth min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 relative overflow-hidden"
+    >
       {/* Animated geometric background */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Large glowing orbs */}
@@ -108,38 +176,78 @@ const About = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Header Section */}
-        <div className={`text-center mb-20 transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-6 py-2 rounded-full shadow-lg mb-6">
+        <div className="text-center mb-20">
+          <div className={`inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-6 py-2 rounded-full shadow-lg mb-6 transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
             <Sparkles className="h-5 w-5 text-cyan-400" />
             <span className="text-white font-medium">Về Chúng Tôi</span>
           </div>
           
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-6 leading-tight">
-            Phòng Chống Ma Túy<br />
-            <span className="text-3xl md:text-5xl lg:text-6xl bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">Cùng Cộng Đồng</span>
-          </h1>
-          
-          <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-200 leading-relaxed">
-            Chúng tôi là tổ chức tình nguyện tập trung vào phòng chống ma túy thông qua giáo dục, 
-            gắn kết cộng đồng và dịch vụ hỗ trợ cá nhân hóa.
-          </p>
+          {/* Main Title with Zoom-In Effect */}
+          <div 
+            ref={titleRef}
+            className={`transform transition-all duration-1500 ease-out ${
+              scrollAnimations.title 
+                ? 'scale-100 opacity-100 translate-y-0' 
+                : 'scale-75 opacity-0 translate-y-8'
+            }`}
+          >
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-6 leading-tight animate-text-shimmer">
+              Phòng Chống Ma Túy
+            </h1>
+          </div>
 
-          <div className="flex justify-center mt-8">
-            <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full shadow-lg shadow-cyan-500/25"></div>
+          {/* Subtitle with Slide-Up Effect */}
+          <div 
+            ref={subtitleRef}
+            className={`transform transition-all duration-1500 ease-out delay-300 ${
+              scrollAnimations.subtitle 
+                ? 'scale-100 opacity-100 translate-y-0' 
+                : 'scale-90 opacity-0 translate-y-6'
+            }`}
+          >
+            <span className="text-3xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent animate-text-shimmer">
+              Cùng Cộng Đồng
+            </span>
+          </div>
+          
+          {/* Description with Fade-In Effect */}
+          <div 
+            ref={descriptionRef}
+            className={`transform transition-all duration-1500 ease-out delay-500 ${
+              scrollAnimations.description 
+                ? 'opacity-100 translate-y-0' 
+                : 'opacity-0 translate-y-4'
+            }`}
+          >
+            <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-200 leading-relaxed mt-6">
+              Chúng tôi là tổ chức tình nguyện tập trung vào phòng chống ma túy thông qua giáo dục, 
+              gắn kết cộng đồng và dịch vụ hỗ trợ cá nhân hóa.
+            </p>
+          </div>
+
+          <div className={`flex justify-center mt-8 transform transition-all duration-1000 delay-700 ${scrollAnimations.description ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+            <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full shadow-lg shadow-cyan-500/25 animate-pulse"></div>
           </div>
         </div>
 
-        {/* Values Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mb-20">
+        {/* Values Grid with Staggered Animation */}
+        <div 
+          ref={valuesRef}
+          className="grid md:grid-cols-3 gap-8 mb-20"
+        >
           {values.map((item, idx) => (
             <div
               key={idx}
-              className={`group relative transform transition-all duration-700 hover:scale-105 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
-              style={{ transitionDelay: `${idx * 200}ms` }}
+              className={`group relative transform transition-all duration-1000 hover:scale-105 ${
+                scrollAnimations.values 
+                  ? 'translate-y-0 opacity-100 scale-100' 
+                  : 'translate-y-12 opacity-0 scale-95'
+              }`}
+              style={{ transitionDelay: `${idx * 200 + 200}ms` }}
               onMouseEnter={() => setActiveCard(idx)}
               onMouseLeave={() => setActiveCard(null)}
             >
-              <div className={`relative bg-gradient-to-br ${item.gradient} p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 border border-white/20 backdrop-blur-sm overflow-hidden`}>
+              <div className={`relative bg-gradient-to-br ${item.gradient} p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 border border-white/20 backdrop-blur-sm overflow-hidden transform hover:rotate-1`}>
                 {/* Animated background effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
@@ -151,7 +259,7 @@ const About = () => {
                 </div>
 
                 <div className="relative z-10">
-                  <div className="inline-flex items-center justify-center p-4 bg-white/20 rounded-2xl text-white mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                  <div className="inline-flex items-center justify-center p-4 bg-white/20 rounded-2xl text-white mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 animate-bounce-subtle">
                     {item.icon}
                   </div>
                   
@@ -164,7 +272,7 @@ const About = () => {
                   </p>
 
                   <div className="mt-6 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                    <ArrowRight className="h-5 w-5 text-yellow-300" />
+                    <ArrowRight className="h-5 w-5 text-yellow-300 animate-pulse" />
                   </div>
                 </div>
               </div>
@@ -172,49 +280,64 @@ const About = () => {
           ))}
         </div>
 
-        {/* Story Section */}
-        <div className={`bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl shadow-2xl p-8 md:p-12 mb-16 transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+        {/* Story Section with Slide Animation */}
+        <div 
+          ref={storyRef}
+          className={`bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl shadow-2xl p-8 md:p-12 mb-16 transform transition-all duration-1500 ${
+            scrollAnimations.story 
+              ? 'translate-x-0 opacity-100' 
+              : '-translate-x-8 opacity-0'
+          }`}
+        >
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 backdrop-blur-sm border border-cyan-400/20 px-4 py-2 rounded-full mb-6">
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 backdrop-blur-sm border border-cyan-400/20 px-4 py-2 rounded-full mb-6 animate-pulse">
                 <Heart className="h-4 w-4 text-cyan-400" />
                 <span className="text-cyan-100 font-medium text-sm">Câu Chuyện Của Chúng Tôi</span>
               </div>
               
-              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-6">
+              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-6 animate-text-shimmer">
                 Hành Trình Phát Triển
               </h2>
               
               <div className="space-y-6 text-gray-300 leading-relaxed">
-                <p>
+                <p className="transform transition-all duration-1000 delay-300 opacity-0 translate-y-4 animate-fade-in-up">
                   Được thành lập vào năm 2025 bởi một nhóm các chuyên gia y tế và lãnh đạo cộng đồng tận tâm, 
                   tổ chức của chúng tôi đã phát triển từ một nhóm hỗ trợ địa phương thành một trung tâm 
                   tài nguyên toàn diện về giáo dục phòng chống ma túy.
                 </p>
                 
-                <p>
+                <p className="transform transition-all duration-1000 delay-500 opacity-0 translate-y-4 animate-fade-in-up">
                   Hiện nay, chúng tôi hợp tác với các trường học, trung tâm cộng đồng và các nhà cung cấp 
                   dịch vụ y tế để triển khai các chương trình tiếp cận mọi lứa tuổi và hoàn cảnh.
                 </p>
               </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-6">
+            {/* Stats Grid with Pop Animation */}
+            <div 
+              ref={statsRef}
+              className="grid grid-cols-2 gap-6"
+            >
               {stats.map((stat, idx) => (
                 <div
                   key={idx}
-                  className={`group relative bg-gradient-to-br ${stat.color} p-6 rounded-2xl shadow-lg hover:shadow-xl transform transition-all duration-500 hover:scale-105 text-center overflow-hidden`}
+                  className={`group relative bg-gradient-to-br ${stat.color} p-6 rounded-2xl shadow-lg hover:shadow-xl transform transition-all duration-700 hover:scale-105 text-center overflow-hidden ${
+                    scrollAnimations.stats 
+                      ? 'scale-100 opacity-100 translate-y-0' 
+                      : 'scale-75 opacity-0 translate-y-8'
+                  }`}
+                  style={{ transitionDelay: `${idx * 150}ms` }}
                 >
                   {/* Animated background */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   
                   <div className="relative z-10">
-                    <div className="inline-flex items-center justify-center p-3 bg-white/20 rounded-xl text-white mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <div className="inline-flex items-center justify-center p-3 bg-white/20 rounded-xl text-white mb-3 group-hover:scale-110 transition-transform duration-300 animate-bounce-subtle">
                       {stat.icon}
                     </div>
                     
-                    <div className="text-3xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                    <div className="text-3xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300 animate-number-count">
                       {stat.number}
                     </div>
                     
@@ -232,9 +355,16 @@ const About = () => {
           </div>
         </div>
 
-        {/* Call to Action */}
-        <div className={`text-center transform transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-8 py-4 rounded-full shadow-lg hover:shadow-xl hover:shadow-cyan-500/25 transform hover:scale-105 transition-all duration-300 cursor-pointer group">
+        {/* Call to Action with Zoom Effect */}
+        <div 
+          ref={ctaRef}
+          className={`text-center transform transition-all duration-1500 ${
+            scrollAnimations.cta 
+              ? 'scale-100 opacity-100 translate-y-0' 
+              : 'scale-90 opacity-0 translate-y-8'
+          }`}
+        >
+          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-8 py-4 rounded-full shadow-lg hover:shadow-xl hover:shadow-cyan-500/25 transform hover:scale-105 transition-all duration-300 cursor-pointer group animate-pulse-glow">
             <span className="font-semibold">Tham Gia Cùng Chúng Tôi</span>
             <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
           </div>
@@ -251,6 +381,32 @@ const About = () => {
           0%, 100% { d: path("M0,60 C300,20 600,100 900,60 C1050,30 1150,80 1200,60 L1200,120 L0,120 Z"); }
           50% { d: path("M0,80 C300,40 600,120 900,80 C1050,50 1150,100 1200,80 L1200,120 L0,120 Z"); }
         }
+
+        @keyframes textShimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+
+        @keyframes fadeInUp {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounceSubtle {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-5px); }
+        }
+
+        @keyframes numberCount {
+          0% { transform: scale(0.8); opacity: 0; }
+          50% { transform: scale(1.1); }
+          100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulseGlow {
+          0%, 100% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
+          50% { box-shadow: 0 0 30px rgba(34, 211, 238, 0.5), 0 0 40px rgba(147, 51, 234, 0.3); }
+        }
         
         .animate-float {
           animation: float 6s ease-in-out infinite;
@@ -266,6 +422,27 @@ const About = () => {
 
         .animate-bounce-slow {
           animation: bounce 4s ease-in-out infinite;
+        }
+
+        .animate-text-shimmer {
+          background-size: 200% auto;
+          animation: textShimmer 3s ease-in-out infinite;
+        }
+
+        .animate-fade-in-up {
+          animation: fadeInUp 1s ease-out forwards;
+        }
+
+        .animate-bounce-subtle {
+          animation: bounceSubtle 3s ease-in-out infinite;
+        }
+
+        .animate-number-count {
+          animation: numberCount 0.8s ease-out;
+        }
+
+        .animate-pulse-glow {
+          animation: pulseGlow 2s ease-in-out infinite;
         }
       `}</style>
     </div>

@@ -1,41 +1,44 @@
 import { Phone, Mail, Heart } from 'lucide-react';
 
-const ContactInfoSection = () => (
-  <section className="py-16 px-4 bg-gray-800 text-white">
-    <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Liên Hệ Khẩn Cấp
-        </h2>
-        <p className="text-lg text-gray-300">
-          Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7
-        </p>
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-8 text-center">
-        <div className="bg-gray-700 rounded-xl p-6">
-          <Phone className="w-8 h-8 text-blue-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">Hotline</h3>
-          <p className="text-blue-400 font-semibold">1900 1234</p>
-          <p className="text-gray-300 text-sm">24/7 - Miễn phí</p>
+// Contact Info Section Component
+const ContactInfoSection = () => {
+  return (
+    <div className="relative py-20 px-6">
+      <div className="absolute inset-0 bg-black/20"></div>
+      <div className="relative max-w-6xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-white mb-4">Liên hệ với chúng tôi</h2>
+          <p className="text-xl text-blue-100">
+            Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7
+          </p>
         </div>
-
-        <div className="bg-gray-700 rounded-xl p-6">
-          <Mail className="w-8 h-8 text-emerald-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">Email</h3>
-          <p className="text-emerald-400 font-semibold">support@preventionsupport.vn</p>
-          <p className="text-gray-300 text-sm">Phản hồi trong 2h</p>
-        </div>
-
-        <div className="bg-gray-700 rounded-xl p-6">
-          <Heart className="w-8 h-8 text-red-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">Khẩn cấp</h3>
-          <p className="text-red-400 font-semibold">113</p>
-          <p className="text-gray-300 text-sm">Cứu hộ khẩn cấp</p>
+        
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="bg-white/15 backdrop-blur-lg rounded-2xl p-8 text-center border border-white/20 hover:bg-white/20 transition-all duration-300">
+            <Phone className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">Điện thoại</h3>
+            <p className="text-blue-100">+84 123 456 789</p>
+            <p className="text-blue-100">+84 987 654 321</p>
+          </div>
+          
+          <div className="bg-white/15 backdrop-blur-lg rounded-2xl p-8 text-center border border-white/20 hover:bg-white/20 transition-all duration-300">
+            <Mail className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">Email</h3>
+            <p className="text-blue-100">info@consultation.com</p>
+            <p className="text-blue-100">support@consultation.com</p>
+          </div>
+          
+          <div className="bg-white/15 backdrop-blur-lg rounded-2xl p-8 text-center border border-white/20 hover:bg-white/20 transition-all duration-300">
+            <Heart className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">Hỗ trợ 24/7</h3>
+            <p className="text-blue-100">Luôn sẵn sàng</p>
+            <p className="text-blue-100">Chăm sóc tận tâm</p>
+          </div>
         </div>
       </div>
     </div>
-  </section>
-);
+  );
+};
+
 
 export default ContactInfoSection;

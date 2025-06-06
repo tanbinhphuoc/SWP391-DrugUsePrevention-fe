@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import { MessageCircle, Video, Calendar, Clock, Star, Phone, Mail, CheckCircle, ArrowRight, Users, Award, Heart } from 'lucide-react';
-import HeroSection from '../consultant/HeroSection'
-import ServicesSection from '../consultant/ServiceSection'
-import ExpertsSection from '../consultant/ExpertSection'
-import BookingFormSection from './BookingFormSection'
-import ContactInfoSection from '../consultant/ContactInfoSection'
-
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, MessageCircle, Video, Calendar, Clock, Star, Phone, Mail, CheckCircle, ArrowRight, Users } from 'lucide-react';
+import HeroSection from './HeroSection';
+import ServicesSection from './ServiceSection';
+import ExpertsSection from './ExpertSection';
+import ContactInfoSection from './ContactInfoSection';
+import BookingFormSection from './BookingFormSection';
+import AnimatedBackground from './AnimatedBackground';
 
 const ConsultationPage = () => {
   const [selectedService, setSelectedService] = useState(null);
@@ -83,48 +81,53 @@ const ConsultationPage = () => {
     });
   };
 
-  const navigate = useNavigate();
-  
-    const handleGoHome = () => {
-      navigate('/')
-    }
+  const handleGoHome = () => {
+    window.location.href = '/'
+  }
 
   const handleSubmit = () => {
     alert('Đăng ký tư vấn thành công! Chúng tôi sẽ liên hệ với bạn trong 24h.');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <button
-        onClick={handleGoHome}
-        className="fixed top-6 left-6 z-50 bg-white text-blue-600 px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2 hover:bg-blue-50 border border-blue-200"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span className="font-semibold">Về trang chủ</span>
-      </button>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated Background */}
+      <AnimatedBackground />
+      
+      {/* Content */}
+      <div className="relative z-10">
+        <button
+          onClick={handleGoHome}
+          className="fixed top-6 left-6 z-50 bg-white/20 backdrop-blur-lg text-white px-6 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center space-x-2 hover:bg-white/30 border border-white/30 group"
+        >
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="font-semibold">Về trang chủ</span>
+        </button>
 
-      {/* Hero Section */}
-      <HeroSection />
+        {/* Hero Section */}
+        <HeroSection />
 
-      {/* Services Section */}
-      <ServicesSection
-        consultationServices={consultationServices}
-        selectedService={selectedService}
-        setSelectedService={setSelectedService}
-      />  
+        {/* Services Section */}
+        <ServicesSection
+          consultationServices={consultationServices}
+          selectedService={selectedService}
+          setSelectedService={setSelectedService}
+        />  
 
-      {/* Experts Section */}
-      <ExpertsSection experts={experts} />
+        {/* Experts Section */}
+        <ExpertsSection experts={experts} />
 
-      {/* Booking Form Section */}
-      <BookingFormSection
-        formData={formData}
-        handleInputChange={handleInputChange}
-        handleSubmit={handleSubmit}
-      />
+        {/* Booking Form Section */}
+        <BookingFormSection
+          formData={formData}
+          handleInputChange={handleInputChange}
+          handleSubmit={handleSubmit}
+        />
 
-      {/* Contact Info Section */}
-      <ContactInfoSection />
+        {/* Contact Info Section */}
+        <ContactInfoSection />
+
+      </div>
     </div>
   );
 };

@@ -16,14 +16,13 @@ import {
   Brain,
   ArrowLeft
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import HeaderSection from './HeaderSection';
+import StatsSection from './StatsSection';
+import FilterSection from './FilterSection';
+import FeaturesSection from './FeaturesSection';
+import CoursesGrid from './CoursesGrid';
+import CallToActionSection from './CallToSection';
 
-import HeaderSection from '../education/HeaderSection'
-import StatsSection from '../education/StatsSection'
-import FilterSection from '../education/FilterSection'
-import CoursesGrid from '../education/CoursesGrid'
-import FeaturesSection from '../education/FeaturesSection'
-import CallToActionSection from '../education/CallToSection'
 
 const EducationCoursesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -32,10 +31,8 @@ const EducationCoursesPage = () => {
     alert('Đăng ký tư vấn thành công! Chúng tôi sẽ liên hệ với bạn trong 24h.');
   };
 
-  const navigate = useNavigate();
-
   const handleGoHome = () => {
-    navigate('/')
+    window.location.href = '/'
   }
 
   const courses = [
@@ -106,60 +103,117 @@ const EducationCoursesPage = () => {
     : courses.filter(course => course.category === selectedCategory);
 
   const stats = [
-    { icon: BookOpen, value: "50+", label: "Khóa học", color: "text-blue-600" },
-    { icon: Users, value: "10,000+", label: "Học viên", color: "text-green-600" },
-    { icon: Award, value: "98%", label: "Hài lòng", color: "text-purple-600" },
-    { icon: Clock, value: "24/7", label: "Hỗ trợ", color: "text-orange-600" }
+    { icon: BookOpen, value: "50+", label: "Khóa học", color: "text-blue-300" },
+    { icon: Users, value: "10,000+", label: "Học viên", color: "text-green-300" },
+    { icon: Award, value: "98%", label: "Hài lòng", color: "text-purple-300" },
+    { icon: Clock, value: "24/7", label: "Hỗ trợ", color: "text-orange-300" }
   ];
 
-  
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 z-0">
+        {/* Base gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900"></div>
+        
+        {/* Animated shapes */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+          {/* Large floating orbs */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-3/4 right-1/4 w-80 h-80 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
+          
+          {/* Geometric patterns */}
+          <div className="absolute top-20 right-20 w-32 h-32 border border-white/10 rotate-45 animate-spin-slow"></div>
+          <div className="absolute bottom-20 left-20 w-24 h-24 border border-white/10 rotate-45 animate-spin-slow delay-1000"></div>
+          
+          {/* Floating particles */}
+          <div className="absolute top-1/3 left-1/2 w-2 h-2 bg-white/30 rounded-full animate-bounce delay-500"></div>
+          <div className="absolute top-2/3 left-1/3 w-1 h-1 bg-white/40 rounded-full animate-bounce delay-1500"></div>
+          <div className="absolute top-1/2 right-1/4 w-3 h-3 bg-white/20 rounded-full animate-bounce delay-2500"></div>
+        </div>
+        
+        {/* Overlay gradients for depth */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30"></div>
+      </div>
+
       {/* Home Button - Fixed Position */}
       <button
         onClick={handleGoHome}
-        className="fixed top-6 left-6 z-50 bg-white text-blue-600 px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2 hover:bg-blue-50 border border-blue-200"
+        className="fixed top-6 left-6 z-50 bg-white/90 backdrop-blur-sm text-blue-600 px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2 hover:bg-white border border-white/20"
       >
         <ArrowLeft className="w-4 h-4" />
         <span className="font-semibold">Về trang chủ</span>
       </button>
       
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      {/* Header Section */}
-      <HeaderSection />
+      {/* Main Content */}
+      <div className="relative z-10">
+        {/* Header Section */}
+        <HeaderSection />
 
-      {/* Stats Section */}
-      <StatsSection stats={stats} />
+        {/* Stats Section */}
+        <StatsSection stats={stats} />
 
-      {/* Filter Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Chọn khóa học phù hợp
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Từ cơ bản đến nâng cao, chúng tôi có đầy đủ các khóa học cho mọi đối tượng
-          </p>
+        {/* Main Content Area */}
+        <div className="relative bg-white/5 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Chọn khóa học phù hợp
+              </h2>
+              <p className="text-lg text-white/80 max-w-2xl mx-auto">
+                Từ cơ bản đến nâng cao, chúng tôi có đầy đủ các khóa học cho mọi đối tượng
+              </p>
+            </div>
+
+            <FilterSection 
+              categories={categories}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+            />
+
+            {/* Courses Grid */}
+            <CoursesGrid courses={filteredCourses} />
+          </div>
         </div>
 
-        <FilterSection 
-            categories={categories}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-        />
-
-
-        {/* Courses Grid */}
-        <CoursesGrid courses={filteredCourses} />
+        {/* Features Section */}
+        <FeaturesSection />
+      
+        {/* CTA Section */}
+        <CallToActionSection />
       </div>
 
-      {/* Features Section */}
-      <FeaturesSection />
-    
-      {/* CTA Section */}
-      <CallToActionSection />
-    </div>
+      {/* Custom Styles */}
+      <style>{`
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fade-in-delay {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-spin-slow {
+          animation: spin-slow 20s linear infinite;
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 1s ease-out;
+        }
+        
+        .animate-fade-in-delay {
+          animation: fade-in-delay 1s ease-out 0.3s both;
+        }
+      `}</style>
     </div>
   );
 };

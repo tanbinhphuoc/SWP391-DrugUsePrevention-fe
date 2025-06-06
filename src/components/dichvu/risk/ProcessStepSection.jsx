@@ -1,33 +1,60 @@
-const ProcessStepsSection = ({ steps }) => (
-  <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-20">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-16">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Quy trình đánh giá
-        </h2>
-        <p className="text-xl opacity-90 max-w-3xl mx-auto">
-          Quy trình 4 bước đơn giản và hiệu quả
-        </p>
-      </div>
+import React from 'react';
+import { ArrowRight } from 'lucide-react';
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        {steps.map((step, index) => (
-          <div key={step.number} className="text-center relative">
-            {index < steps.length - 1 && (
-              <div className="hidden md:block absolute top-8 left-1/2 w-full h-0.5 bg-gradient-to-r from-red-500 to-transparent transform translate-x-8"></div>
-            )}
-            <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 relative z-10">
-                <span className="text-2xl font-bold">{step.number}</span>
+const steps = [
+  {
+    number: 1,
+    title: 'Đăng ký & Tư vấn',
+    description: 'Liên hệ với chuyên gia để được tư vấn phương pháp phù hợp'
+  },
+  {
+    number: 2,
+    title: 'Thu thập Thông tin',
+    description: 'Thực hiện khảo sát và thu thập dữ liệu cần thiết'
+  },
+  {
+    number: 3,
+    title: 'Phân tích & Đánh giá',
+    description: 'Chuyên gia phân tích dữ liệu và đưa ra đánh giá chính xác'
+  },
+  {
+    number: 4,
+    title: 'Báo cáo & Tư vấn',
+    description: 'Nhận báo cáo chi tiết và kế hoạch phòng ngừa cụ thể'
+  }
+];
+
+const ProcessStepsSection = () => {
+  return (
+    <section className="py-16 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-gray-800 mb-4">Quy trình Đánh giá</h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Quy trình đánh giá rủi ro được thực hiện theo 4 bước chuẩn quốc tế
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {steps.map((step, index) => (
+            <div key={step.number} className="relative text-center group">
+              <div className="bg-white/60 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-white/50 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white text-2xl font-bold mb-4">
+                  {step.number}
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-3">{step.title}</h3>
+                <p className="text-gray-600">{step.description}</p>
               </div>
-              <h3 className="text-xl font-bold mb-3">{step.title}</h3>
-              <p className="text-gray-300 leading-relaxed">{step.description}</p>
+              {index < steps.length - 1 && (
+                <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
+                  <ArrowRight className="w-6 h-6 text-gray-400" />
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  </div>
-);
+    </section>
+  );
+};
 
 export default ProcessStepsSection;

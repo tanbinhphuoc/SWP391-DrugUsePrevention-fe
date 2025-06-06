@@ -1,54 +1,50 @@
 import { Clock, CheckCircle } from 'lucide-react';
 
-const ServicesSection = ({ consultationServices, selectedService, setSelectedService }) => (
-  <section className="py-16 px-4">
-    <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-          Các Dịch Vụ Tư Vấn
-        </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Chọn phương thức tư vấn phù hợp với nhu cầu và hoàn cảnh của bạn
-        </p>
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-8">
-        {consultationServices.map((service) => (
-          <div
-            key={service.id}
-            className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2 ${
-              selectedService === service.id ? 'ring-4 ring-blue-500' : ''
-            }`}
-            onClick={() => setSelectedService(service.id)}
-          >
-            <div className="p-8">
-              <div className="text-blue-600 mb-4">{service.icon}</div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">{service.title}</h3>
-              <p className="text-gray-600 mb-4">{service.description}</p>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-2xl font-bold text-blue-600">{service.price}</span>
-                <span className="text-sm text-gray-500 flex items-center">
-                  <Clock className="w-4 h-4 mr-1" />
-                  {service.duration}
-                </span>
+// Services Section Component
+const ServicesSection = ({ consultationServices, selectedService, setSelectedService }) => {
+  return (
+    <div className="relative py-20 px-6">
+      <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+      <div className="relative max-w-6xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-white mb-4">Dịch vụ Tư vấn</h2>
+          <p className="text-xl text-blue-100 max-w-2xl mx-auto">
+            Lựa chọn dịch vụ phù hợp với nhu cầu của bạn
+          </p>
+        </div>
+        
+        <div className="grid md:grid-cols-3 gap-8">
+          {consultationServices.map((service) => (
+            <div 
+              key={service.id}
+              className={`bg-white/15 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:transform hover:-translate-y-2 hover:shadow-2xl ${
+                selectedService === service.id ? 'ring-2 ring-yellow-400 bg-white/25' : ''
+              }`}
+              onClick={() => setSelectedService(service.id)}
+            >
+              <div className="text-yellow-400 mb-4">{service.icon}</div>
+              <h3 className="text-2xl font-bold text-white mb-3">{service.title}</h3>
+              <p className="text-blue-100 mb-4">{service.description}</p>
+              <div className="text-yellow-300 font-bold text-xl mb-2">{service.price}</div>
+              <div className="text-blue-200 mb-4 flex items-center">
+                <Clock className="w-4 h-4 mr-2" />
+                {service.duration}
               </div>
-              <ul className="space-y-2 mb-6">
+              <ul className="space-y-2">
                 {service.features.map((feature, index) => (
-                  <li key={index} className="flex items-center text-sm text-gray-600">
-                    <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                  <li key={index} className="text-blue-100 flex items-center">
+                    <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
                     {feature}
                   </li>
                 ))}
               </ul>
-              <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                Chọn dịch vụ
-              </button>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
-  </section>
-);
+  );
+};
+
 
 export default ServicesSection;

@@ -1,16 +1,15 @@
 const StatsSection = ({ stats }) => (
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {stats.map((stat, index) => (
-        <div
-          key={index}
-          className="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 text-center"
-        >
-          <stat.icon className={`h-8 w-8 mx-auto mb-3 ${stat.color}`} />
-          <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
-          <div className="text-gray-600 text-sm">{stat.label}</div>
-        </div>
-      ))}
+  <div className="relative py-16 bg-white/10 backdrop-blur-sm">
+    <div className="max-w-6xl mx-auto px-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {stats.map((stat, index) => (
+          <div key={index} className="text-center text-white">
+            <stat.icon className={`w-12 h-12 mx-auto mb-4 ${stat.color}`} />
+            <div className="text-3xl font-bold mb-2">{stat.value}</div>
+            <div className="text-lg opacity-90">{stat.label}</div>
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 );

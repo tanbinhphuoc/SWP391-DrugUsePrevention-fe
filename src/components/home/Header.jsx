@@ -74,9 +74,12 @@ const Header = () => {
                 <User className="h-5 w-5 mr-1" />
                 <span className="text-sm sm:text-base">Đăng nhập</span>
               </Link>
-              <button className="bg-sky-600 hover:bg-emerald-500 text-white border-2 border-sky-600 hover:border-emerald-500 px-5 sm:px-7 py-1.5 sm:py-2 rounded-full transition-colors duration-300 font-semibold text-sm sm:text-base">
+              <Link
+                to="/register"
+                className="bg-sky-600 hover:bg-emerald-500 text-white border-2 border-sky-600 hover:border-emerald-500 px-5 sm:px-7 py-1.5 sm:py-2 rounded-full transition-colors duration-300 font-semibold text-sm sm:text-base"
+              >
                 Bắt đầu
-              </button>
+              </Link>
             </div>
           </nav>
 
@@ -104,9 +107,12 @@ const Header = () => {
                 <User className="h-5 w-5 mr-2" />
                 <span>Đăng nhập</span>
               </Link>
-              <button className="w-full bg-sky-600 hover:bg-emerald-500 text-white px-7 py-2 rounded-full transition-colors duration-300 font-semibold">
+              <Link
+                to="/register"
+                className="bg-sky-600 hover:bg-emerald-500 text-white border-2 border-sky-600 hover:border-emerald-500 px-5 sm:px-7 py-1.5 sm:py-2 rounded-full transition-colors duration-300 font-semibold text-sm sm:text-base"
+              >
                 Bắt đầu
-              </button>
+              </Link>
             </div>
           </nav>
         </div>

@@ -1,6 +1,7 @@
+// src/components/admin/Dashboard.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, BookOpen, Calendar, Settings, LogOut, FileText } from "lucide-react";
+import { Users, BookOpen, Calendar, LogOut, FileText } from "lucide-react";
 import AccountManagement from "./AccountManagement";
 import CourseManagement from "./CourseManagement";
 import AppointmentManagement from "./AppointmentManagement";
@@ -22,17 +23,25 @@ const Dashboard = () => {
           userName: localStorage.getItem("userName"),
           email: localStorage.getItem("email"),
           expiresAt: localStorage.getItem("expiresAt"),
+          roleId: localStorage.getItem("roleId"),
+          roleName: localStorage.getItem("roleName"),
         };
       } else {
         userData = {
           userName: sessionStorage.getItem("userName"),
           email: sessionStorage.getItem("email"),
           expiresAt: sessionStorage.getItem("expiresAt"),
+          roleId: sessionStorage.getItem("roleId"),
+          roleName: sessionStorage.getItem("roleName"),
         };
       }
 
+      console.log("User data loaded:", userData); // Log để debug
+
       const currentTime = new Date();
       const expirationTime = new Date(userData.expiresAt);
+      console.log("Current time:", currentTime, "Expiration time:", expirationTime); // Log để debug
+
       if (currentTime > expirationTime) {
         alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
         localStorage.clear();
@@ -41,6 +50,27 @@ const Dashboard = () => {
         return;
       }
 
+      // Kiểm tra vai trò
+      const roleId = userData.roleId;
+      console.log("Role ID:", roleId); // Log để debug
+
+      const roleRoutes = {
+        1: "/",
+        2: "/member-dashboard",
+        3: "/staff-dashboard",
+        4: "/consultant-dashboard",
+        5: "/manager-dashboard",
+      };
+
+      // Nếu không phải Admin (roleId: 6), chuyển hướng đến trang tương ứng
+      if (roleId !== "6") {
+        const targetRoute = roleRoutes[roleId] || "/login";
+        alert("Bạn không có quyền truy cập trang này!");
+        navigate(targetRoute, { replace: true });
+        return;
+      }
+
+      // Nếu là Admin, tiếp tục hiển thị trang
       setUserInfo(userData);
     } else {
       alert("Vui lòng đăng nhập để truy cập trang quản lý!");
@@ -60,6 +90,11 @@ const Dashboard = () => {
     { id: "appointments", label: "Quản lý lịch hẹn", icon: <Calendar className="w-5 h-5" /> },
     { id: "assessments", label: "Quản lý đánh giá", icon: <FileText className="w-5 h-5" /> },
   ];
+
+  // Hiển thị Dashboard chỉ khi userInfo đã được thiết lập
+  if (!userInfo) {
+    return <div>Loading...</div>; // Hiển thị loading để debug
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -84,7 +119,7 @@ const Dashboard = () => {
             ))}
           </nav>
         </div>
-        
+
         {/* User Info & Logout */}
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-sky-900">
           {userInfo && (

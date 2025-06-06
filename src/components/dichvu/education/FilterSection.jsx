@@ -4,10 +4,10 @@ const FilterSection = ({ categories, selectedCategory, setSelectedCategory }) =>
       <button
         key={category.id}
         onClick={() => setSelectedCategory(category.id)}
-        className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+        className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
           selectedCategory === category.id
             ? 'bg-blue-600 text-white shadow-lg transform scale-105'
-            : 'bg-white text-gray-700 hover:bg-blue-50 border-2 border-gray-200'
+            : 'bg-white text-gray-700 hover:bg-blue-50 border border-gray-200'
         }`}
       >
         {category.name} ({category.count})
