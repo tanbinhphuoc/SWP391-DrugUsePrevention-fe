@@ -1,3 +1,13 @@
+import { useNavigate } from "react-router-dom";
+import {
+  UserOverview,
+  UserCourses,
+  UserSurveys,
+  UserAppointments,
+  UserPrograms,
+  UserProfile
+} from "./";
+
 const UserDashboard = () => {
   const navigate = useNavigate();
 
