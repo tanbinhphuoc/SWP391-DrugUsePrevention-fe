@@ -8,6 +8,9 @@ import CommunityProgramsPage from "./components/dichvu/community/CommunityProgra
 import ConsultationPage from "./components/dichvu/consultant/ConsultantPage.jsx";
 import EducationCoursesPage from "./components/dichvu/education/EducationCoursePage.jsx";
 import RiskAssessmentPage from "./components/dichvu/risk/RiskAssessmentPage.jsx";
+import UserDashboard from "./components/user/UserDashboard.jsx";
+import ConsultantDashboard from "./components/dichvu/consultant/ConsultantDashboard.jsx";
+
 
 function App() {
   return (
@@ -18,6 +21,8 @@ function App() {
           <Route path="/login" element={<SignIn />} />
           <Route path="/register" element={<SignUp />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/member-dashboard" element={<UserDashboard />} /> 
+          <Route path="/consultant-dashboard" element={<ConsultantDashboard />} />
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/education-courses" element={<EducationCoursesPage />} />
           <Route path="/risk-assessment" element={<RiskAssessmentPage />} />
