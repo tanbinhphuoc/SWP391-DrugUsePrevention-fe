@@ -7,7 +7,7 @@ import ContactInfoSection from './ContactInfoSection';
 import BookingFormSection from './BookingFormSection';
 import AnimatedBackground from './AnimatedBackground';
 import GoHomeButton from './GoHomeButton';
-import { consultationServices } from './ConsultationServices';
+import consultationServices  from './ConsultationServices';
 import { experts } from './Experts';
 
 const ConsultationPage = () => {
