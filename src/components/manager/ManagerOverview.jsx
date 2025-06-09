@@ -7,7 +7,8 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  Target
+  Target,
+  Settings
 } from "lucide-react";
 
 const ManagerOverview = () => {
