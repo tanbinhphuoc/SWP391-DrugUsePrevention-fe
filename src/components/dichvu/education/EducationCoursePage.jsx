@@ -16,6 +16,7 @@ import {
   Brain,
   ArrowLeft
 } from 'lucide-react';
+
 import HeaderSection from './HeaderSection';
 import StatsSection from './StatsSection';
 import FilterSection from './FilterSection';
@@ -23,6 +24,7 @@ import FeaturesSection from './FeaturesSection';
 import CoursesGrid from './CoursesGrid';
 import CallToActionSection from './CallToSection';
 import AnimatedBackground from './AnimatedBackground';
+
 import { courses, categories } from './CourseData';
 import { stats } from './StatsData';
 
