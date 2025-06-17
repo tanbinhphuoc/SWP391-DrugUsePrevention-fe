@@ -1,28 +1,41 @@
-// Hero Section Component
-const HeroSection = () => {
-  return (
-    <div className="relative pt-24 pb-16 px-6">
-      <div className="max-w-6xl mx-auto text-center">
-        <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
-          Tư vấn <span className="text-yellow-300">Chuyên nghiệp</span>
-          <br />Hỗ trợ <span className="text-blue-200">Tận tâm</span>
-        </h1>
-        <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto leading-relaxed">
-          Đội ngũ chuyên gia hàng đầu sẵn sàng hỗ trợ bạn với những giải pháp tư vấn 
-          chất lượng cao và dịch vụ chăm sóc cá nhân hóa
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button className="bg-yellow-400 text-blue-900 px-8 py-4 rounded-full font-semibold text-lg hover:bg-yellow-300 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-            Đặt lịch ngay
-          </button>
-          <button className="bg-white/20 text-white border-2 border-white/30 px-8 py-4 rounded-full font-semibold text-lg hover:bg-white/30 transition-all duration-300 backdrop-blur-sm">
-            Tìm hiểu thêm
-          </button>
-        </div>
+import React from 'react';
+import { Shield } from 'lucide-react';
+
+const HeroSection = ({ onBookNow }) => (
+  <div className="text-center mb-12">
+    <div className="flex justify-center mb-4">
+      <div className="bg-white/20 backdrop-blur-lg rounded-full p-6">
+        <Shield size={60} className="text-white" />
       </div>
     </div>
-  );
-};
-
+    <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+      Tư vấn <span className="text-green-300">Phòng chống</span><br />
+      Ngăn ngừa <span className="text-yellow-300">Ma túy</span>
+    </h1>
+    <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
+      Đội ngũ chuyên gia giàu kinh nghiệm sẵn sàng tư vấn trực tuyến về phòng chống ma túy, cai nghiện và hỗ trợ gia đình
+    </p>
+    <div className="flex items-center justify-center space-x-6 mb-8">
+      <div className="text-center">
+        <div className="text-2xl font-bold text-white">100.000đ</div>
+        <div className="text-white/70 text-sm">/ 1 giờ tư vấn</div>
+      </div>
+      <div className="text-center">
+        <div className="text-2xl font-bold text-white">7h - 19h</div>
+        <div className="text-white/70 text-sm">Giờ làm việc</div>
+      </div>
+      <div className="text-center">
+        <div className="text-2xl font-bold text-white">Online</div>
+        <div className="text-white/70 text-sm">Tư vấn trực tuyến</div>
+      </div>
+    </div>
+    <button
+      onClick={onBookNow}
+      className="bg-green-400 hover:bg-green-500 text-black font-semibold px-8 py-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg"
+    >
+      Đặt lịch tư vấn ngay
+    </button>
+  </div>
+);
 
 export default HeroSection;
