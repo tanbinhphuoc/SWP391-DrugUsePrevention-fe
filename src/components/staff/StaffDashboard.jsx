@@ -93,7 +93,7 @@ const StaffDashboard = () => {
     { id: "users", label: "Quản lý người dùng", icon: <Users className="w-5 h-5" /> },
     { id: "courses", label: "Quản lý khóa học", icon: <BookOpen className="w-5 h-5" /> },
     { id: "surveys", label: "Quản lý khảo sát", icon: <ClipboardList className="w-5 h-5" /> },
-    { id: "programs", label: "Chương trình truyền thông", icon: <Settings className="w-5 h-5" /> },
+    { id: "programs", label: "Quản lý truyền thông", icon: <Settings className="w-5 h-5" /> },
     { id: "appointments", label: "Hỗ trợ lịch hẹn", icon: <Calendar className="w-5 h-5" /> },
   ];
 
@@ -141,7 +141,7 @@ const StaffDashboard = () => {
                 }`}
               >
                 {item.icon}
-                <span>{item.label}</span>
+                <span className="whitespace-nowrap">{item.label}</span>
               </button>
             ))}
           </nav>
