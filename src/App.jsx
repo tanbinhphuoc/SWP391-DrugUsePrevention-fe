@@ -5,13 +5,14 @@ import SignIn from "./components/login/SignIn.jsx";
 import Dashboard from "./components/admin/Dashboard.jsx";
 import ResourcesPage from "./components/resource/ResourcesPage.jsx";
 import CommunityProgramsPage from "./components/dichvu/community/CommunityProgramPage.jsx";
-import ConsultationPage from "./components/dichvu/consultant/ui/ConsultantPage.jsx";
+import ConsultationPage from "./components/dichvu/consultant/ConsultantPage.jsx";
 import EducationCoursesPage from "./components/dichvu/education/EducationCoursePage.jsx";
 import RiskAssessmentPage from "./components/dichvu/risk/RiskAssessmentPage.jsx";
 import UserDashboard from "./components/user/UserDashboard.jsx";
-import ConsultantDashboard from "./components/dichvu/consultant/ux/ConsultantDashboard.jsx";
+import ConsultantDashboard from "./components/dichvu/consultant/ConsultantDashboard.jsx";
 import StaffDashboard from "./components/staff/StaffDashboard.jsx";
 import ManagerDashboard from "./components/manager/ManagerDashboard.jsx";
+
 
 function App() {
   return (
