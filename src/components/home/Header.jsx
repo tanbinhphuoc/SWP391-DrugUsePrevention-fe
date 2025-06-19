@@ -3,35 +3,83 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react"
 import { Menu, X, ChevronDown, User, Search, Star } from "lucide-react"
-import Logo from '../../assets/medical_logo.jpg' // Đã thay đổi đường dẫn logo
+import Logo from '../../assets/medical_logo.jpg'
+
+// Loading overlay component for navigation transitions
+const NavigationOverlay = ({ isNavigating, destination }) => {
+  if (!isNavigating) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gradient-to-br from-blue-600 to-purple-700 z-[100] flex items-center justify-center backdrop-blur-sm">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mb-4"></div>
+        <p className="text-white text-lg font-semibold">Đang chuyển đến {destination}...</p>
+      </div>
+    </div>
+  );
+};
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isNavigating, setIsNavigating] = useState(false)
+  const [destination, setDestination] = useState('')
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
+  const [activeSection, setActiveSection] = useState('home')
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 10) {
+      const currentScrollY = window.scrollY
+      
+      // Hiệu ứng trong suốt khi scroll
+      if (currentScrollY > 50) {
         setIsScrolled(true)
       } else {
         setIsScrolled(false)
+      }
+
+      // Ẩn/hiện header khi scroll
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsHeaderVisible(false)
+      } else {
+        setIsHeaderVisible(true)
+      }
+      
+      setLastScrollY(currentScrollY)
+
+      // Xác định section hiện tại
+      const sections = ['home', 'about', 'contact']
+      const currentSection = sections.find(section => {
+        const element = document.getElementById(section)
+        if (element) {
+          const rect = element.getBoundingClientRect()
+          return rect.top <= 100 && rect.bottom >= 100
+        }
+        return false
+      })
+
+      if (currentSection) {
+        setActiveSection(currentSection)
+      } else if (currentScrollY < 100) {
+        setActiveSection('home')
       }
     }
 
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, [lastScrollY])
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
   }
 
-  // Thêm hàm xử lý smooth scroll
+  // Enhanced smooth scroll with loading state
   const handleSmoothScroll = (e, targetId) => {
     e.preventDefault()
     const targetElement = document.getElementById(targetId)
     if (targetElement) {
-      const headerOffset = 80 // Chiều cao của header cố định
+      const headerOffset = 80
       const elementPosition = targetElement.getBoundingClientRect().top
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset
 
@@ -40,88 +88,128 @@ const Header = () => {
         behavior: "smooth"
       })
     }
-    // Đóng mobile menu sau khi click
     setIsMenuOpen(false)
   }
 
+  // Handle navigation with loading state
+  const handleNavigation = (path, destinationName) => {
+    setDestination(destinationName)
+    setIsNavigating(true)
+    setIsMenuOpen(false)
+    
+    setTimeout(() => {
+      window.location.href = path
+    }, 800)
+  }
+
   return (
-    <header
-      className={`fixed w-full z-50 bg-white transition-all duration-300 ${isScrolled ? "shadow-md py-1" : "py-3"}`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <a href="/" className="flex items-center">
-              <img
-                src={Logo}
-                alt="Medical Logo" // Cập nhật alt text cho phù hợp với logo y tế
-                className="h-14 sm:h-16 md:h-18 w-auto rounded-md shadow-sm transition-transform duration-300 hover:scale-105"
-              />
-              <span className="font-bold text-xl sm:text-2xl text-sky-700">
-                PreventionSupport
-              </span>
-            </a>
-          </div>
-
-          <nav className="hidden md:flex items-center space-x-6">
-            <NavLinks handleSmoothScroll={handleSmoothScroll} />
-
-            <div className="flex items-center space-x-3">
-              <Link
-                to="/login"
-                className="flex items-center text-sky-700 hover:text-orange-500 transition-colors duration-200"
-              >
-                <User className="h-5 w-5 mr-1" />
-                <span className="text-sm sm:text-base">Đăng nhập</span>
-              </Link>
-              <Link
-                to="/register"
-                className="bg-sky-600 hover:bg-emerald-500 text-white border-2 border-sky-600 hover:border-emerald-500 px-5 sm:px-7 py-1.5 sm:py-2 rounded-full transition-colors duration-300 font-semibold text-sm sm:text-base"
-              >
-                Bắt đầu
-              </Link>
+    <>
+      {/* Navigation Loading Overlay */}
+      <NavigationOverlay isNavigating={isNavigating} destination={destination} />
+      
+      <header
+        className={`fixed w-full z-50 transition-all duration-500 ease-in-out ${
+          isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+        } ${
+          isScrolled 
+            ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-white/20' 
+            : 'bg-white'
+        }`}
+        style={{
+          background: isScrolled 
+            ? 'rgba(255, 255, 255, 0.95)' 
+            : 'rgba(255, 255, 255, 1)'
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <a href="/" className="flex items-center group">
+                <div className="relative">
+                  <img
+                    src={Logo}
+                    alt="Medical Logo"
+                    className="h-10 w-auto rounded-lg shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:shadow-md"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-sky-500/20 to-emerald-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+                <span className="ml-3 font-bold text-xl text-sky-700 group-hover:text-sky-600 transition-colors duration-300">
+                  PreventionSupport
+                </span>
+              </a>
             </div>
-          </nav>
 
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={toggleMenu}
-              className="text-sky-700 transition-colors duration-200"
-              aria-label={isMenuOpen ? "Đóng menu" : "Mở menu"}
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+            <nav className="hidden md:flex items-center space-x-8">
+              <NavLinks 
+                handleSmoothScroll={handleSmoothScroll} 
+                handleNavigation={handleNavigation}
+                activeSection={activeSection}
+              />
+
+              <div className="flex items-center space-x-4 ml-6 pl-6 border-l border-gray-200">
+                <button
+                  onClick={() => handleNavigation('/login', 'Đăng nhập')}
+                  className="flex items-center text-sky-700 hover:text-orange-500 transition-all duration-300 group"
+                >
+                  <User className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-medium">Đăng nhập</span>
+                </button>
+                <button
+                  onClick={() => handleNavigation('/register', 'Đăng ký')}
+                  className="bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-700 hover:to-emerald-700 text-white px-6 py-2 rounded-full transition-all duration-300 font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-105"
+                >
+                  Bắt đầu
+                </button>
+              </div>
+            </nav>
+
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={toggleMenu}
+                className="text-sky-700 hover:text-sky-600 transition-colors duration-200 p-2"
+                aria-label={isMenuOpen ? "Đóng menu" : "Mở menu"}
+              >
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {isMenuOpen && (
-        <div className="md:hidden bg-white p-4 shadow-lg transition-all duration-300 ease-in-out">
-          <nav className="flex flex-col space-y-4">
-            <MobileNavLinks handleSmoothScroll={handleSmoothScroll} />
-            <div className="pt-4 border-t border-gray-200">
-              <Link
-                to="/login"
-                className="flex items-center text-sky-700 hover:text-orange-500 mb-4 transition-colors duration-200"
+        {/* Mobile Menu */}
+        <div className={`md:hidden transition-all duration-300 ease-in-out ${
+          isMenuOpen 
+            ? 'max-h-screen opacity-100 bg-white/95 backdrop-blur-md' 
+            : 'max-h-0 opacity-0 overflow-hidden'
+        }`}>
+          <div className="px-4 pb-4 space-y-2">
+            <MobileNavLinks 
+              handleSmoothScroll={handleSmoothScroll} 
+              handleNavigation={handleNavigation}
+              activeSection={activeSection}
+            />
+            <div className="pt-4 border-t border-gray-200 space-y-3">
+              <button
+                onClick={() => handleNavigation('/login', 'Đăng nhập')}
+                className="flex items-center text-sky-700 hover:text-orange-500 transition-colors duration-200 w-full"
               >
                 <User className="h-5 w-5 mr-2" />
                 <span>Đăng nhập</span>
-              </Link>
-              <Link
-                to="/register"
-                className="bg-sky-600 hover:bg-emerald-500 text-white border-2 border-sky-600 hover:border-emerald-500 px-5 sm:px-7 py-1.5 sm:py-2 rounded-full transition-colors duration-300 font-semibold text-sm sm:text-base"
+              </button>
+              <button
+                onClick={() => handleNavigation('/register', 'Đăng ký')}
+                className="bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-700 hover:to-emerald-700 text-white px-6 py-2 rounded-full transition-all duration-300 font-semibold text-sm w-full"
               >
                 Bắt đầu
-              </Link>
+              </button>
             </div>
-          </nav>
+          </div>
         </div>
-      )}
-    </header>
+      </header>
+    </>
   )
 }
 
-const NavLinks = ({ handleSmoothScroll }) => {
+const NavLinks = ({ handleSmoothScroll, handleNavigation, activeSection }) => {
   const [servicesOpen, setServicesOpen] = useState(false)
   const dropdownRef = useRef(null)
 
@@ -139,116 +227,156 @@ const NavLinks = ({ handleSmoothScroll }) => {
     setServicesOpen(!servicesOpen)
   }
 
-  // Đóng dropdown khi click vào link
   const closeDropdown = () => {
     setServicesOpen(false)
   }
 
+  const navLinkClass = (section) => `
+    relative text-sm font-medium transition-all duration-300 group px-3 py-2 rounded-lg
+    ${activeSection === section 
+      ? 'text-orange-500 bg-orange-50' 
+      : 'text-sky-700 hover:text-orange-500 hover:bg-sky-50'
+    }
+  `
+
   return (
     <>
-      <a href="/" className="text-sky-700 hover:text-orange-500 transition-colors duration-200 text-sm sm:text-base">
+      <a 
+        href="/" 
+        className={navLinkClass('home')}
+      >
         Trang chủ
+        <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-orange-400 to-orange-600 transform transition-transform duration-300 ${
+          activeSection === 'home' ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+        }`}></span>
       </a>
+      
       <a 
         href="#about" 
         onClick={(e) => handleSmoothScroll(e, 'about')}
-        className="text-sky-700 hover:text-orange-500 transition-colors duration-200 text-sm sm:text-base"
+        className={navLinkClass('about')}
       >
         Giới thiệu
+        <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-orange-400 to-orange-600 transform transition-transform duration-300 ${
+          activeSection === 'about' ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+        }`}></span>
       </a>
 
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={toggleServices}
-          className="flex items-center text-sky-700 hover:text-orange-500 transition-colors duration-200 focus:outline-none text-sm sm:text-base"
+          className="flex items-center text-sky-700 hover:text-orange-500 transition-all duration-300 focus:outline-none text-sm font-medium px-3 py-2 rounded-lg hover:bg-sky-50 group"
           aria-expanded={servicesOpen}
           aria-controls="services-dropdown"
           aria-label="Dịch vụ"
         >
-          Dịch vụ{" "}
+          Dịch vụ
           <ChevronDown
-            className={`h-4 w-4 ml-1 transition-transform duration-200 ${servicesOpen ? "rotate-180" : ""}`}
+            className={`h-4 w-4 ml-1 transition-transform duration-300 ${servicesOpen ? "rotate-180" : ""}`}
           />
+          <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-orange-400 to-orange-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
         </button>
+        
         <div
           id="services-dropdown"
-          className={`absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50 transition-all duration-300 ease-in-out ${
-            servicesOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
+          className={`absolute left-0 mt-2 w-64 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-white/20 py-2 z-50 transition-all duration-300 ease-in-out ${
+            servicesOpen ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-2 invisible"
           }`}
         >
-          <Link
-            to="/education-courses"
-            onClick={closeDropdown}
-            className="block px-4 py-2 text-sky-800 hover:bg-sky-50 hover:text-orange-500 transition-colors duration-200 text-sm"
+          <button
+            onClick={() => {
+              closeDropdown();
+              handleNavigation('/education-courses', 'Khóa học giáo dục');
+            }}
+            className="block w-full text-left px-4 py-3 text-sky-800 hover:bg-gradient-to-r hover:from-sky-50 hover:to-emerald-50 hover:text-orange-500 transition-all duration-200 text-sm font-medium"
           >
-            Khóa học giáo dục
-          </Link>
-          <Link
-            to="/risk-assessment"
-            onClick={closeDropdown}
-            className="block px-4 py-2 text-sky-800 hover:bg-sky-50 hover:text-orange-500 transition-colors duration-200 text-sm"
+            📚 Khóa học giáo dục
+          </button>
+          <button
+            onClick={() => {
+              closeDropdown();
+              handleNavigation('/risk-assessment', 'Đánh giá rủi ro');
+            }}
+            className="block w-full text-left px-4 py-3 text-sky-800 hover:bg-gradient-to-r hover:from-sky-50 hover:to-emerald-50 hover:text-orange-500 transition-all duration-200 text-sm font-medium"
           >
-            Đánh giá rủi ro
-          </Link>
-          <Link
-            to="/consultation"
-            onClick={closeDropdown}
-            className="block px-4 py-2 text-sky-800 hover:bg-sky-50 hover:text-orange-500 transition-colors duration-200 text-sm"
+            🔍 Đánh giá rủi ro
+          </button>
+          <button
+            onClick={() => {
+              closeDropdown();
+              handleNavigation('/consultation', 'Tư vấn');
+            }}
+            className="block w-full text-left px-4 py-3 text-sky-800 hover:bg-gradient-to-r hover:from-sky-50 hover:to-emerald-50 hover:text-orange-500 transition-all duration-200 text-sm font-medium"
           >
-            Tư vấn
-          </Link>
-          <Link
-            to="/community-programs"
-            onClick={closeDropdown}
-            className="block px-4 py-2 text-sky-800 hover:bg-sky-50 hover:text-orange-500 transition-colors duration-200 text-sm"
+            💬 Tư vấn
+          </button>
+          <button
+            onClick={() => {
+              closeDropdown();
+              handleNavigation('/community-programs', 'Chương trình cộng đồng');
+            }}
+            className="block w-full text-left px-4 py-3 text-sky-800 hover:bg-gradient-to-r hover:from-sky-50 hover:to-emerald-50 hover:text-orange-500 transition-all duration-200 text-sm font-medium"
           >
-            Chương trình cộng đồng
-          </Link>
+            🤝 Chương trình cộng đồng
+          </button>
         </div>
       </div>
 
-      <Link 
-        to="/resources"
-        className="text-sky-700 hover:text-orange-500 transition-colors duration-200 text-sm sm:text-base">
+      <button 
+        onClick={() => handleNavigation('/resources', 'Tài nguyên')}
+        className="text-sky-700 hover:text-orange-500 transition-all duration-300 text-sm font-medium px-3 py-2 rounded-lg hover:bg-sky-50 group relative"
+      >
         Tài nguyên
-      </Link>
+        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-orange-400 to-orange-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+      </button>
       
       <a 
         href="#contact" 
         onClick={(e) => handleSmoothScroll(e, 'contact')}
-        className="text-sky-700 hover:text-orange-500 transition-colors duration-200 text-sm sm:text-base"
+        className={navLinkClass('contact')}
       >
         Liên hệ
+        <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-orange-400 to-orange-600 transform transition-transform duration-300 ${
+          activeSection === 'contact' ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+        }`}></span>
       </a>
     </>
   )
 }
 
-const MobileNavLinks = ({ handleSmoothScroll }) => {
+const MobileNavLinks = ({ handleSmoothScroll, handleNavigation, activeSection }) => {
   const [servicesOpen, setServicesOpen] = useState(false)
+
+  const mobileNavLinkClass = (section) => `
+    block w-full text-left px-4 py-3 rounded-lg transition-all duration-300 font-medium
+    ${activeSection === section 
+      ? 'text-orange-500 bg-orange-50' 
+      : 'text-sky-700 hover:text-orange-500 hover:bg-sky-50'
+    }
+  `
 
   return (
     <>
-      <a href="/" className="text-sky-700 hover:text-orange-500 transition-colors duration-200">
-        Trang chủ
+      <a href="/" className={mobileNavLinkClass('home')}>
+        🏠 Trang chủ
       </a>
       <a 
         href="#about" 
         onClick={(e) => handleSmoothScroll(e, 'about')}
-        className="text-sky-700 hover:text-orange-500 transition-colors duration-200"
+        className={mobileNavLinkClass('about')}
       >
-        Giới thiệu
+        ℹ️ Giới thiệu
       </a>
 
       <div>
         <button
           onClick={() => setServicesOpen(!servicesOpen)}
-          className="flex items-center justify-between w-full text-sky-700 hover:text-orange-500 transition-colors duration-200 focus:outline-none"
+          className="flex items-center justify-between w-full px-4 py-3 text-sky-700 hover:text-orange-500 hover:bg-sky-50 rounded-lg transition-all duration-300 focus:outline-none font-medium"
           aria-expanded={servicesOpen}
           aria-controls="mobile-services-dropdown"
           aria-label="Dịch vụ"
         >
-          <span>Dịch vụ</span>
+          <span>🛠️ Dịch vụ</span>
           <ChevronDown
             className={`h-4 w-4 transition-transform duration-300 ${servicesOpen ? "transform rotate-180" : ""}`}
           />
@@ -256,53 +384,57 @@ const MobileNavLinks = ({ handleSmoothScroll }) => {
 
         <div
           id="mobile-services-dropdown"
-          className={`mt-2 ml-4 space-y-2 transition-all duration-300 ease-in-out ${
+          className={`ml-4 mt-2 space-y-1 transition-all duration-300 ease-in-out ${
             servicesOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 overflow-hidden"
           }`}
         >
-          <Link 
-            to="/education-courses" 
-            className="block text-sky-600 hover:text-orange-500 transition-colors duration-200"
+          <button 
+            onClick={() => handleNavigation('/education-courses', 'Khóa học giáo dục')}
+            className="block w-full text-left px-4 py-2 text-sky-600 hover:text-orange-500 hover:bg-sky-50 rounded-lg transition-all duration-200 text-sm"
           >
-            Khóa học giáo dục
-          </Link>
-          <Link 
-            to="/risk-assessment" 
-            className="block text-sky-600 hover:text-orange-500 transition-colors duration-200"
+            📚 Khóa học giáo dục
+          </button>
+          <button 
+            onClick={() => handleNavigation('/risk-assessment', 'Đánh giá rủi ro')}
+            className="block w-full text-left px-4 py-2 text-sky-600 hover:text-orange-500 hover:bg-sky-50 rounded-lg transition-all duration-200 text-sm"
           >
-            Đánh giá rủi ro
-          </Link>
-          <Link 
-            to="/consultation" 
-            className="block text-sky-600 hover:text-orange-500 transition-colors duration-200"
+            🔍 Đánh giá rủi ro
+          </button>
+          <button 
+            onClick={() => handleNavigation('/consultation', 'Tư vấn')}
+            className="block w-full text-left px-4 py-2 text-sky-600 hover:text-orange-500 hover:bg-sky-50 rounded-lg transition-all duration-200 text-sm"
           >
-            Tư vấn
-          </Link>
-          <Link 
-            to="/community-programs" 
-            className="block text-sky-600 hover:text-orange-500 transition-colors duration-200"
+            💬 Tư vấn
+          </button>
+          <button 
+            onClick={() => handleNavigation('/community-programs', 'Chương trình cộng đồng')}
+            className="block w-full text-left px-4 py-2 text-sky-600 hover:text-orange-500 hover:bg-sky-50 rounded-lg transition-all duration-200 text-sm"
           >
-            Chương trình cộng đồng
-          </Link>
+            🤝 Chương trình cộng đồng
+          </button>
         </div>
       </div>
 
-      <Link to="/resources" className="text-sky-700 hover:text-orange-500 transition-colors duration-200">
-        Tài nguyên
-      </Link>
+      <button 
+        onClick={() => handleNavigation('/resources', 'Tài nguyên')}
+        className="block w-full text-left px-4 py-3 text-sky-700 hover:text-orange-500 hover:bg-sky-50 rounded-lg transition-all duration-300 font-medium"
+      >
+        📖 Tài nguyên
+      </button>
+      
       <a
         href="#contact" 
         onClick={(e) => handleSmoothScroll(e, 'contact')}
-        className="text-sky-700 hover:text-orange-500 transition-colors duration-200"
+        className={mobileNavLinkClass('contact')}
       >
-        Liên hệ
+        📞 Liên hệ
       </a>
 
       <div className="relative mt-2">
         <input
           type="text"
           placeholder="Tìm kiếm..."
-          className="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
         />
         <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
       </div>

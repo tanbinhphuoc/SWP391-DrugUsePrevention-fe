@@ -2,6 +2,7 @@ import React from 'react';
 
 const AnimatedBackground = () => {
   return (
+    <>
     <div className="fixed inset-0 -z-10">
       {/* Primary gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50"></div>
@@ -32,6 +33,17 @@ const AnimatedBackground = () => {
         ))}
       </div>
     </div>
+    
+    <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+      `}</style>
+    </>
   );
 };
 

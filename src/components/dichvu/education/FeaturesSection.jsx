@@ -1,28 +1,27 @@
-import { Brain, Shield, Heart } from 'lucide-react';
+import React from 'react';
+import { features } from './data/features';
 
 const FeaturesSection = () => (
-  <div className="relative py-20 bg-white/10 backdrop-blur-sm">
-    <div className="max-w-6xl mx-auto px-4 text-center text-white">
-      <h2 className="text-4xl font-bold mb-12">Tại sao chọn chúng tôi?</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="text-center">
-          <Shield className="w-16 h-16 mx-auto mb-4 text-blue-300" />
-          <h3 className="text-xl font-bold mb-2">An toàn & Tin cậy</h3>
-          <p className="opacity-90">Nội dung được kiểm duyệt bởi chuyên gia</p>
-        </div>
-        <div className="text-center">
-          <Brain className="w-16 h-16 mx-auto mb-4 text-purple-300" />
-          <h3 className="text-xl font-bold mb-2">Khoa học & Hiệu quả</h3>
-          <p className="opacity-90">Phương pháp giảng dạy hiện đại</p>
-        </div>
-        <div className="text-center">
-          <Heart className="w-16 h-16 mx-auto mb-4 text-pink-300" />
-          <h3 className="text-xl font-bold mb-2">Tận tâm & Hỗ trợ</h3>
-          <p className="opacity-90">Đồng hành cùng học viên 24/7</p>
-        </div>
+  <section className="relative py-16 bg-white/10 backdrop-blur-sm">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          Tại sao chọn chúng tôi?
+        </h2>
+      </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {features.map((feature, index) => (
+          <div key={index} className="text-center group">
+            <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+              <div className="text-white">{feature.icon}</div>
+            </div>
+            <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
+            <p className="text-white/80">{feature.description}</p>
+          </div>
+        ))}
       </div>
     </div>
-  </div>
+  </section>
 );
 
 export default FeaturesSection;

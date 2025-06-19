@@ -1,15 +1,29 @@
-const CallToActionSection = () => (
-  <div className="relative py-20 text-center text-white">
-    <div className="relative z-10 max-w-4xl mx-auto px-4">
-      <h2 className="text-4xl font-bold mb-6">Sẵn sàng bắt đầu hành trình?</h2>
-      <p className="text-xl mb-8 opacity-90">
-        Tham gia cùng hàng nghìn học viên đã thay đổi cuộc sống
+import React from 'react';
+
+const CTASection = ({ handleSubmit }) => (
+  <section className="relative py-20 bg-gradient-to-r from-blue-600 to-purple-700">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+        Sẵn sàng bắt đầu hành trình học tập?
+      </h2>
+      <p className="text-xl text-white/90 mb-8">
+        Đăng ký ngay để nhận tư vấn miễn phí và ưu đãi đặc biệt
       </p>
-      <button className="bg-white text-blue-700 px-8 py-4 rounded-full font-semibold text-lg hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-        Đăng ký tư vấn miễn phí
-      </button>
+      <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+        <input
+          type="email"
+          placeholder="Nhập email của bạn"
+          className="flex-1 px-6 py-4 rounded-full border-0 focus:ring-4 focus:ring-white/30 focus:outline-none"
+        />
+        <button
+          onClick={handleSubmit}
+          className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition-colors duration-300 whitespace-nowrap"
+        >
+          Đăng ký ngay
+        </button>
+      </div>
     </div>
-  </div>
+  </section>
 );
 
-export default CallToActionSection;
+export default CTASection;
