@@ -1,23 +1,32 @@
-const CallToActionSection = () => (
-  <section className="py-20 px-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white relative overflow-hidden">
-    <div className="absolute inset-0 bg-black opacity-10" />
-    <div className="relative z-10 max-w-6xl mx-auto text-center">
-      <h2 className="text-3xl md:text-4xl font-bold mb-6">
-        Hãy cùng tạo ra sự khác biệt
-      </h2>
-      <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto">
-        Tham gia ngay các chương trình cộng đồng để lan tỏa giá trị tích cực và giúp đỡ những người xung quanh bạn
-      </p>
-      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <button className="bg-white text-emerald-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors">
-          Đăng ký tham gia
-        </button>
-        <button className="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-emerald-600 transition-colors">
-          Tìm hiểu thêm
-        </button>
-      </div>
-    </div>
-  </section>
-);
+import React from 'react';
+import { Phone, Mail } from 'lucide-react';
+
+const CallToActionSection = () => {
+  return (
+    <section className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-12 text-center text-white relative overflow-hidden">
+            <div className="absolute inset-0 bg-black/10"></div>
+            <div className="relative z-10">
+              <h2 className="text-4xl font-bold mb-4">Hãy cùng chúng tôi tạo nên sự khác biệt!</h2>
+              <p className="text-xl mb-8 opacity-90">
+                Tham gia cộng đồng tình nguyện và góp phần xây dựng một xã hội tốt đẹp hơn
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button className="px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 flex items-center justify-center group">
+                  <Phone className="w-5 h-5 mr-2" />
+                  Liên hệ ngay
+                </button>
+                <button className="px-8 py-4 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 flex items-center justify-center group">
+                  <Mail className="w-5 h-5 mr-2" />
+                  Đăng ký nhận tin
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+  );
+};
 
 export default CallToActionSection;
