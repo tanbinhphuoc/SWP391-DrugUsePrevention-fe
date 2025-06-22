@@ -1,11 +1,14 @@
-import { useState } from "react";
-import { BarChart3, TrendingUp, Users, BookOpen, Calendar, Download, Filter } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Bar } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
+import { BarChart3, TrendingUp, Users, Download, Filter } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
 
-const SystemReports = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState("month");
-  const [selectedReport, setSelectedReport] = useState("overview");
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-  const reportData = {
+// Giả lập API
+const mockApi = {
+  fetchReports: async () => ({
     overview: {
       title: "Báo cáo tổng quan hệ thống",
       metrics: [
@@ -41,31 +44,81 @@ const SystemReports = () => {
         { label: "Đánh giá chất lượng", value: "4.8/5", change: "+0.1", trend: "up" },
         { label: "Thời gian chờ TB", value: "2.3 ngày", change: "-0.5", trend: "down" }
       ]
+    },
+    chartData: [
+      { month: "T1", users: 1200, courses: 45, consultations: 89 },
+      { month: "T2", users: 1450, courses: 52, consultations: 102 },
+      { month: "T3", users: 1680, courses: 48, consultations: 95 },
+      { month: "T4", users: 1920, courses: 61, consultations: 118 },
+      { month: "T5", users: 2150, courses: 58, consultations: 134 },
+      { month: "T6", users: 2380, courses: 67, consultations: 156 }
+    ],
+    topPerformers: [
+      { name: "Khóa học Nhận thức về ma túy", metric: "1,234 học viên", performance: "98%" },
+      { name: "TS. Nguyễn Minh Anh", metric: "156 buổi tư vấn", performance: "4.9/5" },
+      { name: "Chương trình Tuyên truyền", metric: "2,500 người tham gia", performance: "95%" },
+      { name: "Khảo sát ASSIST", metric: "892 lượt hoàn thành", performance: "92%" }
+    ],
+    recommendations: [
+      "Tăng cường đào tạo cho consultant",
+      "Phát triển thêm khóa học chuyên sâu",
+      "Tối ưu hóa giao diện",
+      "Mở rộng chương trình tuyên truyền"
+    ]
+  }),
+  addRecommendation: async (data) => ({ id: Date.now(), ...data }),
+};
+
+const SystemReports = () => {
+  const [selectedPeriod, setSelectedPeriod] = useState("month");
+  const [selectedReport, setSelectedReport] = useState("overview");
+  const [reportData, setReportData] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [recommendation, setRecommendation] = useState("");
+
+  useEffect(() => {
+    mockApi.fetchReports().then(data => setReportData(data));
+  }, []);
+
+  const currentReport = reportData[selectedReport] || { title: "", metrics: [] };
+  const chartData = reportData.chartData || [];
+  const topPerformers = reportData.topPerformers || [];
+  const recommendations = reportData.recommendations || [];
+
+  const handleExport = () => {
+    toast.info("Đang xuất báo cáo... (Chưa triển khai)");
+  };
+
+  const handleAddRecommendation = async (e) => {
+    e.preventDefault();
+    try {
+      const newRec = await mockApi.addRecommendation({ text: recommendation });
+      setReportData({ ...reportData, recommendations: [...recommendations, newRec.text] });
+      setIsModalOpen(false);
+      setRecommendation("");
+      toast.success("Thêm đề xuất thành công!");
+    } catch {
+      toast.error("Thêm đề xuất thất bại!");
     }
   };
 
-  const currentReport = reportData[selectedReport];
+  const chartOptions = {
+    responsive: true,
+    plugins: { legend: { position: "top" }, title: { display: true, text: "Xu hướng theo thời gian" } },
+  };
 
-  const chartData = [
-    { month: "T1", users: 1200, courses: 45, consultations: 89 },
-    { month: "T2", users: 1450, courses: 52, consultations: 102 },
-    { month: "T3", users: 1680, courses: 48, consultations: 95 },
-    { month: "T4", users: 1920, courses: 61, consultations: 118 },
-    { month: "T5", users: 2150, courses: 58, consultations: 134 },
-    { month: "T6", users: 2380, courses: 67, consultations: 156 }
-  ];
-
-  const topPerformers = [
-    { name: "Khóa học Nhận thức về ma túy", metric: "1,234 học viên", performance: "98%" },
-    { name: "TS. Nguyễn Minh Anh", metric: "156 buổi tư vấn", performance: "4.9/5" },
-    { name: "Chương trình Tuyên truyền", metric: "2,500 người tham gia", performance: "95%" },
-    { name: "Khảo sát ASSIST", metric: "892 lượt hoàn thành", performance: "92%" }
-  ];
+  const chartConfig = {
+    labels: chartData.map(d => d.month),
+    datasets: [
+      { label: "Người dùng", data: chartData.map(d => d.users), backgroundColor: "rgba(139, 92, 246, 0.5)" },
+      { label: "Khóa học", data: chartData.map(d => d.courses), backgroundColor: "rgba(34, 197, 94, 0.5)" },
+      { label: "Tư vấn", data: chartData.map(d => d.consultations), backgroundColor: "rgba(59, 130, 246, 0.5)" },
+    ],
+  };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        
         <h2 className="text-2xl font-bold text-gray-800">Báo cáo tổng thể</h2>
         <div className="flex space-x-4">
           <select 
@@ -78,31 +131,27 @@ const SystemReports = () => {
             <option value="quarter">Quý này</option>
             <option value="year">Năm này</option>
           </select>
-          <button className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+          <button onClick={handleExport} className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
             <Download className="w-4 h-4" />
             <span>Xuất báo cáo</span>
           </button>
         </div>
       </div>
 
-      {/* Report Type Selector */}
       <div className="mb-6 flex space-x-2 bg-gray-100 p-1 rounded-lg">
-        {Object.keys(reportData).map((key) => (
+        {Object.keys(reportData).filter(k => k !== "chartData" && k !== "topPerformers" && k !== "recommendations").map((key) => (
           <button
             key={key}
             onClick={() => setSelectedReport(key)}
             className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
-              selectedReport === key
-                ? "bg-white text-purple-600 shadow-sm"
-                : "text-gray-600 hover:text-gray-800"
+              selectedReport === key ? "bg-white text-purple-600 shadow-sm" : "text-gray-600 hover:text-gray-800"
             }`}
           >
-            {reportData[key].title.split(' ')[1]}
+            {reportData[key]?.title.split(' ')[1]}
           </button>
         ))}
       </div>
 
-      {/* Current Report Metrics */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">{currentReport.title}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -112,47 +161,26 @@ const SystemReports = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">{metric.label}</p>
                   <p className="text-3xl font-bold text-gray-900">{metric.value}</p>
-                  <p className={`text-sm font-medium ${
-                    metric.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <p className={`text-sm font-medium ${metric.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
                     {metric.change}
                   </p>
                 </div>
-                <div className="flex-shrink-0">
-                  <TrendingUp className={`w-8 h-8 ${
-                    metric.trend === 'up' ? 'text-green-500' : 'text-red-500'
-                  }`} />
-                </div>
+                <TrendingUp className={`w-8 h-8 ${metric.trend === 'up' ? 'text-green-500' : 'text-red-500'}`} />
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Trend Chart */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-800">Xu hướng theo thời gian</h3>
             <BarChart3 className="w-5 h-5 text-purple-500" />
           </div>
-          <div className="h-64 flex items-end justify-between space-x-2">
-            {chartData.map((data, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center">
-                <div className="w-full bg-gray-200 rounded-t relative" style={{ height: '200px' }}>
-                  <div 
-                    className="bg-purple-500 rounded-t absolute bottom-0 w-full"
-                    style={{ height: `${(data.users / 2500) * 100}%` }}
-                  ></div>
-                </div>
-                <span className="text-xs text-gray-600 mt-2">{data.month}</span>
-              </div>
-            ))}
-          </div>
+          <Bar options={chartOptions} data={chartConfig} />
         </div>
 
-        {/* Top Performers */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-800">Hiệu suất cao nhất</h3>
@@ -172,8 +200,7 @@ const SystemReports = () => {
         </div>
       </div>
 
-      {/* Detailed Analytics */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Phân tích chi tiết</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
@@ -194,16 +221,41 @@ const SystemReports = () => {
         </div>
       </div>
 
-      {/* Recommendations */}
-      <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-blue-800 mb-4">Đề xuất cải tiến</h3>
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-blue-800">Đề xuất cải tiến</h3>
+          <button onClick={() => setIsModalOpen(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Thêm đề xuất</button>
+        </div>
         <ul className="space-y-2 text-blue-700">
-          <li>• Tăng cường đào tạo cho consultant để cải thiện thời gian phản hồi</li>
-          <li>• Phát triển thêm khóa học chuyên sâu dựa trên phản hồi người dùng</li>
-          <li>• Tối ưu hóa giao diện để tăng tỷ lệ hoàn thành khóa học</li>
-          <li>• Mở rộng chương trình tuyên truyền để tiếp cận nhiều đối tượng hơn</li>
+          {recommendations.map((rec, index) => (
+            <li key={index}>• {rec}</li>
+          ))}
         </ul>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Thêm đề xuất cải tiến</h3>
+            <form onSubmit={handleAddRecommendation}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Nội dung đề xuất</label>
+                <textarea
+                  value={recommendation}
+                  onChange={(e) => setRecommendation(e.target.value)}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              <div className="flex gap-2">
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">Lưu</button>
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-600 text-white rounded">Hủy</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

@@ -3,15 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { 
   BarChart3, 
   Users, 
-  BookOpen, 
-  Calendar, 
+  UserCheck, 
+  TrendingUp, 
   Settings,
   LogOut,
   Menu,
-  X,
-  UserCheck,
-  TrendingUp
+  X
 } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
 import ManagerOverview from "./ManagerOverview";
 import StaffManagement from "./StaffManagement";
 import ConsultantManagement from "./ConsultantManagement";
@@ -52,7 +51,7 @@ const ManagerDashboard = () => {
       const expirationTime = new Date(userData.expiresAt);
 
       if (currentTime > expirationTime) {
-        alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
         localStorage.clear();
         sessionStorage.clear();
         navigate("/login", { replace: true });
@@ -70,14 +69,14 @@ const ManagerDashboard = () => {
 
       if (roleId !== "5") {
         const targetRoute = roleRoutes[roleId] || "/login";
-        alert("Bạn không có quyền truy cập trang này!");
+        toast.error("Bạn không có quyền truy cập trang này!");
         navigate(targetRoute, { replace: true });
         return;
       }
 
       setUserInfo(userData);
     } else {
-      alert("Vui lòng đăng nhập để truy cập trang quản lý!");
+      toast.error("Vui lòng đăng nhập để truy cập trang quản lý!");
       navigate("/login", { replace: true });
     }
   }, [navigate]);
@@ -85,6 +84,7 @@ const ManagerDashboard = () => {
   const handleLogout = () => {
     localStorage.clear();
     sessionStorage.clear();
+    toast.success("Đăng xuất thành công!");
     navigate("/login", { replace: true });
   };
 
@@ -109,7 +109,6 @@ const ManagerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Mobile menu button */}
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -119,7 +118,6 @@ const ManagerDashboard = () => {
         </button>
       </div>
 
-      {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 w-64 bg-purple-800 text-white transform transition-transform duration-300 ease-in-out z-40 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0`}>
@@ -146,7 +144,6 @@ const ManagerDashboard = () => {
           </nav>
         </div>
 
-        {/* User Info & Logout */}
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-purple-900">
           {userInfo && (
             <div className="mb-4">
@@ -165,7 +162,6 @@ const ManagerDashboard = () => {
         </div>
       </div>
 
-      {/* Overlay for mobile */}
       {sidebarOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
@@ -173,7 +169,6 @@ const ManagerDashboard = () => {
         ></div>
       )}
 
-      {/* Main Content */}
       <div className="lg:ml-64 p-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800">
@@ -182,13 +177,13 @@ const ManagerDashboard = () => {
           <p className="text-gray-600">Quản lý tổng thể hệ thống phòng chống ma túy</p>
         </div>
 
-        {/* Content based on active tab */}
         {activeTab === "overview" && <ManagerOverview />}
         {activeTab === "staff" && <StaffManagement />}
         {activeTab === "consultants" && <ConsultantManagement />}
         {activeTab === "reports" && <SystemReports />}
         {activeTab === "settings" && <SystemSettings />}
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

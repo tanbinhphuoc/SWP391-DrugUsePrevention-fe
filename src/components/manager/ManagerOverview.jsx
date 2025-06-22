@@ -7,96 +7,28 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  Target,
-  Settings
+  Target
 } from "lucide-react";
 
 const ManagerOverview = () => {
   const systemStats = [
-    {
-      title: "Tổng người dùng",
-      value: "2,847",
-      change: "+15.3%",
-      icon: <Users className="w-8 h-8 text-blue-600" />,
-      color: "bg-blue-50 border-blue-200",
-      trend: "up"
-    },
-    {
-      title: "Staff hoạt động",
-      value: "12",
-      change: "+2",
-      icon: <Users className="w-8 h-8 text-green-600" />,
-      color: "bg-green-50 border-green-200",
-      trend: "up"
-    },
-    {
-      title: "Consultant",
-      value: "8",
-      change: "+1",
-      icon: <Users className="w-8 h-8 text-purple-600" />,
-      color: "bg-purple-50 border-purple-200",
-      trend: "up"
-    },
-    {
-      title: "Hiệu quả hệ thống",
-      value: "94.2%",
-      change: "+2.1%",
-      icon: <Target className="w-8 h-8 text-orange-600" />,
-      color: "bg-orange-50 border-orange-200",
-      trend: "up"
-    }
+    { title: "Tổng người dùng", value: "2,847", change: "+15.3%", icon: <Users className="w-8 h-8 text-blue-600" />, color: "bg-blue-50 border-blue-200", trend: "up" },
+    { title: "Staff hoạt động", value: "12", change: "+2", icon: <Users className="w-8 h-8 text-green-600" />, color: "bg-green-50 border-green-200", trend: "up" },
+    { title: "Consultant", value: "8", change: "+1", icon: <Users className="w-8 h-8 text-purple-600" />, color: "bg-purple-50 border-purple-200", trend: "up" },
+    { title: "Hiệu quả hệ thống", value: "94.2%", change: "+2.1%", icon: <Target className="w-8 h-8 text-orange-600" />, color: "bg-orange-50 border-orange-200", trend: "up" },
   ];
 
   const performanceMetrics = [
-    {
-      category: "Khóa học",
-      total: 45,
-      active: 38,
-      completion: "87%",
-      satisfaction: "4.6/5"
-    },
-    {
-      category: "Khảo sát",
-      total: 15,
-      active: 12,
-      completion: "92%",
-      satisfaction: "4.4/5"
-    },
-    {
-      category: "Tư vấn",
-      total: 234,
-      active: 156,
-      completion: "89%",
-      satisfaction: "4.8/5"
-    },
-    {
-      category: "Chương trình",
-      total: 8,
-      active: 5,
-      completion: "75%",
-      satisfaction: "4.5/5"
-    }
+    { category: "Khóa học", total: 45, active: 38, completion: "87%", satisfaction: "4.6/5" },
+    { category: "Khảo sát", total: 15, active: 12, completion: "92%", satisfaction: "4.4/5" },
+    { category: "Tư vấn", total: 234, active: 156, completion: "89%", satisfaction: "4.8/5" },
+    { category: "Chương trình", total: 8, active: 5, completion: "75%", satisfaction: "4.5/5" },
   ];
 
   const systemAlerts = [
-    { 
-      type: "warning", 
-      message: "Cần phê duyệt 3 khóa học mới", 
-      priority: "Cao",
-      time: "2 giờ trước"
-    },
-    { 
-      type: "info", 
-      message: "Báo cáo tháng cần xem xét", 
-      priority: "Trung bình",
-      time: "1 ngày trước"
-    },
-    { 
-      type: "success", 
-      message: "Hệ thống backup hoàn tất", 
-      priority: "Thấp",
-      time: "3 giờ trước"
-    },
+    { type: "warning", message: "Cần phê duyệt 3 khóa học mới", priority: "Cao", time: "2 giờ trước" },
+    { type: "info", message: "Báo cáo tháng cần xem xét", priority: "Trung bình", time: "1 ngày trước" },
+    { type: "success", message: "Hệ thống backup hoàn tất", priority: "Thấp", time: "3 giờ trước" },
   ];
 
   const recentActivities = [
@@ -108,7 +40,6 @@ const ManagerOverview = () => {
 
   return (
     <div className="space-y-6">
-      {/* System Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {systemStats.map((stat, index) => (
           <div key={index} className={`p-6 rounded-lg border-2 ${stat.color} hover:shadow-lg transition-shadow`}>
@@ -120,16 +51,13 @@ const ManagerOverview = () => {
                   {stat.change}
                 </p>
               </div>
-              <div className="flex-shrink-0">
-                {stat.icon}
-              </div>
+              {stat.icon}
             </div>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Performance Metrics */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-800">Hiệu suất hệ thống</h3>
@@ -157,7 +85,6 @@ const ManagerOverview = () => {
           </div>
         </div>
 
-        {/* System Alerts */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-800">Cảnh báo hệ thống</h3>
@@ -189,7 +116,6 @@ const ManagerOverview = () => {
         </div>
       </div>
 
-      {/* Recent Activities */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-gray-800">Hoạt động gần đây</h3>
@@ -210,29 +136,6 @@ const ManagerOverview = () => {
               </div>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-6">Thao tác nhanh</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <button className="p-4 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors">
-            <Users className="w-6 h-6 text-blue-600 mb-2" />
-            <p className="text-sm font-medium text-blue-800">Quản lý Staff</p>
-          </button>
-          <button className="p-4 bg-purple-50 hover:bg-purple-100 rounded-lg border border-purple-200 transition-colors">
-            <Users className="w-6 h-6 text-purple-600 mb-2" />
-            <p className="text-sm font-medium text-purple-800">Quản lý Consultant</p>
-          </button>
-          <button className="p-4 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition-colors">
-            <TrendingUp className="w-6 h-6 text-green-600 mb-2" />
-            <p className="text-sm font-medium text-green-800">Xem báo cáo</p>
-          </button>
-          <button className="p-4 bg-orange-50 hover:bg-orange-100 rounded-lg border border-orange-200 transition-colors">
-            <Settings className="w-6 h-6 text-orange-600 mb-2" />
-            <p className="text-sm font-medium text-orange-800">Cài đặt hệ thống</p>
-          </button>
         </div>
       </div>
     </div>
