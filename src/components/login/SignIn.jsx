@@ -7,7 +7,6 @@ import axios from "axios"
 import "./SignIn.css" // Ensure this file exists in the same directory
 
 const demoAccounts = {
-  demo_guest: { role: "Guest", roleId: 1 },
   demo_member: { role: "Member", roleId: 2 },
   demo_staff: { role: "Staff", roleId: 3 },
   demo_consult: { role: "Consultant", roleId: 4 },
