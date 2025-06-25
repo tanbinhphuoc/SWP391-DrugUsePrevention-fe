@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Shield, Star, X, Check, Users, Heart, BookOpen, Clock, MapPin, Calendar } from 'lucide-react';
 
-import { services } from './data/service'; // Giả lập dữ liệu dịch vụ
-import { experts } from './data/experts'; // Giả lập dữ liệu chuyên gia
+import { experts } from './data/experts';
+import { services } from './data/services';
 
+import AnimatedBackground from './AnimatedBackground';
 import HeroSection from './HeroSection';
-import ServicesSection from './ServiceSection';
+import ServicesSection from './ServicesSection';
 import WhyChooseUsSection from './WhyChooseUsSection';
 import BookingModal from './BookingModal';
-import AnimatedBackground from './AnimatedBackground';
 
+
+// Main Component
 const ConsultationPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -24,53 +26,9 @@ const ConsultationPage = () => {
     message: ''
   });
 
-  // Giờ làm việc từ 7h sáng đến 7h tối
-  const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 7; hour <= 19; hour++) {
-      slots.push(`${hour.toString().padStart(2, '0')}:00`);
-    }
-    return slots;
-  };
-
-  
-
-  const generateDates = () => {
-    const dates = [];
-    const today = new Date();
-    for (let i = 1; i <= 14; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      dates.push(date);
-    }
-    return dates;
-  };
-
-  const isTimeSlotAvailable = (date, time) => {
-    const dateString = date.toISOString().split('T')[0];
-    return !bookedSlots[dateString]?.includes(time);
-  };
-
   const handleBookNow = () => {
     setShowBookingModal(true);
     setCurrentStep(1);
-  };
-
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleTimeSlotToggle = (time) => {
-    setSelectedTimeSlots(prev => {
-      if (prev.includes(time)) {
-        return prev.filter(t => t !== time);
-      } else {
-        return [...prev, time].sort();
-      }
-    });
   };
 
   const handleNextStep = () => {
@@ -86,7 +44,10 @@ const ConsultationPage = () => {
   };
 
   const calculateTotalPrice = () => {
-    return selectedTimeSlots.length * 100000;
+    if (selectedExpert && selectedTimeSlots.length > 0) {
+      return selectedTimeSlots.length * selectedExpert.hourlyRate;
+    }
+    return 0;
   };
 
   const formatPrice = (price) => {
@@ -103,14 +64,6 @@ const ConsultationPage = () => {
     setSelectedDate(null);
     setSelectedTimeSlots([]);
     setFormData({ name: '', email: '', phone: '', message: '' });
-  };
-
-  const formatDate = (date) => {
-    return date.toLocaleDateString('vi-VN', {
-      weekday: 'short',
-      day: '2-digit',
-      month: '2-digit'
-    });
   };
 
   return (
@@ -145,7 +98,6 @@ const ConsultationPage = () => {
       {showBookingModal && (
         <BookingModal
           currentStep={currentStep}
-          setCurrentStep={setCurrentStep}
           onClose={() => setShowBookingModal(false)}
           services={services}
           experts={experts}

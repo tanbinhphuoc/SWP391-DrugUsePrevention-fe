@@ -15,9 +15,9 @@ const HeroSection = ({ onBookNow }) => (
     <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
       Đội ngũ chuyên gia giàu kinh nghiệm sẵn sàng tư vấn trực tuyến về phòng chống ma túy, cai nghiện và hỗ trợ gia đình
     </p>
-    <div className="flex items-center justify-center space-x-6 mb-8">
+    <div className="flex items-center justify-center space-x-6 mb-8 flex-wrap gap-4">
       <div className="text-center">
-        <div className="text-2xl font-bold text-white">100.000đ</div>
+        <div className="text-2xl font-bold text-white">80k - 200k đ</div>
         <div className="text-white/70 text-sm">/ 1 giờ tư vấn</div>
       </div>
       <div className="text-center">
