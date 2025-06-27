@@ -2,10 +2,10 @@ import React from 'react';
 import { Play, ArrowRight, Clock, Target, Award, BarChart3 } from 'lucide-react';
 import Breadcrumb from './Breadcrumb';
 
-const SurveyStart = ({ onStart, currentStep }) => {
+const SurveyStart = ({ onStart }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-emerald-50">
-      <Breadcrumb currentStep={currentStep} />
+      <Breadcrumb currentStep="survey-start" />
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">

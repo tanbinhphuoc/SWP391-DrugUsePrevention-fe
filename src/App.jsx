@@ -13,6 +13,7 @@ import ConsultantDashboard from "./components/dichvu/consultant/ux/ConsultantDas
 import "react-toastify/dist/ReactToastify.css";
 import StaffDashboard from "./components/staff/StaffDashboard.jsx";
 import ManagerDashboard from "./components/manager/ManagerDashboard.jsx";
+import ArticlesPage from "./components/article/ArticlesPage.jsx";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/risk-assessment" element={<RiskAssessmentPage />} />
           <Route path="/consultation" element={<ConsultationPage />} />
           <Route path="/community-programs" element={<CommunityProgramsPage />} />
+          <Route path="/articles" element={<ArticlesPage />} />
         </Routes>
       </div>
     </Router>

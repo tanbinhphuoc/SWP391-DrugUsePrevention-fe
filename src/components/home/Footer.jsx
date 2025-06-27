@@ -90,7 +90,7 @@ const Footer = () => {
             {/* Quick Links */}
             <div className="transform hover:scale-105 transition-all duration-500 ease-out">
               <h3 className="text-white text-lg font-semibold mb-6 relative">
-                Quick Links
+                Liên kết nhanh
                 <div className="absolute -bottom-2 left-0 w-8 h-0.5 bg-gradient-to-r from-emerald-400 to-transparent rounded-full"></div>
               </h3>
               <ul className="space-y-3">

@@ -1,60 +1,94 @@
 import React from 'react';
-import { AlertCircle, User, Calendar } from 'lucide-react';
+import { Star, Clock, PlayCircle, Users, BarChart3 } from 'lucide-react';
 import Breadcrumb from './Breadcrumb';
 
-const ConsultationRedirect = ({ onContinue, currentStep }) => {
+const CourseSelection = ({ availableCourses, recommendedCourse, score, onSelect }) => {
+  const getScoreLabel = (score) => {
+    if (score < 4) return 'Mức độ rủi ro thấp - Khóa học cơ bản phù hợp';
+    if (score === 4) return 'Mức độ rủi ro trung bình - Nên học khóa chuyên sâu';
+    return 'Mức độ rủi ro cao - Đã được tư vấn';
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50">
-      <Breadcrumb currentStep={currentStep} />
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
+      <Breadcrumb currentStep="course-selection" />
       <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 text-center">
-            <div className="w-32 h-32 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-8">
-              <AlertCircle className="h-16 w-16 text-white" />
-            </div>
-
-            <h2 className="text-4xl font-bold text-gray-800 mb-6">
-              Cần Tư Vấn Chuyên Sâu
-            </h2>
-
-            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-              Dựa trên kết quả khảo sát của bạn, chúng tôi khuyến nghị bạn nên trao đổi trực tiếp với chuyên gia tư vấn
-              để được hỗ trợ phù hợp và hiệu quả nhất.
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">Chọn Khóa Học Phù Hợp</h1>
+            <p className="text-lg text-gray-600">
+              {score < 4 ? 'Khóa học được đề xuất cho bạn' :
+                score === 4 ? 'Bạn có thể chọn khóa học phù hợp hoặc khám phá thêm' :
+                'Chọn khóa học bạn muốn học'}
             </p>
 
-            <div className="grid md:grid-cols-2 gap-6 mb-10">
-              <div className="bg-red-50 rounded-2xl p-6">
-                <div className="flex items-center mb-4">
-                  <User className="h-8 w-8 text-red-600 mr-3" />
-                  <h3 className="text-xl font-semibold text-gray-800">Tư Vấn Cá Nhân</h3>
+            {score !== null && (
+              <div className="mt-6 bg-white rounded-2xl p-6 shadow-lg max-w-md mx-auto">
+                <div className="flex items-center justify-center mb-4">
+                  <BarChart3 className="h-8 w-8 text-blue-600 mr-3" />
+                  <span className="text-2xl font-bold text-gray-800">Điểm khảo sát: {score}</span>
                 </div>
-                <p className="text-gray-600">Gặp gỡ trực tiếp với chuyên gia để được tư vấn riêng biệt</p>
+                <div className="text-sm text-gray-600">{getScoreLabel(score)}</div>
               </div>
+            )}
+          </div>
 
-              <div className="bg-orange-50 rounded-2xl p-6">
-                <div className="flex items-center mb-4">
-                  <Calendar className="h-8 w-8 text-orange-600 mr-3" />
-                  <h3 className="text-xl font-semibold text-gray-800">Đặt Lịch Ngay</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {availableCourses.map((course) => (
+              <div
+                key={course.id}
+                className="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
+              >
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src={course.thumbnail}
+                    alt={course.title}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                  />
+                  {course.id === recommendedCourse?.id && (
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center">
+                      <Star className="h-4 w-4 mr-1" />
+                      Đề xuất
+                    </div>
+                  )}
                 </div>
-                <p className="text-gray-600">Chọn thời gian phù hợp để được tư vấn chuyên nghiệp</p>
+
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-800 mb-3">{course.title}</h3>
+                  <p className="text-gray-600 mb-4 line-clamp-2">{course.description}</p>
+
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-2xl font-bold text-emerald-600">{course.price}</span>
+                    <div className="flex items-center">
+                      <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                      <span className="text-gray-600">{course.rating}</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4 mb-6 text-sm text-gray-600">
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-1" />
+                      {course.duration}
+                    </div>
+                    <div className="flex items-center">
+                      <PlayCircle className="h-4 w-4 mr-1" />
+                      {course.lessons} bài
+                    </div>
+                    <div className="flex items-center">
+                      <Users className="h-4 w-4 mr-1" />
+                      {course.students}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => onSelect(course)}
+                    className="w-full bg-gradient-to-r from-emerald-500 to-blue-500 text-white py-3 rounded-2xl font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                  >
+                    {course.price === 'Miễn phí' ? 'Bắt Đầu Học' : 'Mua Khóa Học'}
+                  </button>
+                </div>
               </div>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-4">
-              <button
-                onClick={() => window.open('/consultation', '_blank')}
-                className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-              >
-                Đặt Lịch Tư Vấn Ngay
-              </button>
-
-              <button
-                onClick={onContinue}
-                className="bg-gray-100 text-gray-700 px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-gray-200 transition-all duration-300"
-              >
-                Tôi Đã Tư Vấn, Tiếp Tục Học
-              </button>
-            </div>
+            ))}
           </div>
         </div>
       </div>
@@ -62,4 +96,4 @@ const ConsultationRedirect = ({ onContinue, currentStep }) => {
   );
 };
 
-export default ConsultationRedirect;
+export default CourseSelection;

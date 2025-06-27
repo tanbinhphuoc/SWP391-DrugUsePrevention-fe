@@ -125,6 +125,13 @@ const UserDashboard = () => {
                 <span>{item.label}</span>
               </button>
             ))}
+            <button
+              onClick={() => navigate("/")}
+              className="w-full flex items-center space-x-3 px-4 py-2 rounded transition-colors hover:bg-blue-800 text-gray-300 mt-4"
+            >
+              <span>🏠</span>
+              <span>Trang chủ</span>
+            </button>
           </nav>
         </div>
         <div className="p-4 border-t border-white/30 text-sm">
