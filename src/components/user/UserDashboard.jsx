@@ -96,6 +96,8 @@ const UserDashboard = () => {
     { id: "appointments", label: "Tư vấn", icon: "📅" },
     { id: "programs", label: "Chương trình", icon: "📣" },
     { id: "profile", label: "Hồ sơ", icon: "👤" },
+    // THAY ĐỔI: Thêm nút Trang chủ với icon Home
+    { id: "home", label: "Trang chủ", icon: "🏠", path: "/" },
   ];
 
   // THAY ĐỔI: Hiển thị loading khi userInfo chưa sẵn sàng
@@ -112,26 +114,25 @@ const UserDashboard = () => {
           <nav className="space-y-2 px-4">
             {/* THAY ĐỔI: Cải thiện sidebar với trạng thái active và điều hướng */}
             {menuItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-2 rounded transition-colors ${
-                  activeTab === item.id
-                    ? "bg-blue-700 text-white"
-                    : "hover:bg-blue-800 text-gray-300"
-                }`}
-              >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
-              </button>
-            ))}
-            <button
-              onClick={() => navigate("/")}
-              className="w-full flex items-center space-x-3 px-4 py-2 rounded transition-colors hover:bg-blue-800 text-gray-300 mt-4"
-            >
-              <span>🏠</span>
-              <span>Trang chủ</span>
-            </button>
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (item.path) {
+                      navigate(item.path); // 👈 điều hướng nếu có đường dẫn
+                    } else {
+                      setActiveTab(item.id); // các tab nội bộ khác
+                    }
+                  }}
+                  className={`w-full flex items-center space-x-3 px-4 py-2 rounded transition-colors ${
+                    activeTab === item.id
+                      ? "bg-blue-700 text-white"
+                      : "hover:bg-blue-800 text-gray-300"
+                  }`}
+                >
+                  <span>{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              ))}
           </nav>
         </div>
         <div className="p-4 border-t border-white/30 text-sm">

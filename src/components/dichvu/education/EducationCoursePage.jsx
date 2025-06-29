@@ -62,15 +62,15 @@ const coursesData = {
     level: 'Trung bình',
     lessons_detail: [
       { id: 1, title: 'Ma túy trong môi trường đại học', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '20 phút', completed: false },
-      { id: 2, title: 'Áp lực xã hội và cách đối phó', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '25 phút', completed: false },
-      { id: 3, title: 'Tác động nghiêm trọng đến tương lai', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '30 phút', completed: false },
-      { id: 4, title: 'Kỹ năng giao tiếp và từ chối', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '28 phút', completed: false },
-      { id: 5, title: 'Quản lý stress và cảm xúc', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '22 phút', completed: false },
-      { id: 6, title: 'Xây dựng mạng lưới hỗ trợ tích cực', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '25 phút', completed: false },
-      { id: 7, title: 'Pháp luật và hậu quả pháp lý', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '20 phút', completed: false },
-      { id: 8, title: 'Nghề nghiệp và cơ hội phát triển', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '18 phút', completed: false },
-      { id: 9, title: 'Hỗ trợ người khác và cộng đồng', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '22 phút', completed: false },
-      { id: 10, title: 'Kế hoạch hành động cá nhân', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '20 phút', completed: false }
+      // { id: 2, title: 'Áp lực xã hội và cách đối phó', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '25 phút', completed: false },
+      // { id: 3, title: 'Tác động nghiêm trọng đến tương lai', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '30 phút', completed: false },
+      // { id: 4, title: 'Kỹ năng giao tiếp và từ chối', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '28 phút', completed: false },
+      // { id: 5, title: 'Quản lý stress và cảm xúc', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '22 phút', completed: false },
+      // { id: 6, title: 'Xây dựng mạng lưới hỗ trợ tích cực', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '25 phút', completed: false },
+      // { id: 7, title: 'Pháp luật và hậu quả pháp lý', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '20 phút', completed: false },
+      // { id: 8, title: 'Nghề nghiệp và cơ hội phát triển', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '18 phút', completed: false },
+      // { id: 9, title: 'Hỗ trợ người khác và cộng đồng', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '22 phút', completed: false },
+      // { id: 10, title: 'Kế hoạch hành động cá nhân', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '20 phút', completed: false }
     ]
   },
   parent: {
@@ -901,7 +901,7 @@ const EducationCoursesPage = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-2xl p-6 mb-8">
+              {/* <div className="bg-gray-50 rounded-2xl p-6 mb-8">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Thống Kê Học Tập</h3>
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
@@ -913,7 +913,7 @@ const EducationCoursesPage = () => {
                     <p className="text-gray-600">Thời gian học</p>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Đánh Giá Kết Quả</h3>

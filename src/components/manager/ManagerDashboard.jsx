@@ -8,7 +8,8 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  Home
 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import ManagerOverview from "./ManagerOverview";
@@ -94,6 +95,8 @@ const ManagerDashboard = () => {
     { id: "consultants", label: "Quản lý Consultant", icon: <UserCheck className="w-5 h-5" /> },
     { id: "reports", label: "Báo cáo tổng thể", icon: <TrendingUp className="w-5 h-5" /> },
     { id: "settings", label: "Cài đặt hệ thống", icon: <Settings className="w-5 h-5" /> },
+    // THAY ĐỔI: Thêm nút Trang chủ với icon Home
+    { id: "home", label: "Trang chủ", icon: <Home className="w-5 h-5" />, path: "/" }
   ];
 
   if (!userInfo) {
@@ -128,7 +131,11 @@ const ManagerDashboard = () => {
               <button
                 key={item.id}
                 onClick={() => {
-                  setActiveTab(item.id);
+                  if (item.path) {
+                    navigate(item.path);
+                  } else {
+                    setActiveTab(item.id);
+                  }
                   setSidebarOpen(false);
                 }}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
