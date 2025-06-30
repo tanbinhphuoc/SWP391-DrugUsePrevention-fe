@@ -107,6 +107,8 @@ const UserDashboard = () => {
     { id: "appointments", label: "Tư vấn", icon: "📅" },
     { id: "programs", label: "Chương trình", icon: "📣" },
     { id: "profile", label: "Hồ sơ", icon: "👤" },
+    // THAY ĐỔI: Thêm nút Trang chủ với icon Home
+    { id: "home", label: "Trang chủ", icon: "🏠", path: "/" },
   ];
 
   if (!userInfo) {

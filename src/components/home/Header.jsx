@@ -27,6 +27,27 @@ const Header = () => {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [activeSection, setActiveSection] = useState('home')
+  const [userName, setUserName] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const name = localStorage.getItem("userName");
+    const token = localStorage.getItem("token");
+    setUserName(name);
+    setIsLoggedIn(!!(name && token));
+  }, []);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const name = localStorage.getItem("userName");
+      const token = localStorage.getItem("token");
+      setUserName(name);
+      setIsLoggedIn(!!(name && token));
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -102,6 +123,18 @@ const Header = () => {
     }, 800)
   }
 
+  const getRouteByRole = (roleId) => {
+    const routes = {
+      1: "/",
+      2: "/member-dashboard",
+      3: "/staff-dashboard",
+      4: "/consultant-dashboard",
+      5: "/manager-dashboard",
+      6: "/dashboard",
+    };
+    return routes[roleId] || "/";
+  };
+
   return (
     <>
       {/* Navigation Loading Overlay */}
@@ -146,20 +179,51 @@ const Header = () => {
                 activeSection={activeSection}
               />
 
-              <div className="flex items-center space-x-4 ml-6 pl-6 border-l border-gray-200">
-                <button
-                  onClick={() => handleNavigation('/login', 'Đăng nhập')}
-                  className="flex items-center text-sky-700 hover:text-orange-500 transition-all duration-300 group"
-                >
-                  <User className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-sm font-medium">Đăng nhập</span>
-                </button>
-                <button
-                  onClick={() => handleNavigation('/register', 'Đăng ký')}
-                  className="bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-700 hover:to-emerald-700 text-white px-6 py-2 rounded-full transition-all duration-300 font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-105"
-                >
-                  Bắt đầu
-                </button>
+             <div className="flex items-center space-x-4 ml-6 pl-6 border-l border-gray-200">
+                {isLoggedIn ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        const roleId = Number(localStorage.getItem("roleId"));
+                        const dashboardPath = getRouteByRole(roleId);
+                        handleNavigation(dashboardPath, "Dashboard của bạn");
+                      }}
+                      className="flex items-center space-x-2 text-sky-700 font-medium hover:underline"
+                      title="Vào trang của bạn"
+                    >
+                      <User className="w-5 h-5" />
+                      <span>Chào, {userName}</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        localStorage.clear();
+                        setUserName(null);
+                        setIsLoggedIn(false);
+                        handleNavigation("/", "Trang chủ");
+                      }}
+                      className="text-sm text-red-500 hover:underline ml-4"
+                    >
+                      Đăng xuất
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handleNavigation('/login', 'Đăng nhập')}
+                      className="flex items-center text-sky-700 hover:text-orange-500 transition-all duration-300 group"
+                    >
+                      <User className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+                      <span className="text-sm font-medium">Đăng nhập</span>
+                    </button>
+                    <button
+                      onClick={() => handleNavigation('/register', 'Đăng ký')}
+                      className="bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-700 hover:to-emerald-700 text-white px-6 py-2 rounded-full transition-all duration-300 font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-105"
+                    >
+                      Bắt đầu
+                    </button>
+                  </>
+                )}
               </div>
             </nav>
 
@@ -187,20 +251,42 @@ const Header = () => {
               handleNavigation={handleNavigation}
               activeSection={activeSection}
             />
-            <div className="pt-4 border-t border-gray-200 space-y-3">
-              <button
-                onClick={() => handleNavigation('/login', 'Đăng nhập')}
-                className="flex items-center text-sky-700 hover:text-orange-500 transition-colors duration-200 w-full"
-              >
-                <User className="h-5 w-5 mr-2" />
-                <span>Đăng nhập</span>
-              </button>
-              <button
-                onClick={() => handleNavigation('/register', 'Đăng ký')}
-                className="bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-700 hover:to-emerald-700 text-white px-6 py-2 rounded-full transition-all duration-300 font-semibold text-sm w-full"
-              >
-                Bắt đầu
-              </button>
+            <div className="flex items-center space-x-4 ml-6 pl-6 border-l border-gray-200">
+              {isLoggedIn ? (
+                <>
+                  <div className="flex items-center space-x-2 text-sky-700 font-medium">
+                    <User className="w-5 h-5" />
+                    <span>Chào, {userName}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      localStorage.clear();
+                      setUserName(null);
+                      setIsLoggedIn(false);
+                      handleNavigation("/", "Trang chủ");
+                    }}
+                    className="text-sm text-red-500 hover:underline ml-4"
+                  >
+                    Đăng xuất
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleNavigation('/login', 'Đăng nhập')}
+                    className="flex items-center text-sky-700 hover:text-orange-500 transition-all duration-300 group"
+                  >
+                    <User className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-sm font-medium">Đăng nhập</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavigation('/register', 'Đăng ký')}
+                    className="bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-700 hover:to-emerald-700 text-white px-6 py-2 rounded-full transition-all duration-300 font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-105"
+                  >
+                    Bắt đầu
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
