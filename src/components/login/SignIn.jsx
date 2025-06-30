@@ -109,10 +109,11 @@ const SignIn = () => {
     }
 
     try {
-      const res = await axios.post("https://localhost:7092/api/Auth/login", {
+      const res = await axios.post("http://localhost:7092/api/Auth/login", {
         userName: loginEmail,
         password: loginPassword,
       })
+
 
       const { token, userName, email, expiresAt, role, userId } = res.data
       const roleMap = {

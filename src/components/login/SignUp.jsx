@@ -242,7 +242,7 @@ const SignUp = () => {
     };
 
     try {
-      const response = await axios.post("https://localhost:7092/api/Auth/register", registerData, {
+      const response = await axios.post("http://localhost:7092/api/Auth/register", registerData, {
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",

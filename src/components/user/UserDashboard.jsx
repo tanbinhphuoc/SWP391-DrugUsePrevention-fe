@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   UserOverview,
   UserCourses,
@@ -8,41 +8,35 @@ import {
   UserPrograms,
   UserProfile,
 } from "./";
-// THAY ĐỔI: Thêm react-toastify và lucide-react để đồng bộ với Admin Dashboard
 import { toast, ToastContainer } from "react-toastify";
 import { LogOut } from "lucide-react";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  // THAY ĐỔI: Thêm state cho activeTab
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("overview");
-  // THAY ĐỔI: Thêm state cho userInfo
   const [userInfo, setUserInfo] = useState(null);
 
-  // THAY ĐỔI: Kiểm tra token và vai trò tương tự Admin Dashboard
   useEffect(() => {
     const localToken = localStorage.getItem("token");
     const sessionToken = sessionStorage.getItem("tempToken");
 
     if (localToken || sessionToken) {
-      let userData;
-      if (localToken) {
-        userData = {
-          userName: localStorage.getItem("userName"),
-          email: localStorage.getItem("email"),
-          expiresAt: localStorage.getItem("expiresAt"),
-          roleId: localStorage.getItem("roleId"),
-          roleName: localStorage.getItem("roleName"),
-        };
-      } else {
-        userData = {
-          userName: sessionStorage.getItem("userName"),
-          email: sessionStorage.getItem("email"),
-          expiresAt: sessionStorage.getItem("expiresAt"),
-          roleId: sessionStorage.getItem("roleId"),
-          roleName: sessionStorage.getItem("roleName"),
-        };
-      }
+      let userData = localToken
+        ? {
+            userName: localStorage.getItem("userName"),
+            email: localStorage.getItem("email"),
+            expiresAt: localStorage.getItem("expiresAt"),
+            roleId: localStorage.getItem("roleId"),
+            roleName: localStorage.getItem("roleName"),
+          }
+        : {
+            userName: sessionStorage.getItem("userName"),
+            email: sessionStorage.getItem("email"),
+            expiresAt: sessionStorage.getItem("expiresAt"),
+            roleId: sessionStorage.getItem("roleId"),
+            roleName: sessionStorage.getItem("roleName"),
+          };
 
       const currentTime = new Date();
       const expirationTime = new Date(userData.expiresAt);
@@ -55,7 +49,6 @@ const UserDashboard = () => {
         return;
       }
 
-      // THAY ĐỔI: Kiểm tra vai trò (roleId: 2 cho Member)
       const roleId = userData.roleId;
       const roleRoutes = {
         1: "/",
@@ -80,15 +73,33 @@ const UserDashboard = () => {
     }
   }, [navigate]);
 
+  // Xử lý callback từ VNPay
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    const vnp_ResponseCode = searchParams.get("vnp_ResponseCode");
+    const appointmentId = searchParams.get("appointmentId");
+
+    if (tab) {
+      setActiveTab(tab); // Kích hoạt tab từ query param (appointments)
+    }
+
+    if (vnp_ResponseCode === "00" && appointmentId) {
+      toast.success(`Thanh toán lịch hẹn ${appointmentId} thành công!`);
+      // Xóa query params sau khi xử lý
+      setSearchParams({}, { replace: true });
+    } else if (vnp_ResponseCode && appointmentId) {
+      toast.error(`Thanh toán lịch hẹn ${appointmentId} thất bại!`);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
   const handleLogout = () => {
     localStorage.clear();
     sessionStorage.clear();
-    // THAY ĐỔI: Thêm thông báo đăng xuất
     toast.success("Đăng xuất thành công!");
     navigate("/login", { replace: true });
   };
 
-  // THAY ĐỔI: Danh sách menu với id để điều hướng
   const menuItems = [
     { id: "overview", label: "Tổng quan", icon: "📊" },
     { id: "courses", label: "Khóa học", icon: "🎓" },
@@ -100,39 +111,28 @@ const UserDashboard = () => {
     { id: "home", label: "Trang chủ", icon: "🏠", path: "/" },
   ];
 
-  // THAY ĐỔI: Hiển thị loading khi userInfo chưa sẵn sàng
   if (!userInfo) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
       <aside className="w-64 bg-blue-900 text-white flex flex-col justify-between">
         <div>
           <div className="p-6 text-xl font-bold">User Dashboard</div>
           <nav className="space-y-2 px-4">
-            {/* THAY ĐỔI: Cải thiện sidebar với trạng thái active và điều hướng */}
             {menuItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    if (item.path) {
-                      navigate(item.path); // 👈 điều hướng nếu có đường dẫn
-                    } else {
-                      setActiveTab(item.id); // các tab nội bộ khác
-                    }
-                  }}
-                  className={`w-full flex items-center space-x-3 px-4 py-2 rounded transition-colors ${
-                    activeTab === item.id
-                      ? "bg-blue-700 text-white"
-                      : "hover:bg-blue-800 text-gray-300"
-                  }`}
-                >
-                  <span>{item.icon}</span>
-                  <span>{item.label}</span>
-                </button>
-              ))}
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`w-full flex items-center space-x-3 px-4 py-2 rounded transition-colors ${
+                  activeTab === item.id ? "bg-blue-700 text-white" : "hover:bg-blue-800 text-gray-300"
+                }`}
+              >
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
           </nav>
         </div>
         <div className="p-4 border-t border-white/30 text-sm">
@@ -142,30 +142,22 @@ const UserDashboard = () => {
             onClick={handleLogout}
             className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white text-sm"
           >
-            {/* THAY ĐỔI: Thêm icon LogOut từ lucide-react */}
             <LogOut className="w-4 h-4" />
             <span>Đăng xuất</span>
           </button>
         </div>
       </aside>
-
-      {/* Main content */}
       <main className="flex-1 p-8 bg-gray-100">
-        <h1 className="text-2xl font-bold mb-6">
-          🎉 Chào mừng {userInfo.userName} trở lại!
-        </h1>
-
-        {/* THAY ĐỔI: Hiển thị component dựa trên activeTab */}
+        <h1 className="text-2xl font-bold mb-6">🎉 Chào mừng {userInfo.userName} trở lại!</h1>
         <div className="mt-6 grid gap-6">
           {activeTab === "overview" && <UserOverview />}
           {activeTab === "courses" && <UserCourses />}
           {activeTab === "surveys" && <UserSurveys />}
-          {activeTab === "appointments" && <UserAppointments />}
+          {activeTab === "appointments" && <UserAppointments appointmentId={searchParams.get("appointmentId")} />}
           {activeTab === "programs" && <UserPrograms />}
           {activeTab === "profile" && <UserProfile />}
         </div>
       </main>
-      {/* THAY ĐỔI: Thêm ToastContainer */}
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
