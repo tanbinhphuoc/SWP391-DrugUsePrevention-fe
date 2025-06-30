@@ -1,7 +1,7 @@
 // src/components/admin/Dashboard.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, BookOpen, Calendar, LogOut, FileText } from "lucide-react";
+import { Users, BookOpen, Calendar, LogOut, FileText, Home } from "lucide-react";
 import AccountManagement from "./AccountManagement";
 import CourseManagement from "./CourseManagement";
 import AppointmentManagement from "./AppointmentManagement";
@@ -89,6 +89,7 @@ const Dashboard = () => {
     { id: "courses", label: "Quản lý khóa học", icon: <BookOpen className="w-5 h-5" /> },
     { id: "appointments", label: "Quản lý lịch hẹn", icon: <Calendar className="w-5 h-5" /> },
     { id: "assessments", label: "Quản lý đánh giá", icon: <FileText className="w-5 h-5" /> },
+    { id: "home", label: "Trang chủ", icon: <Home className="w-5 h-5" />, path: "/" } // Thêm nút Trang chủ
   ];
 
   // Hiển thị Dashboard chỉ khi userInfo đã được thiết lập
@@ -106,7 +107,13 @@ const Dashboard = () => {
             {menuItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  if (item.path) {
+                    navigate(item.path); // điều hướng tới trang chủ
+                  } else {
+                    setActiveTab(item.id); // các tab nội bộ
+                  }
+                }}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
                   activeTab === item.id
                     ? "bg-sky-700 text-white"

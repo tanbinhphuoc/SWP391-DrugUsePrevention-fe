@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import HomePage from "./components/home/HomePage.jsx";
 import SignUp from "./components/login/SignUp.jsx";
 import SignIn from "./components/login/SignIn.jsx";
@@ -13,11 +15,13 @@ import ConsultantDashboard from "./components/dichvu/consultant/ux/ConsultantDas
 import "react-toastify/dist/ReactToastify.css";
 import StaffDashboard from "./components/staff/StaffDashboard.jsx";
 import ManagerDashboard from "./components/manager/ManagerDashboard.jsx";
+import ArticlesPage from "./components/article/ArticlesPage.jsx";
 
 function App() {
   return (
     <Router>
       <div className="App">
+        <ToastContainer />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<SignIn />} />
@@ -32,6 +36,7 @@ function App() {
           <Route path="/risk-assessment" element={<RiskAssessmentPage />} />
           <Route path="/consultation" element={<ConsultationPage />} />
           <Route path="/community-programs" element={<CommunityProgramsPage />} />
+          <Route path="/articles" element={<ArticlesPage />} />
         </Routes>
       </div>
     </Router>
