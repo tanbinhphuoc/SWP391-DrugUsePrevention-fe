@@ -8,6 +8,7 @@ import {
   Calendar, 
   BarChart3, 
   Settings,
+  FileText,
   LogOut,
   Menu,
   X,
@@ -26,6 +27,7 @@ import CourseManagement from "./CourseManagement";
 import SurveyManagement from "./SurveyManagement";
 import ProgramManagement from "./ProgramManagement";
 import AppointmentSupport from "./AppointmentSupport";
+import BlogManagement from "./BlogManagement";
 
 const StaffDashboard = () => {
   const [userInfo, setUserInfo] = useState(null);
@@ -118,6 +120,7 @@ const StaffDashboard = () => {
     { id: "surveys", label: "Quản lý khảo sát", icon: <ClipboardList className="w-5 h-5" />, description: "Tạo và quản lý khảo sát" },
     { id: "programs", label: "Quản lý truyền thông", icon: <Settings className="w-5 h-5" />, description: "Quản lý chương trình truyền thông" },
     { id: "appointments", label: "Hỗ trợ lịch hẹn", icon: <Calendar className="w-5 h-5" />, description: "Hỗ trợ đặt lịch tư vấn" },
+    { id: "blogs", label: "Quản lý Blog", icon: <FileText className="w-5 h-5" />, description: "Tạo và quản lý nội dung blog" }
   ];
 
   if (!userInfo) {
@@ -191,8 +194,8 @@ const StaffDashboard = () => {
         </div>
       </div>
 
-      {/* Enhanced Sidebar */}
-      <div className={`fixed inset-y-0 left-0 w-80 backdrop-blur-xl shadow-2xl transform transition-all duration-300 ease-in-out z-40 ${
+      {/* Enhanced Sidebar với thanh cuộn */}
+      <div className={`fixed inset-y-0 left-0 w-80 backdrop-blur-xl shadow-2xl transform transition-all duration-300 ease-in-out z-40 flex flex-col ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0 border-r ${
         isDarkMode 
@@ -200,8 +203,8 @@ const StaffDashboard = () => {
           : 'bg-white/95 border-gray-200/50'
       }`}>
         
-        {/* Sidebar Header */}
-        <div className={`p-6 relative overflow-hidden ${
+        {/* Sidebar Header - Fixed */}
+        <div className={`p-6 relative overflow-hidden flex-shrink-0 ${
           isDarkMode 
             ? 'bg-gradient-to-r from-gray-700 via-gray-600 to-indigo-700' 
             : 'bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-600'
@@ -233,72 +236,108 @@ const StaffDashboard = () => {
           </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="p-4 space-y-2">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                if (item.path) {
-                  navigate(item.path);
-                } else {
-                  setActiveTab(item.id);
-                }
-                setSidebarOpen(false);
-              }}
-              className={`w-full group flex items-center space-x-3 px-4 py-3 rounded-2xl transition-all duration-200 ${
-                activeTab === item.id
-                  ? `${isDarkMode 
-                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600' 
-                      : 'bg-gradient-to-r from-blue-500 to-indigo-500'
-                    } text-white shadow-lg transform scale-[1.02]`
-                  : `${isDarkMode 
-                      ? 'hover:bg-gray-700 text-gray-300' 
-                      : 'hover:bg-gray-100 text-gray-700'
-                    } hover:transform hover:scale-[1.01]`
-              }`}
-            >
-              <div className={`p-2 rounded-xl ${
-                activeTab === item.id 
-                  ? 'bg-white/20' 
-                  : `${isDarkMode 
-                      ? 'bg-gray-600 group-hover:bg-indigo-600' 
-                      : 'bg-gray-100 group-hover:bg-blue-100'
-                    }`
-              }`}>
-                {React.cloneElement(item.icon, {
-                  className: `w-5 h-5 ${
-                    activeTab === item.id ? 'text-white' : 
-                    isDarkMode ? 'text-gray-300 group-hover:text-white' : 'text-gray-600 group-hover:text-blue-600'
-                  }`
-                })}
-              </div>
-              <div className="flex-1 text-left">
-                <p className={`font-medium ${
-                  activeTab === item.id ? 'text-white' : 
-                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
+          {/* Navigation */}
+          <nav className="p-4 space-y-2">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  if (item.path) {
+                    navigate(item.path);
+                  } else {
+                    setActiveTab(item.id);
+                  }
+                  setSidebarOpen(false);
+                }}
+                className={`w-full group flex items-center space-x-3 px-4 py-3 rounded-2xl transition-all duration-200 ${
+                  activeTab === item.id
+                    ? `${isDarkMode 
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600' 
+                        : 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                      } text-white shadow-lg transform scale-[1.02]`
+                    : `${isDarkMode 
+                        ? 'hover:bg-gray-700 text-gray-300' 
+                        : 'hover:bg-gray-100 text-gray-700'
+                      } hover:transform hover:scale-[1.01]`
+                }`}
+              >
+                <div className={`p-2 rounded-xl ${
+                  activeTab === item.id 
+                    ? 'bg-white/20' 
+                    : `${isDarkMode 
+                        ? 'bg-gray-600 group-hover:bg-indigo-600' 
+                        : 'bg-gray-100 group-hover:bg-blue-100'
+                      }`
                 }`}>
-                  {item.label}
-                </p>
-                {item.description && (
-                  <p className={`text-xs ${
-                    activeTab === item.id ? 'text-blue-100' : 
-                    isDarkMode ? 'text-gray-500' : 'text-gray-500'
+                  {React.cloneElement(item.icon, {
+                    className: `w-5 h-5 ${
+                      activeTab === item.id ? 'text-white' : 
+                      isDarkMode ? 'text-gray-300 group-hover:text-white' : 'text-gray-600 group-hover:text-blue-600'
+                    }`
+                  })}
+                </div>
+                <div className="flex-1 text-left">
+                  <p className={`font-medium ${
+                    activeTab === item.id ? 'text-white' : 
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
                   }`}>
-                    {item.description}
+                    {item.label}
                   </p>
-                )}
-              </div>
-              <ChevronRight className={`w-4 h-4 transition-all duration-200 ${
-                activeTab === item.id ? 'text-white' : 
-                isDarkMode ? 'text-gray-400 group-hover:translate-x-1 group-hover:text-white' : 'text-gray-400 group-hover:translate-x-1 group-hover:text-blue-600'
-              }`} />
-            </button>
-          ))}
-        </nav>
+                  {item.description && (
+                    <p className={`text-xs ${
+                      activeTab === item.id ? 'text-blue-100' : 
+                      isDarkMode ? 'text-gray-500' : 'text-gray-500'
+                    }`}>
+                      {item.description}
+                    </p>
+                  )}
+                </div>
+                <ChevronRight className={`w-4 h-4 transition-all duration-200 ${
+                  activeTab === item.id ? 'text-white' : 
+                  isDarkMode ? 'text-gray-400 group-hover:translate-x-1 group-hover:text-white' : 'text-gray-400 group-hover:translate-x-1 group-hover:text-blue-600'
+                }`} />
+              </button>
+            ))}
+          </nav>
 
-        {/* User Info & Logout */}
-        <div className={`absolute bottom-0 left-0 right-0 p-4 ${
+          {/* Thêm một số mục menu demo để test scroll */}
+          <div className="px-4 pb-4">
+            <div className={`mb-4 p-3 rounded-xl ${
+              isDarkMode ? 'bg-gray-700/50' : 'bg-gray-100/50'
+            }`}>
+              <h3 className={`text-sm font-semibold mb-2 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-700'
+              }`}>Tiện ích nhanh</h3>
+              <div className="space-y-2">
+                <button className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                  isDarkMode ? 'hover:bg-gray-600 text-gray-400' : 'hover:bg-gray-200 text-gray-600'
+                }`}>
+                  📊 Báo cáo hàng ngày
+                </button>
+                <button className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                  isDarkMode ? 'hover:bg-gray-600 text-gray-400' : 'hover:bg-gray-200 text-gray-600'
+                }`}>
+                  📈 Thống kê tháng
+                </button>
+                <button className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                  isDarkMode ? 'hover:bg-gray-600 text-gray-400' : 'hover:bg-gray-200 text-gray-600'
+                }`}>
+                  🔔 Thông báo mới
+                </button>
+                <button className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                  isDarkMode ? 'hover:bg-gray-600 text-gray-400' : 'hover:bg-gray-200 text-gray-600'
+                }`}>
+                  ⚙️ Cài đặt hệ thống
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* User Info & Logout - Fixed at bottom */}
+        <div className={`flex-shrink-0 p-4 ${
           isDarkMode 
             ? 'bg-gradient-to-t from-gray-800 to-transparent' 
             : 'bg-gradient-to-t from-gray-50 to-transparent'
@@ -457,6 +496,11 @@ const StaffDashboard = () => {
               {activeTab === "appointments" && (
                 <div className="animate-in slide-in-from-right-5 fade-in duration-500">
                   <AppointmentSupport />
+                </div>
+              )}
+              {activeTab === "blogs" && (
+                <div className="animate-in slide-in-from-right-5 fade-in duration-500">
+                  <BlogManagement />
                 </div>
               )}
             </div>

@@ -16,6 +16,10 @@ import "react-toastify/dist/ReactToastify.css";
 import StaffDashboard from "./components/staff/StaffDashboard.jsx";
 import ManagerDashboard from "./components/manager/ManagerDashboard.jsx";
 import ArticlesPage from "./components/article/ArticlesPage.jsx";
+import BlogManagement from "./components/staff/BlogManagement.jsx";
+import BlogEditor from "./components/blog/BlogEditor.jsx";
+import BlogDetail from "./components/blog/BlogDetail.jsx";
+
 
 function App() {
   return (
@@ -37,6 +41,10 @@ function App() {
           <Route path="/consultation" element={<ConsultationPage />} />
           <Route path="/community-programs" element={<CommunityProgramsPage />} />
           <Route path="/articles" element={<ArticlesPage />} />
+          <Route path="/staff/blog" element={<BlogManagement />} />
+          <Route path="/staff/blog/create" element={<BlogEditor />} />
+          <Route path="/blog/edit/:id" element={<BlogEditor />} />
+          <Route path="/blog/:id" element={<BlogDetail />} />
         </Routes>
       </div>
     </Router>
