@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { X } from "lucide-react"; // Thêm dòng này
 import { useNavigate } from "react-router-dom";
 import { Pie, Bar, Line } from "react-chartjs-2";
 import {
@@ -29,10 +30,13 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [userInfo, setUserInfo] = useState(null);
   const [dashboardData, setDashboardData] = useState({
-    accountStats: { Admin: 0, Student: 0, Teacher: 0 },
+    accountStats: { Admin: 0, Member: 0, Staff: 0, Consultant: 0 },
     courseStats: { Total: 0, Completed: 0 },
-    appointmentStats: [],
     riskAssessmentStats: [],
+  });
+  const [appointmentChartData, setAppointmentChartData] = useState({
+    labels: [],
+    datasets: [],
   });
   const navigate = useNavigate();
 
@@ -40,7 +44,7 @@ const Dashboard = () => {
   const fetchDashboardData = async (token) => {
     try {
       // Fetch account stats
-      const accountResponse = await fetch("https://b6f1-123-20-88-171.ngrok-free.app/api/Auth/users", {
+      const accountResponse = await fetch("http://localhost:7092/api/Admin/GetAllUsers", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -48,17 +52,21 @@ const Dashboard = () => {
         },
       });
       if (!accountResponse.ok) throw new Error("Failed to fetch account data.");
-      const accounts = await accountResponse.json();
-      const stats = accounts.reduce(
+      const accountData = await accountResponse.json();
+      if (!accountData.success || !Array.isArray(accountData.data)) throw new Error("Invalid account data.");
+      const accounts = accountData.data;
+      const accountStats = accounts.reduce(
         (acc, user) => {
-          acc[user.roleName] = (acc[user.roleName] || 0) + 1;
+          if (user.roleName in acc) {
+            acc[user.roleName]++;
+          }
           return acc;
         },
-        { Admin: 0, Student: 0, Teacher: 0 }
+        { Admin: 0, Member: 0, Staff: 0, Consultant: 0 }
       );
 
       // Fetch course stats
-      const courseResponse = await fetch("https://b6f1-123-20-88-171.ngrok-free.app/api/Course/GetAllCourse", {
+      const courseResponse = await fetch("http://localhost:7092/api/Course/GetAllCourse", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -66,35 +74,60 @@ const Dashboard = () => {
         },
       });
       if (!courseResponse.ok) throw new Error("Failed to fetch course data.");
-      const courses = await courseResponse.json();
+      const courseData = await courseResponse.json();
+      if (!courseData.success || !Array.isArray(courseData.data)) throw new Error(courseData.message || "Invalid course data.");
+      const courses = courseData.data;
       const courseStats = {
         Total: courses.length,
-        Completed: courses.filter((c) => c.status === "COMPLETED").length,
+        Completed: courses.filter((c) => c.status === "CLOSED").length,
       };
 
-      // Mock appointment and risk assessment data (replace with real API when available)
-      const appointmentResponse = await fetch("https://b6f1-123-20-88-171.ngrok-free.app/api/Appointment/GetAll", {
+      // Fetch appointment stats
+      const appointmentResponse = await fetch("http://localhost:7092/api/Admin/GetAllAppointments", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-      const appointments = await appointmentResponse.json();
-      const appointmentStats = [
-        { type: "Consultation", count: appointments.filter((a) => a.type === "Consultation").length },
-        { type: "Tutoring", count: appointments.filter((a) => a.type === "Tutoring").length },
-        { type: "Workshop", count: appointments.filter((a) => a.type === "Workshop").length },
-      ];
+      if (!appointmentResponse.ok) throw new Error("Failed to fetch appointment data.");
+      const appointmentData = await appointmentResponse.json();
+      if (!appointmentData.success || !Array.isArray(appointmentData.data)) throw new Error("Invalid appointment data.");
+      const appointments = appointmentData.data;
 
-      const riskResponse = await fetch("https://b6f1-123-20-88-171.ngrok-free.app/api/Assessment/GetAllAssessment", {
+      // Group appointments by date for trend chart
+      const grouped = appointments.reduce((acc, apt) => {
+        const date = new Date(apt.startDateTime).toLocaleDateString('en-CA'); // YYYY-MM-DD for sorting
+        acc[date] = (acc[date] || 0) + 1;
+        return acc;
+      }, {});
+      const sortedDates = Object.keys(grouped).sort();
+      const newAppointmentChartData = {
+        labels: sortedDates.map(date => new Date(date).toLocaleDateString('vi-VN')),
+        datasets: [
+          {
+            label: "Số lượng lịch hẹn",
+            data: sortedDates.map(date => grouped[date]),
+            fill: true,
+            backgroundColor: "rgba(75,192,192,0.2)",
+            borderColor: "rgba(75,192,192,1)",
+            tension: 0.4,
+          },
+        ],
+      };
+
+      // Fetch risk assessment stats
+      const riskResponse = await fetch("http://localhost:7092/api/Assessment/GetAllAssessment", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-      const riskAssessments = await riskResponse.json();
+      if (!riskResponse.ok) throw new Error("Failed to fetch risk assessment data.");
+      const riskData = await riskResponse.json();
+      if (!riskData.success || !Array.isArray(riskData.data)) throw new Error("Invalid risk assessment data.");
+      const riskAssessments = riskData.data;
       const riskAssessmentStats = [
         { level: "High", count: riskAssessments.filter((r) => r.level === "High").length },
         { level: "Medium", count: riskAssessments.filter((r) => r.level === "Medium").length },
@@ -102,13 +135,18 @@ const Dashboard = () => {
       ];
 
       setDashboardData({
-        accountStats: stats,
+        accountStats,
         courseStats,
-        appointmentStats,
         riskAssessmentStats,
       });
+      setAppointmentChartData(newAppointmentChartData);
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
+      setDashboardData({ accountStats: { Admin: 0, Member: 0, Staff: 0, Consultant: 0 }, courseStats: { Total: 0, Completed: 0 }, riskAssessmentStats: [] });
+      setAppointmentChartData({
+        labels: [],
+        datasets: [],
+      });
     }
   };
 
@@ -120,19 +158,19 @@ const Dashboard = () => {
       let userData;
       if (localToken) {
         userData = {
-          userName: localStorage.getItem("userName"),
-          email: localStorage.getItem("email"),
-          expiresAt: localStorage.getItem("expiresAt"),
-          roleId: localStorage.getItem("roleId"),
-          roleName: localStorage.getItem("roleName"),
+          userName: localStorage.getItem("userName") || "",
+          email: localStorage.getItem("email") || "",
+          expiresAt: localStorage.getItem("expiresAt") || new Date().toISOString(),
+          roleId: localStorage.getItem("roleId") || "0",
+          roleName: localStorage.getItem("roleName") || "",
         };
       } else {
         userData = {
-          userName: sessionStorage.getItem("userName"),
-          email: sessionStorage.getItem("email"),
-          expiresAt: sessionStorage.getItem("expiresAt"),
-          roleId: sessionStorage.getItem("roleId"),
-          roleName: sessionStorage.getItem("roleName"),
+          userName: sessionStorage.getItem("userName") || "",
+          email: sessionStorage.getItem("email") || "",
+          expiresAt: sessionStorage.getItem("expiresAt") || new Date().toISOString(),
+          roleId: sessionStorage.getItem("roleId") || "0",
+          roleName: sessionStorage.getItem("roleName") || "",
         };
       }
 
@@ -154,11 +192,11 @@ const Dashboard = () => {
       console.log("Role ID:", roleId);
 
       const roleRoutes = {
-        1: "/",
-        2: "/member-dashboard",
-        3: "/staff-dashboard",
-        4: "/consultant-dashboard",
-        5: "/manager-dashboard",
+        "1": "/",
+        "2": "/member-dashboard",
+        "3": "/staff-dashboard",
+        "4": "/consultant-dashboard",
+        "5": "/manager-dashboard",
       };
 
       if (roleId !== "6") {
@@ -169,7 +207,7 @@ const Dashboard = () => {
       }
 
       setUserInfo(userData);
-      fetchDashboardData(localToken || sessionToken); // Fetch data with token
+      fetchDashboardData(localToken || sessionToken);
     } else {
       alert("Vui lòng đăng nhập để truy cập trang quản lý!");
       navigate("/login", { replace: true });
@@ -196,7 +234,7 @@ const Dashboard = () => {
       {
         label: "Số lượng tài khoản",
         data: Object.values(dashboardData.accountStats),
-        backgroundColor: ["rgba(255, 99, 132, 0.6)", "rgba(54, 162, 235, 0.6)", "rgba(255, 206, 86, 0.6)"],
+        backgroundColor: ["rgba(255, 99, 132, 0.6)", "rgba(54, 162, 235, 0.6)", "rgba(255, 206, 86, 0.6)", "rgba(75, 192, 192, 0.6)"],
         borderWidth: 0,
       },
     ],
@@ -222,20 +260,6 @@ const Dashboard = () => {
         data: [dashboardData.courseStats.Total, dashboardData.courseStats.Completed],
         backgroundColor: ["rgba(75, 192, 192, 0.6)", "rgba(54, 162, 235, 0.6)"],
         borderWidth: 0,
-      },
-    ],
-  };
-
-  const appointmentChartData = {
-    labels: dashboardData.appointmentStats.map((item) => item.type),
-    datasets: [
-      {
-        label: "Số lượng lịch hẹn",
-        data: dashboardData.appointmentStats.map((item) => item.count),
-        fill: false,
-        backgroundColor: "rgba(75,192,192,0.2)",
-        borderColor: "rgba(75,192,192,1)",
-        tension: 0.4,
       },
     ],
   };
@@ -383,7 +407,7 @@ const Dashboard = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-slate-900">
-                      {dashboardData.appointmentStats.reduce((sum, item) => sum + item.count, 0)}
+                      {appointmentChartData.datasets[0]?.data.reduce((a, b) => a + b, 0) || 0}
                     </div>
                     <div className="text-xs text-slate-500 font-medium">Tổng lịch hẹn</div>
                   </div>

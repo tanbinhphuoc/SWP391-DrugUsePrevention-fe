@@ -1,44 +1,140 @@
-import { useState } from "react";
-import { Search, Calendar, Clock, User, MapPin, Check, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Calendar, Clock, User, MapPin } from "lucide-react";
 
 const AppointmentManagement = () => {
-  const [appointments, setAppointments] = useState([
-    {
-      id: 1,
-      patientName: "Nguyễn Văn A",
-      expertName: "Dr. Trần B",
-      date: "2025-02-15",
-      time: "09:00",
-      type: "Tư vấn trực tiếp",
-      status: "Chờ xác nhận",
-      location: "Phòng 301, Tòa nhà A",
-    },
-    {
-      id: 2,
-      patientName: "Lê Thị C",
-      expertName: "Dr. Phạm D",
-      date: "2025-02-16",
-      time: "14:30",
-      type: "Tư vấn online",
-      status: "Đã xác nhận",
-      location: "Google Meet",
-    },
-    {
-      id: 3,
-      patientName: "Trần Văn E",
-      expertName: "Dr. Hoàng F",
-      date: "2025-02-17",
-      time: "10:00",
-      type: "Tư vấn trực tiếp",
-      status: "Đã hủy",
-      location: "Phòng 205, Tòa nhà B",
-    },
-  ]);
+  const [appointments, setAppointments] = useState([]);
+  const [filteredAppointments, setFilteredAppointments] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({ total: 0, pending: 0, successful: 0, failed: 0, canceled: 0 });
+
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Vui lòng đăng nhập để tiếp tục.");
+        }
+
+        const response = await fetch("http://localhost:7092/api/Admin/GetAllAppointments", {
+          method: "GET",
+          headers: {
+            "Accept": "*/*",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Lấy danh sách lịch hẹn thất bại: ${errorText}`);
+        }
+
+        const data = await response.json();
+        if (!data.success || !Array.isArray(data.data)) {
+          throw new Error("Dữ liệu không hợp lệ.");
+        }
+
+        const mappedAppointments = data.data.map((apt) => ({
+          id: apt.appointmentID,
+          patientName: apt.userName,
+          expertName: apt.consultantName,
+          date: new Date(apt.startDateTime).toLocaleDateString('vi-VN'),
+          time: new Date(apt.startDateTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+          type: "Tư vấn online", // Assuming all are online since no type in API
+          status: mapStatus(apt.status, apt.paymentStatus),
+          location: "Google Meet", // Assuming online
+          rawStatus: apt.status,
+          rawPaymentStatus: apt.paymentStatus,
+        }));
+
+        setAppointments(mappedAppointments);
+        setFilteredAppointments(mappedAppointments);
+
+        // Calculate statistics
+        const total = mappedAppointments.length;
+        const pending = mappedAppointments.filter(apt => apt.status === "Chờ xác nhận").length;
+        const successful = mappedAppointments.filter(apt => apt.status === "Đã xác nhận").length;
+        const failed = mappedAppointments.filter(apt => apt.status === "Thất bại").length;
+        const canceled = mappedAppointments.filter(apt => apt.status === "Đã hủy").length;
+        setStats({ total, pending, successful, failed, canceled });
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  const mapStatus = (status, paymentStatus) => {
+    if (status === "CANCELED") return "Đã hủy";
+    if (status === "PENDING_PAYMENT") {
+      if (paymentStatus === "PENDING") return "Chờ xác nhận";
+      if (paymentStatus === "SUCCESS") return "Đã xác nhận";
+      if (paymentStatus === "FAILED") return "Thất bại";
+    }
+    return "Không xác định";
+  };
+
+  useEffect(() => {
+    let filtered = appointments;
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (apt) =>
+          apt.patientName.toLowerCase().includes(lowerSearch) ||
+          apt.expertName.toLowerCase().includes(lowerSearch) ||
+          apt.date.includes(lowerSearch) ||
+          apt.time.toLowerCase().includes(lowerSearch)
+      );
+    }
+    if (statusFilter) {
+      filtered = filtered.filter((apt) => apt.status === statusFilter);
+    }
+    setFilteredAppointments(filtered);
+  }, [searchTerm, statusFilter, appointments]);
+
+  if (loading) {
+    return <div className="text-center py-8">Đang tải...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-600 text-center py-8">{error}</div>;
+  }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Quản lý lịch hẹn</h2>
+      </div>
+
+      {/* Statistics */}
+      <div className="mb-8 grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="bg-white p-4 rounded-lg shadow text-center">
+          <h3 className="text-lg font-semibold">Tổng lịch hẹn</h3>
+          <p className="text-2xl font-bold">{stats.total}</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow text-center">
+          <h3 className="text-lg font-semibold">Chờ xác nhận</h3>
+          <p className="text-2xl font-bold">{stats.pending}</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow text-center">
+          <h3 className="text-lg font-semibold">Thành công</h3>
+          <p className="text-2xl font-bold">{stats.successful}</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow text-center">
+          <h3 className="text-lg font-semibold">Thất bại</h3>
+          <p className="text-2xl font-bold">{stats.failed}</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow text-center">
+          <h3 className="text-lg font-semibold">Đã hủy</h3>
+          <p className="text-2xl font-bold">{stats.canceled}</p>
+        </div>
       </div>
 
       {/* Search and Filter */}
@@ -48,25 +144,27 @@ const AppointmentManagement = () => {
           <input
             type="text"
             placeholder="Tìm kiếm lịch hẹn..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
-        <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          <option value="">Tất cả hình thức</option>
-          <option value="direct">Trực tiếp</option>
-          <option value="online">Online</option>
-        </select>
-        <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
           <option value="">Tất cả trạng thái</option>
-          <option value="pending">Chờ xác nhận</option>
-          <option value="confirmed">Đã xác nhận</option>
-          <option value="cancelled">Đã hủy</option>
+          <option value="Chờ xác nhận">Chờ xác nhận</option>
+          <option value="Đã xác nhận">Đã xác nhận</option>
+          <option value="Thất bại">Thất bại</option>
+          <option value="Đã hủy">Đã hủy</option>
         </select>
       </div>
 
       {/* Appointments List */}
       <div className="space-y-4">
-        {appointments.map((appointment) => (
+        {filteredAppointments.map((appointment) => (
           <div
             key={appointment.id}
             className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
@@ -81,6 +179,8 @@ const AppointmentManagement = () => {
                         ? "bg-yellow-100 text-yellow-800"
                         : appointment.status === "Đã xác nhận"
                         ? "bg-green-100 text-green-800"
+                        : appointment.status === "Thất bại"
+                        ? "bg-orange-100 text-orange-800"
                         : "bg-red-100 text-red-800"
                     }`}
                   >
@@ -106,19 +206,6 @@ const AppointmentManagement = () => {
                     <span className="text-sm">Địa điểm: {appointment.location}</span>
                   </div>
                 </div>
-              </div>
-
-              <div className="flex space-x-2">
-                {appointment.status === "Chờ xác nhận" && (
-                  <>
-                    <button className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors">
-                      <Check className="w-5 h-5" />
-                    </button>
-                    <button className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors">
-                      <X className="w-5 h-5" />
-                    </button>
-                  </>
-                )}
               </div>
             </div>
           </div>
