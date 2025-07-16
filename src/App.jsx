@@ -11,16 +11,14 @@ import ConsultationPage from "./components/dichvu/consultant/ui/ConsultantPage.j
 import EducationCoursesPage from "./components/dichvu/education/EducationCoursePage.jsx";
 import RiskAssessmentPage from "./components/dichvu/risk/RiskAssessmentPage.jsx";
 import UserDashboard from "./components/user/UserDashboard.jsx";
-import ConsultantDashboard from "./components/dichvu/consultant/ux/ConsultantDashboard.jsx";
+// import ConsultantDashboard from "./components/dichvu/consultant/ux/ConsultantDashboard.jsx";
 import "react-toastify/dist/ReactToastify.css";
 import StaffDashboard from "./components/staff/StaffDashboard.jsx";
 import ManagerDashboard from "./components/manager/ManagerDashboard.jsx";
 import ArticlesPage from "./components/article/ArticlesPage.jsx";
-import BlogManagement from "./components/staff/BlogManagement.jsx";
-import BlogEditor from "./components/blog/BlogEditor.jsx";
-import BlogDetail from "./components/blog/BlogDetail.jsx";
-
-
+import CourseLearning from "./components/user/CourseLearning.jsx";
+import OutputAssessment from "./components/user/OutputAssessment.jsx";
+import ConsultantDashboard from "./components/consultant/ConsultantDashboard.jsx";
 function App() {
   return (
     <Router>
@@ -34,6 +32,8 @@ function App() {
           <Route path="/member-dashboard" element={<UserDashboard />} />
           <Route path="/staff-dashboard" element={<StaffDashboard />} />
           <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+          <Route path="/courses/:courseId/learn" element={<CourseLearning />} />
+          {/* <Route path="/consultant-dashboard" element={<ConsultantDashboard />} /> */}
           <Route path="/consultant-dashboard" element={<ConsultantDashboard />} />
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/education-courses" element={<EducationCoursesPage />} />
@@ -41,10 +41,7 @@ function App() {
           <Route path="/consultation" element={<ConsultationPage />} />
           <Route path="/community-programs" element={<CommunityProgramsPage />} />
           <Route path="/articles" element={<ArticlesPage />} />
-          <Route path="/staff/blog" element={<BlogManagement />} />
-          <Route path="/staff/blog/create" element={<BlogEditor />} />
-          <Route path="/blog/edit/:id" element={<BlogEditor />} />
-          <Route path="/blog/:id" element={<BlogDetail />} />
+          <Route path="/output-assessment/:assessmentId" element={<OutputAssessment />} />
         </Routes>
       </div>
     </Router>

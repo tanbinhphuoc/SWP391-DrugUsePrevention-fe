@@ -67,6 +67,32 @@ const UserDashboard = () => {
       }
 
       setUserInfo(userData);
+
+      // Fetch profile to check assessmentStage
+      const fetchAssessmentStage = async () => {
+        try {
+          const response = await fetch("http://localhost:7092/api/Users/GetProfileMember", {
+            headers: {
+              Authorization: `Bearer ${localToken || sessionToken}`,
+            },
+          });
+          if (!response.ok) {
+            throw new Error("Failed to fetch profile");
+          }
+          const data = await response.json();
+          console.log("Profile data:", data);
+          console.log("Assessment Stage:", data.assessmentStage);
+          if (data.assessmentStage === null) {
+            console.log("Setting active tab to surveys");
+            setActiveTab("surveys");
+            toast.info("Vui lòng hoàn thành bài khảo sát đầu vào trước!");
+          }
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+          toast.error("Lỗi khi kiểm tra trạng thái khảo sát.");
+        }
+      };
+      fetchAssessmentStage();
     } else {
       toast.error("Vui lòng đăng nhập để truy cập trang này!");
       navigate("/login", { replace: true });
