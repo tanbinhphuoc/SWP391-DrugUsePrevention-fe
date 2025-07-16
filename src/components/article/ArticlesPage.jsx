@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { Search, Filter, Heart, Share2, Calendar, User, Eye, ChevronRight, Star, TrendingUp, MessageCircle, Download, Users, Phone, Mail, Facebook, Youtube, X, Image, Video, Smile, MapPin, Tag, Globe, Lock, Edit3, ChevronDown } from 'lucide-react';
 
 import { categories, privacyOptions, commonEmojis } from './data/constant'; 
@@ -9,12 +11,13 @@ import SearchFilterBar from './SearchFilterBar';
 import Sidebar from './SideBar';
 import Footer from './Footer';
 import CreatePostModal from './CreatePostModal';
-import PostCard from './PostCard';
 
 const ArticlesPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [filteredPosts, setFilteredPosts] = useState([]);
+  const [allPosts, setAllPosts] = useState([]);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,7 +34,8 @@ const ArticlesPage = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showPrivacyDropdown, setShowPrivacyDropdown] = useState(false);
 
-  const posts = [
+  // Mock data cho fallback
+  const mockPosts = [
     {
       id: 1,
       title: "5 dấu hiệu nhận biết người thân sử dụng ma túy",
@@ -106,14 +110,78 @@ const ArticlesPage = () => {
     }
   ];
 
-  const featuredPosts = posts.filter(post => post.featured);
-  const regularPosts = posts.filter(post => !post.featured);
+  // Hàm chuyển đổi category từ BlogManagement sang ArticlesPage format
+  const mapCategoryToArticleFormat = (blogCategory) => {
+    const categoryMap = {
+      'Giáo dục': 'knowledge',
+      'Hướng dẫn': 'education',
+      'Câu chuyện': 'stories',
+      'Báo cáo': 'knowledge',
+      'Tin tức': 'events'
+    };
+    return categoryMap[blogCategory] || 'knowledge';
+  };
+
+  // Hàm chuyển đổi dữ liệu từ BlogManagement format sang ArticlesPage format
+  const transformBlogToPost = (blog) => {
+    return {
+      id: blog.blogID || blog.id,
+      title: blog.title,
+      excerpt: blog.excerpt || (blog.content ? blog.content.substring(0, 100) + "..." : ""),
+      category: mapCategoryToArticleFormat(blog.category),
+      author: blog.author || "Tác giả",
+      date: blog.publishDate || blog.createdAt || new Date().toISOString(),
+      image: blog.thumbnail || "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=250&fit=crop",
+      views: blog.views || 0,
+      featured: blog.featured || false,
+      tags: Array.isArray(blog.tags) ? blog.tags : [],
+      likes: blog.likes || 0,
+      comments: blog.comments || 0,
+      shares: blog.shares || 0,
+      status: blog.status
+    };
+  };
+
+  // Fetch blogs từ API
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get('http://localhost:7092/api/Blog/list');
+        let blogsFromServer = response.data;
+        
+        if (!blogsFromServer || blogsFromServer.length === 0) {
+          // Nếu không có dữ liệu từ API, sử dụng mock data
+          setAllPosts(mockPosts);
+        } else {
+          // Chuyển đổi dữ liệu từ blog format sang post format và chỉ lấy những blog đã approved
+          const transformedPosts = blogsFromServer
+            .filter(blog => blog.status === 'APPROVED') // Chỉ hiển thị blog đã được duyệt
+            .map(transformBlogToPost);
+          
+          // Nếu có dữ liệu từ API nhưng không có blog nào được approved, fallback về mock data
+          if (transformedPosts.length === 0) {
+            setAllPosts(mockPosts);
+          } else {
+            setAllPosts(transformedPosts);
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải blogs:", error);
+        // Nếu API lỗi, sử dụng mock data
+        setAllPosts(mockPosts);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
 
   // Fetch user profile từ API
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        setLoading(true);
         // Giả lập API call - thay thế bằng endpoint thực tế
         const response = await fetch('/api/user/profile', {
           headers: {
@@ -140,16 +208,15 @@ const ArticlesPage = () => {
           fullName: 'Khách',
           avatar: null
         });
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchUserProfile();
   }, []);
 
+  // Filter posts
   useEffect(() => {
-    let filtered = posts;
+    let filtered = [...allPosts];
 
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(post => post.category === selectedCategory);
@@ -164,7 +231,15 @@ const ArticlesPage = () => {
     }
 
     setFilteredPosts(filtered);
-  }, [searchTerm, selectedCategory]);
+  }, [allPosts, searchTerm, selectedCategory]);
+
+  const featuredPosts = allPosts.filter(post => post.featured);
+  const regularPosts = filteredPosts.filter(post => !post.featured);
+
+  // Handle navigation to blog detail
+  const handleReadMore = (postId) => {
+    navigate(`/blog/${postId}`);
+  };
 
   // Handle image upload
   const handleImageUpload = (e) => {
@@ -253,14 +328,14 @@ const ArticlesPage = () => {
   const userName = userProfile?.fullName || userProfile?.username || 'Khách';
 
   const PostCard = ({ post, featured = false }) => (
-    <div className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 ${featured ? 'border-2 border-yellow-400' : ''}`}>
+    <div className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 ${featured ? 'border-2 border-yellow-400' : ''} cursor-pointer`}>
       {featured && (
         <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 text-sm font-semibold flex items-center">
           <Star className="w-4 h-4 mr-2" />
           Bài viết nổi bật
         </div>
       )}
-      <div className="relative">
+      <div className="relative" onClick={() => handleReadMore(post.id)}>
         <img src={post.image} alt={post.title} className="w-full h-48 object-cover" />
         <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-full px-3 py-1 text-sm font-medium text-gray-700 flex items-center">
           <Eye className="w-4 h-4 mr-1" />
@@ -277,7 +352,10 @@ const ArticlesPage = () => {
             {new Date(post.date).toLocaleDateString('vi-VN')}
           </div>
         </div>
-        <h3 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2 hover:text-blue-600 transition-colors">
+        <h3 
+          className="text-xl font-bold text-gray-800 mb-3 line-clamp-2 hover:text-blue-600 transition-colors cursor-pointer"
+          onClick={() => handleReadMore(post.id)}
+        >
           {post.title}
         </h3>
         <p className="text-gray-600 mb-4 line-clamp-2">{post.excerpt}</p>
@@ -300,7 +378,10 @@ const ArticlesPage = () => {
             <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
               <Share2 className="w-4 h-4" />
             </button>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center text-sm font-semibold">
+            <button 
+              onClick={() => handleReadMore(post.id)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center text-sm font-semibold"
+            >
               Đọc tiếp <ChevronRight className="w-4 h-4 ml-1" />
             </button>
           </div>
@@ -319,7 +400,6 @@ const ArticlesPage = () => {
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -377,7 +457,7 @@ const ArticlesPage = () => {
                 </span>
               </div>
               <div className="grid md:grid-cols-2 gap-6">
-                {filteredPosts.map(post => (
+                {(selectedCategory === 'all' ? regularPosts : filteredPosts).map(post => (
                   <PostCard key={post.id} post={post} />
                 ))}
               </div>
@@ -392,7 +472,7 @@ const ArticlesPage = () => {
           </main>
 
           {/* Sidebar */}
-          <Sidebar posts={posts} />
+          <Sidebar posts={allPosts} />
         </div>
       </div>
 
@@ -427,7 +507,7 @@ const ArticlesPage = () => {
         setShowPrivacyDropdown={setShowPrivacyDropdown}
         userName={userName}
       />
-  </div>
+    </div>
   );
 };
 
