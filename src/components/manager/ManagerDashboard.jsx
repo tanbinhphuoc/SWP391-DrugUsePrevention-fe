@@ -93,8 +93,6 @@ const ManagerDashboard = () => {
     { id: "overview", label: "Dashboard & Reports", icon: <BarChart3 className="w-5 h-5" /> },
     { id: "staff", label: "Quản lý Staff", icon: <Users className="w-5 h-5" /> },
     { id: "consultants", label: "Quản lý Consultant", icon: <UserCheck className="w-5 h-5" /> },
-    { id: "reports", label: "Báo cáo tổng thể", icon: <TrendingUp className="w-5 h-5" /> },
-    { id: "settings", label: "Cài đặt hệ thống", icon: <Settings className="w-5 h-5" /> },
     // THAY ĐỔI: Thêm nút Trang chủ với icon Home
     { id: "home", label: "Trang chủ", icon: <Home className="w-5 h-5" />, path: "/" }
   ];
