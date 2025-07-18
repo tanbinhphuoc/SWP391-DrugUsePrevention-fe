@@ -182,6 +182,7 @@ const UserDashboard = () => {
           {activeTab === "appointments" && <UserAppointments appointmentId={searchParams.get("appointmentId")} />}
           {activeTab === "programs" && <UserPrograms />}
           {activeTab === "profile" && <UserProfile />}
+          {activeTab === "home" && navigate("/")}
         </div>
       </main>
       <ToastContainer position="top-right" autoClose={3000} />
