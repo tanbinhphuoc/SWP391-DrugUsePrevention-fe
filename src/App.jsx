@@ -19,6 +19,9 @@ import ArticlesPage from "./components/article/ArticlesPage.jsx";
 import CourseLearning from "./components/user/CourseLearning.jsx";
 import OutputAssessment from "./components/user/OutputAssessment.jsx";
 import ConsultantDashboard from "./components/consultant/ConsultantDashboard.jsx";
+import UserCourses from "./components/serviceuser/UserCourses.jsx";
+import UserAppointments from "./components/serviceuser/UserAppointments.jsx";
+import UserSurveys from "./components/serviceuser/UserSurveys.jsx";
 function App() {
   return (
     <Router>
@@ -42,6 +45,9 @@ function App() {
           <Route path="/community-programs" element={<CommunityProgramsPage />} />
           <Route path="/articles" element={<ArticlesPage />} />
           <Route path="/output-assessment/:assessmentId" element={<OutputAssessment />} />
+          <Route path="/UserCourses" element={<UserCourses />} />
+          <Route path="/UserAppointments" element={<UserAppointments />} />
+          <Route path="/UserSurveys" element={<UserSurveys />} />
         </Routes>
       </div>
     </Router>
