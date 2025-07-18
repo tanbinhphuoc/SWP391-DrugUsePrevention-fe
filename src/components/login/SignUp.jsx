@@ -1,7 +1,8 @@
 import { useState, useCallback } from "react";
-import { User, Mail, Lock, Eye, EyeOff, RefreshCw } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, RefreshCw, ArrowLeft, Shield, Sparkles, Users, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "./SignIn.css";
 
 const SignUp = () => {
   const [username, setUsername] = useState("");
@@ -274,320 +275,326 @@ const SignUp = () => {
     }
   };
 
-  const BackToHomeButton = () => (
-    <button
-      type="button"
-      onClick={() => navigate("/")}
-      className="fixed top-8 left-8 z-50 group flex items-center gap-3 px-6 py-3 bg-white/90 backdrop-blur-xl border border-white/30 rounded-full hover:bg-white hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-white/50 animate-slide-in-left"
-    >
-      <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full group-hover:rotate-[-5deg] transition-transform duration-300">
-        <svg
-          className="w-4 h-4 text-white"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-      </div>
-      <span className="text-gray-700 font-semibold text-sm group-hover:text-blue-600 transition-colors duration-300">
-        Quay lại trang chủ
-      </span>
-    </button>
-  );
+  const handleBackToHome = () => {
+    setTimeout(() => {
+      navigate("/")
+    }, 300)
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-cyan-400 to-green-400 relative overflow-hidden">
-      <BackToHomeButton />
-      <div className="flex min-h-screen pt-20">
-        <div className="flex-1 flex flex-col justify-center items-center p-8 bg-white/10 backdrop-blur-sm">
-          <div className="w-72 h-72 mb-8 relative animate-pulse-slow">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-400 via-blue-500 to-blue-600 rounded-full opacity-20"></div>
-            <div className="absolute inset-1/4 bg-white/80 rotate-45 rounded-lg"></div>
-            <div className="absolute top-1/4 left-1/2 w-4 h-4 bg-blue-500 rounded-full transform -translate-x-1/2"></div>
-            <div className="absolute top-1/2 left-1/4 w-4 h-4 bg-cyan-400 rounded-full"></div>
-            <div className="absolute top-1/2 right-1/4 w-4 h-4 bg-green-400 rounded-full"></div>
-            <div className="absolute bottom-1/4 left-1/2 w-4 h-4 bg-orange-500 rounded-full transform -translate-x-1/2"></div>
-          </div>
-          <div className="text-center text-white max-w-md">
-            <h2 className="text-4xl font-bold mb-4 drop-shadow-lg">Chung tay vì cộng đồng</h2>
-            <p className="text-lg opacity-90 leading-relaxed">
-              Tham gia cùng chúng tôi để hỗ trợ phòng chống ma túy trong cộng đồng thông qua giáo dục, đánh giá rủi ro
-              và tư vấn chuyên nghiệp.
+    <div className="signin-container">
+      {/* Animated Background Elements */}
+      <div className="background-elements">
+        <div className="bg-element-1"></div>
+        <div className="bg-element-2"></div>
+        <div className="bg-element-3"></div>
+      </div>
+
+      {/* Back to Home Button */}
+      <button 
+        onClick={handleBackToHome}
+        className="back-to-home-button animate-slide-in-left"
+      >
+        <div className="icon-container">
+          <ArrowLeft className="w-4 h-4 text-white" />
+        </div>
+        <span>Quay lại trang chủ</span>
+      </button>
+
+      <div className="main-container">
+        {/* Left Side - Welcome Section */}
+        <div className="welcome-section">
+          <div className="welcome-content">
+            {/* Logo/Icon */}
+            <div className="logo-container">
+              <div className="logo-main animate-fade-in">
+                <UserPlus className="w-12 h-12 text-white" />
+              </div>
+              <div className="logo-badge">
+                <Sparkles className="w-3 h-3 text-white" />
+              </div>
+            </div>
+
+            {/* Welcome Text */}
+            <h1 className="welcome-title animate-fade-in">
+              Chung tay vì cộng đồng!
+            </h1>
+            <p className="welcome-description animate-fade-in">
+              Tham gia cùng chúng tôi để hỗ trợ phòng chống ma túy trong cộng đồng thông qua giáo dục, đánh giá rủi ro và tư vấn chuyên nghiệp.
             </p>
+
+            {/* Feature Cards */}
+            <div className="feature-cards">
+              <div className="feature-card animate-fade-in">
+                <Users className="w-8 h-8 text-cyan-500" />
+                <h3>Cộng đồng</h3>
+                <p>Kết nối với cộng đồng hỗ trợ</p>
+              </div>
+              <div className="feature-card animate-fade-in">
+                <Shield className="w-8 h-8 text-blue-500" />
+                <h3>An toàn</h3>
+                <p>Môi trường an toàn và bảo mật</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex-1 flex justify-center items-center p-8">
-          <div className="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20">
-            <div className="animate-fade-in">
-              <h2 className="text-3xl font-bold text-blue-600 text-center mb-2">Đăng ký</h2>
-              <p className="text-gray-600 text-center mb-8 text-sm">
-                Tạo tài khoản mới để tham gia cộng đồng PreventionSupport.
-              </p>
-
-              {errors.api && <p className="text-red-500 text-center mb-4">{errors.api}</p>}
-
-              <div className="max-h-96 overflow-y-auto pr-2">
-                <div className="mb-6 group">
-                  <label className="block text-gray-700 font-medium text-sm mb-2">
-                    Tên đăng nhập <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={handleUsernameChange}
-                      placeholder="Nhập tên đăng nhập"
-                      className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl bg-white/80 backdrop-blur-sm
-                               focus:outline-none focus:ring-3 focus:ring-blue-500/10
-                               transition-all duration-300 group-hover:-translate-y-1 ${
-                                 errors.username
-                                   ? "border-red-500 focus:border-red-500"
-                                   : "border-gray-200 focus:border-blue-500"
-                               }`}
-                    />
-                  </div>
-                  {errors.username && <p className="text-xs text-red-600 mt-1">{errors.username}</p>}
+        {/* Right Side - Register Form */}
+        <div className="form-section">
+          <div className="form-wrapper">
+            <div className="form-container animate-fade-in">
+              {/* Form Background Pattern */}
+              <div className="form-background"></div>
+              
+              <div className="form-content">
+                {/* Form Header */}
+                <div className="form-header">
+                  <h2 className="form-title">Đăng ký</h2>
+                  <p className="form-subtitle">Tạo tài khoản mới để tham gia cộng đồng PreventionSupport</p>
                 </div>
 
-                <div className="mb-6 group">
-                  <label className="block text-gray-700 font-medium text-sm mb-2">Họ và tên</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      value={fullName}
-                      onChange={handleFullNameChange}
-                      placeholder="Nhập họ và tên đầy đủ"
-                      className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl bg-white/80 backdrop-blur-sm
-                               focus:outline-none focus:ring-3 focus:ring-blue-500/10
-                               transition-all duration-300 group-hover:-translate-y-1 ${
-                                 errors.fullName
-                                   ? "border-red-500 focus:border-red-500"
-                                   : "border-gray-200 focus:border-blue-500"
-                               }`}
-                    />
+                {/* Error Message */}
+                {errors.api && (
+                  <div className="error-message">
+                    <span>{errors.api}</span>
                   </div>
-                  {errors.fullName && <p className="text-xs text-red-600 mt-1">{errors.fullName}</p>}
-                </div>
+                )}
 
-                <div className="mb-6 group">
-                  <label className="block text-gray-700 font-medium text-sm mb-2">
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={handleEmailChange}
-                      placeholder="Nhập địa chỉ email"
-                      className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl bg-white/80 backdrop-blur-sm
-                               focus:outline-none focus:ring-3 focus:ring-blue-500/10
-                               transition-all duration-300 group-hover:-translate-y-1 ${
-                                 errors.email
-                                   ? "border-red-500 focus:border-red-500"
-                                   : "border-gray-200 focus:border-blue-500"
-                               }`}
-                    />
-                  </div>
-                  {errors.email && <p className="text-xs text-red-600 mt-1">{errors.email}</p>}
-                </div>
-
-                <div className="mb-6 group">
-                  <label className="block text-gray-700 font-medium text-sm mb-2">Số điện thoại</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      value={phone}
-                      onChange={handlePhoneChange}
-                      placeholder="Nhập số điện thoại (VD: 0901234567)"
-                      className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl bg-white/80 backdrop-blur-sm
-                               focus:outline-none focus:ring-3 focus:ring-blue-500/10
-                               transition-all duration-300 group-hover:-translate-y-1 ${
-                                 errors.phone
-                                   ? "border-red-500 focus:border-red-500"
-                                   : "border-gray-200 focus:border-blue-500"
-                               }`}
-                    />
-                  </div>
-                  {errors.phone && <p className="text-xs text-red-600 mt-1">{errors.phone}</p>}
-                </div>
-
-                <div className="mb-6 group">
-                  <label className="block text-gray-700 font-medium text-sm mb-2">Ngày sinh</label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      value={birthDate}
-                      onChange={handleBirthDateChange}
-                      className={`w-full pl-4 pr-4 py-3 border-2 rounded-xl bg-white/80 backdrop-blur-sm
-                               focus:outline-none focus:ring-3 focus:ring-blue-500/10
-                               transition-all duration-300 group-hover:-translate-y-1 ${
-                                 errors.birthDate
-                                   ? "border-red-500 focus:border-red-500"
-                                   : "border-gray-200 focus:border-blue-500"
-                               }`}
-                    />
-                  </div>
-                  {errors.birthDate && <p className="text-xs text-red-600 mt-1">{errors.birthDate}</p>}
-                </div>
-
-                <div className="mb-6 group">
-                  <label className="block text-gray-700 font-medium text-sm mb-2">Địa chỉ</label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={address}
-                      onChange={handleAddressChange}
-                      placeholder="Nhập địa chỉ"
-                      className={`w-full pl-4 pr-4 py-3 border-2 rounded-xl bg-white/80 backdrop-blur-sm
-                               focus:outline-none focus:ring-3 focus:ring-blue-500/10
-                               transition-all duration-300 group-hover:-translate-y-1 ${
-                                 errors.address
-                                   ? "border-red-500 focus:border-red-500"
-                                   : "border-gray-200 focus:border-blue-500"
-                               }`}
-                    />
-                  </div>
-                  {errors.address && <p className="text-xs text-red-600 mt-1">{errors.address}</p>}
-                </div>
-
-                <div className="mb-4 group">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="block text-gray-700 font-medium text-sm">
-                      Mật khẩu <span className="text-red-500">*</span>
+                {/* Scrollable Form Fields */}
+                <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '8px' }}>
+                  
+                  {/* Username Field */}
+                  <div className="input-group">
+                    <label className="input-label">
+                      Tên đăng nhập <span style={{ color: '#ef4444' }}>*</span>
                     </label>
-                    <button
-                      type="button"
-                      onClick={handleGeneratePassword}
-                      className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                      Tạo mật khẩu mạnh
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={handlePasswordChange}
-                      placeholder="Tạo mật khẩu mạnh"
-                      className={`w-full pl-12 pr-12 py-3 border-2 rounded-xl bg-white/80 backdrop-blur-sm
-                               focus:outline-none focus:ring-3 focus:ring-blue-500/10
-                               transition-all duration-300 group-hover:-translate-y-1 ${
-                                 errors.password
-                                   ? "border-red-500 focus:border-red-500"
-                                   : "border-gray-200 focus:border-blue-500"
-                               }`}
-                    />
-                    <button
-                      type="button"
-                      onClick={toggleShowPassword}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                  {errors.password && <p className="text-xs text-red-600 mt-1">{errors.password}</p>}
-
-                  {password && passwordStrength && (
-                    <div className="mt-2">
-                      <div className="flex gap-1 mb-2">
-                        {[1, 2, 3, 4, 5].map((level) => (
-                          <div
-                            key={level}
-                            className={`h-1 flex-1 rounded ${
-                              level <= passwordStrength.score
-                                ? passwordStrength.strength === "weak"
-                                  ? "bg-red-500"
-                                  : passwordStrength.strength === "medium"
-                                    ? "bg-yellow-500"
-                                    : "bg-green-500"
-                                : "bg-gray-200"
-                            }`}
-                          ></div>
-                        ))}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span
-                          className={`text-xs font-medium ${
-                            passwordStrength.strength === "weak"
-                              ? "text-red-600"
-                              : passwordStrength.strength === "medium"
-                                ? "text-yellow-600"
-                                : "text-green-600"
-                          }`}
-                        >
-                          {passwordStrength.strength === "weak"
-                            ? "Yếu"
-                            : passwordStrength.strength === "medium"
-                              ? "Trung bình"
-                              : "Mạnh"}
-                        </span>
-                        {passwordStrength.feedback.length > 0 && (
-                          <span className="text-xs text-gray-500">
-                            Cần: {passwordStrength.feedback.join(", ")}
-                          </span>
-                        )}
-                      </div>
+                    <div className="input-wrapper">
+                      <input
+                        type="text"
+                        value={username}
+                        onChange={handleUsernameChange}
+                        placeholder="Nhập tên đăng nhập"
+                        className={`form-input ${errors.username ? 'error' : ''}`}
+                      />
                     </div>
-                  )}
-                </div>
-
-                <div className="mb-6 group">
-                  <label className="block text-gray-700 font-medium text-sm mb-2">
-                    Xác nhận mật khẩu <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={handleConfirmPasswordChange}
-                      placeholder="Xác nhận mật khẩu"
-                      className={`w-full pl-12 pr-12 py-3 border-2 rounded-xl bg-white/80 backdrop-blur-sm
-                               focus:outline-none focus:ring-3 focus:ring-blue-500/10
-                               transition-all duration-300 group-hover:-translate-y-1 ${
-                                 errors.confirmPassword
-                                   ? "border-red-500 focus:border-red-500"
-                                   : "border-gray-200 focus:border-blue-500"
-                               }`}
-                    />
-                    <button
-                      type="button"
-                      onClick={toggleShowPassword}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
+                    {errors.username && <p className="input-error">{errors.username}</p>}
                   </div>
-                  {errors.confirmPassword && (
-                    <p className="text-xs text-red-600 mt-1">{errors.confirmPassword}</p>
-                  )}
+
+                  {/* Full Name Field */}
+                  <div className="input-group">
+                    <label className="input-label">Họ và tên</label>
+                    <div className="input-wrapper">
+                      <input
+                        type="text"
+                        value={fullName}
+                        onChange={handleFullNameChange}
+                        placeholder="Nhập họ và tên đầy đủ"
+                        className={`form-input ${errors.fullName ? 'error' : ''}`}
+                      />
+                    </div>
+                    {errors.fullName && <p className="input-error">{errors.fullName}</p>}
+                  </div>
+
+                  {/* Email Field */}
+                  <div className="input-group">
+                    <label className="input-label">
+                      Email <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <div className="input-wrapper">
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={handleEmailChange}
+                        placeholder="Nhập địa chỉ email"
+                        className={`form-input ${errors.email ? 'error' : ''}`}
+                      />
+                    </div>
+                    {errors.email && <p className="input-error">{errors.email}</p>}
+                  </div>
+
+                  {/* Phone Field */}
+                  <div className="input-group">
+                    <label className="input-label">Số điện thoại</label>
+                    <div className="input-wrapper">
+                      <input
+                        type="text"
+                        value={phone}
+                        onChange={handlePhoneChange}
+                        placeholder="Nhập số điện thoại (VD: 0901234567)"
+                        className={`form-input ${errors.phone ? 'error' : ''}`}
+                      />
+                    </div>
+                    {errors.phone && <p className="input-error">{errors.phone}</p>}
+                  </div>
+
+                  {/* Birth Date Field */}
+                  <div className="input-group">
+                    <label className="input-label">Ngày sinh</label>
+                    <div className="input-wrapper">
+                      <input
+                        type="date"
+                        value={birthDate}
+                        onChange={handleBirthDateChange}
+                        className={`form-input ${errors.birthDate ? 'error' : ''}`}
+                      />
+                    </div>
+                    {errors.birthDate && <p className="input-error">{errors.birthDate}</p>}
+                  </div>
+
+                  {/* Address Field */}
+                  <div className="input-group">
+                    <label className="input-label">Địa chỉ</label>
+                    <div className="input-wrapper">
+                      <input
+                        type="text"
+                        value={address}
+                        onChange={handleAddressChange}
+                        placeholder="Nhập địa chỉ"
+                        className={`form-input ${errors.address ? 'error' : ''}`}
+                      />
+                    </div>
+                    {errors.address && <p className="input-error">{errors.address}</p>}
+                  </div>
+
+                  {/* Password Field */}
+                  <div className="input-group">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <label className="input-label" style={{ marginBottom: 0 }}>
+                        Mật khẩu <span style={{ color: '#ef4444' }}>*</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleGeneratePassword}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          fontSize: '0.75rem',
+                          color: '#06b6d4',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'color 0.3s ease'
+                        }}
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        Tạo mật khẩu mạnh
+                      </button>
+                    </div>
+                    <div className="input-wrapper">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={handlePasswordChange}
+                        placeholder="Tạo mật khẩu mạnh"
+                        className={`form-input ${errors.password ? 'error' : ''}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={toggleShowPassword}
+                        className="password-toggle"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                    {errors.password && <p className="input-error">{errors.password}</p>}
+
+                    {/* Password Strength Indicator */}
+                    {password && passwordStrength && (
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.5rem' }}>
+                          {[1, 2, 3, 4, 5].map((level) => (
+                            <div
+                              key={level}
+                              style={{
+                                height: '4px',
+                                flex: 1,
+                                borderRadius: '2px',
+                                backgroundColor: level <= passwordStrength.score
+                                  ? passwordStrength.strength === "weak"
+                                    ? "#ef4444"
+                                    : passwordStrength.strength === "medium"
+                                      ? "#eab308"
+                                      : "#10b981"
+                                  : "#e5e7eb"
+                              }}
+                            ></div>
+                          ))}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span
+                            style={{
+                              fontSize: '0.75rem',
+                              fontWeight: '500',
+                              color: passwordStrength.strength === "weak"
+                                ? "#dc2626"
+                                : passwordStrength.strength === "medium"
+                                  ? "#d97706"
+                                  : "#059669"
+                            }}
+                          >
+                            {passwordStrength.strength === "weak"
+                              ? "Yếu"
+                              : passwordStrength.strength === "medium"
+                                ? "Trung bình"
+                                : "Mạnh"}
+                          </span>
+                          {passwordStrength.feedback.length > 0 && (
+                            <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                              Cần: {passwordStrength.feedback.join(", ")}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Confirm Password Field */}
+                  <div className="input-group">
+                    <label className="input-label">
+                      Xác nhận mật khẩu <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <div className="input-wrapper">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={handleConfirmPasswordChange}
+                        placeholder="Xác nhận mật khẩu"
+                        className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={toggleShowPassword}
+                        className="password-toggle"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                    {errors.confirmPassword && <p className="input-error">{errors.confirmPassword}</p>}
+                  </div>
+
                 </div>
 
+                {/* Submit Button */}
                 <button
-                  type="button"
                   onClick={handleSubmit}
-                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold
-                           hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 mb-4"
+                  className="submit-button"
+                  style={{ marginTop: '1rem' }}
                 >
                   Tạo tài khoản
                 </button>
-              </div>
 
-              <p className="text-center text-gray-600 text-sm mt-4">
-                Đã có tài khoản?{" "}
-                <button onClick={() => navigate("/login")} className="text-blue-600 hover:underline font-medium">
-                  Đăng nhập ngay
-                </button>
-              </p>
+                {/* Login Link */}
+                <p className="register-link">
+                  Đã có tài khoản?{" "}
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="register-button"
+                  >
+                    Đăng nhập ngay
+                  </button>
+                </p>
+              </div>
             </div>
           </div>
         </div>

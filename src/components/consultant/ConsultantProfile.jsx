@@ -108,7 +108,12 @@ const ConsultantProfile = () => {
 
       setSuccess("Cập nhật hồ sơ thành công!");
       setIsEditing(false);
-      fetchProfile();
+      await fetchProfile();
+      
+      // Auto hide success message after 3 seconds
+      setTimeout(() => {
+        setSuccess(null);
+      }, 3000);
     } catch (err) {
       setEditError(err.message);
     } finally {
@@ -410,6 +415,16 @@ const ConsultantProfile = () => {
 
   return (
     <section className="bg-white p-8 rounded-lg shadow">
+      {/* Success Message */}
+      {success && (
+        <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-4">
+          <div className="flex items-center space-x-3">
+            <CheckCircle className="w-5 h-5 text-green-500" />
+            <p className="text-green-600 font-medium">{success}</p>
+          </div>
+        </div>
+      )}
+
       {/* Profile Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center space-x-6">
@@ -431,92 +446,104 @@ const ConsultantProfile = () => {
         </button>
       </div>
 
-      {/* Profile Information Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Profile Information - Vertical Layout */}
+      <div className="max-w-2xl mx-auto space-y-4">
         {/* Email */}
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl border border-blue-200">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
-              <Mail className="w-5 h-5 text-white" />
+        <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Mail className="w-6 h-6 text-blue-600" />
             </div>
-            <h3 className="text-sm font-semibold text-blue-800 uppercase tracking-wide">Email</h3>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1">Email</h3>
+              <p className="text-gray-800 font-medium text-lg">{profile.email}</p>
+            </div>
           </div>
-          <p className="text-blue-900 font-medium text-lg">{profile.email}</p>
         </div>
 
         {/* Degree */}
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl border border-purple-200">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center">
-              <Award className="w-5 h-5 text-white" />
+        <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <Award className="w-6 h-6 text-purple-600" />
             </div>
-            <h3 className="text-sm font-semibold text-purple-800 uppercase tracking-wide">Bằng cấp</h3>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1">Bằng cấp</h3>
+              <p className="text-gray-800 font-medium text-lg">{profile.degree}</p>
+            </div>
           </div>
-          <p className="text-purple-900 font-medium text-lg">{profile.degree}</p>
         </div>
 
         {/* Hourly Rate */}
-        <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl border border-green-200">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
-              <DollarSign className="w-5 h-5 text-white" />
+        <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-green-600" />
             </div>
-            <h3 className="text-sm font-semibold text-green-800 uppercase tracking-wide">Giá tư vấn/giờ</h3>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1">Giá tư vấn/giờ</h3>
+              <p className="text-gray-800 font-medium text-lg">{profile.hourlyRate.toLocaleString('vi-VN')} VND</p>
+            </div>
           </div>
-          <p className="text-green-900 font-medium text-lg">{profile.hourlyRate.toLocaleString('vi-VN')} VND</p>
         </div>
 
         {/* Experience */}
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-2xl border border-orange-200">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
-              <User className="w-5 h-5 text-white" />
+        <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <User className="w-6 h-6 text-orange-600" />
             </div>
-            <h3 className="text-sm font-semibold text-orange-800 uppercase tracking-wide">Kinh nghiệm</h3>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1">Kinh nghiệm</h3>
+              <p className="text-gray-800 font-medium text-lg">{profile.experience}</p>
+            </div>
           </div>
-          <p className="text-orange-900 font-medium text-lg">{profile.experience}</p>
         </div>
 
         {/* Certificate */}
-        <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-2xl border border-indigo-200">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center">
-              <Award className="w-5 h-5 text-white" />
+        <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <Award className="w-6 h-6 text-indigo-600" />
             </div>
-            <h3 className="text-sm font-semibold text-indigo-800 uppercase tracking-wide">Tên chứng chỉ</h3>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1">Tên chứng chỉ</h3>
+              <p className="text-gray-800 font-medium text-lg">{profile.certificateName}</p>
+            </div>
           </div>
-          <p className="text-indigo-900 font-medium text-lg">{profile.certificateName}</p>
         </div>
 
         {/* Date Acquired */}
-        <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-6 rounded-2xl border border-pink-200">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-pink-500 rounded-xl flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-white" />
+        <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-pink-600" />
             </div>
-            <h3 className="text-sm font-semibold text-pink-800 uppercase tracking-wide">Ngày cấp chứng chỉ</h3>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1">Ngày cấp chứng chỉ</h3>
+              <p className="text-gray-800 font-medium text-lg">{formattedDateAcquired}</p>
+            </div>
           </div>
-          <p className="text-pink-900 font-medium text-lg">{formattedDateAcquired}</p>
         </div>
-      </div>
 
-      {/* Google Meet Link */}
-      <div className="mt-6">
-        <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 p-6 rounded-2xl border border-cyan-200">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center">
-              <Link2 className="w-5 h-5 text-white" />
+        {/* Google Meet Link */}
+        <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
+              <Link2 className="w-6 h-6 text-cyan-600" />
             </div>
-            <h3 className="text-sm font-semibold text-cyan-800 uppercase tracking-wide">Link Google Meet</h3>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1">Link Google Meet</h3>
+              <a 
+                href={profile.googleMeetLink} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-cyan-600 hover:text-cyan-800 font-medium text-lg hover:underline transition-colors duration-200 break-all"
+              >
+                {profile.googleMeetLink}
+              </a>
+            </div>
           </div>
-          <a 
-            href={profile.googleMeetLink} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-cyan-700 hover:text-cyan-900 font-medium text-lg hover:underline transition-colors duration-200 break-all"
-          >
-            {profile.googleMeetLink}
-          </a>
         </div>
       </div>
     </section>

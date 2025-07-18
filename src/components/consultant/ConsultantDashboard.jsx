@@ -1,4 +1,3 @@
-//ConsultantDashBoard.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Calendar, LogOut, Menu, X } from "lucide-react";
@@ -27,14 +26,22 @@ const ConsultantDashboard = () => {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       {/* Sidebar */}
-      <aside className={`fixed md:static w-64 bg-white/80 backdrop-blur-lg shadow-xl border border-white/20 z-50 h-full transition-transform transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+      <aside className={`fixed md:static w-80 bg-white/80 backdrop-blur-lg shadow-xl border border-white/20 z-50 h-screen transition-all duration-500 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-6 border-b border-gray-200/50">
+          <div className="p-8 border-b border-gray-200/50">
             <div className="flex items-center justify-between">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Consultant Dashboard
-              </h1>
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <User className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    Consultant Dashboard
+                  </h1>
+                  <p className="text-gray-600 text-sm">Trang tư vấn viên</p>
+                </div>
+              </div>
               <button 
                 onClick={() => setSidebarOpen(false)}
                 className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -45,8 +52,11 @@ const ConsultantDashboard = () => {
           </div>
           
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6">
-            <div className="space-y-2">
+          <nav className="flex-1 px-6 py-8">
+            <div className="space-y-4">
+              <div className="mb-6">
+                <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Chức năng chính</h3>
+              </div>
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -56,14 +66,28 @@ const ConsultantDashboard = () => {
                       setActiveSection(item.id);
                       setSidebarOpen(false);
                     }}
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                    className={`w-full flex items-center space-x-4 px-6 py-4 rounded-xl transition-all duration-300 ${
                       activeSection === item.id 
                         ? 'bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-600 text-white shadow-lg transform scale-105' 
                         : 'text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 hover:transform hover:scale-105'
                     }`}
                   >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium">{item.label}</span>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                      activeSection === item.id 
+                        ? 'bg-white/20 shadow-inner' 
+                        : 'bg-gray-100 group-hover:bg-gray-200'
+                    }`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <span className="font-semibold text-base">{item.label}</span>
+                      <p className="text-xs opacity-70 mt-1">
+                        {item.id === 'appointments' ? 'Quản lý lịch hẹn và cuộc họp' : 'Thông tin cá nhân và chứng chỉ'}
+                      </p>
+                    </div>
+                    {activeSection === item.id && (
+                      <div className="w-2 h-8 bg-white/60 rounded-full"></div>
+                    )}
                   </button>
                 );
               })}
@@ -71,23 +95,27 @@ const ConsultantDashboard = () => {
           </nav>
           
           {/* User Info & Logout */}
-          <div className="p-4 border-t border-gray-200/50">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">{userName}</p>
-                <p className="text-xs text-gray-500 truncate">{email}</p>
+          <div className="p-6 border-t border-gray-200/50">
+            <div className="mb-6">
+              <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-4">Thông tin tài khoản</h3>
+              <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+                  <User className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-gray-800 font-semibold truncate">{userName}</p>
+                  <p className="text-gray-600 text-sm truncate">{email}</p>
+                  <p className="text-gray-500 text-xs mt-1">Chuyên viên tư vấn</p>
+                </div>
               </div>
             </div>
             
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 via-pink-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:via-pink-600 hover:to-red-700 transition-all duration-300 shadow-md hover:shadow-lg"
+              className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-red-500 via-pink-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:via-pink-600 hover:to-red-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
             >
-              <LogOut className="w-4 h-4" />
-              <span>Đăng xuất</span>
+              <LogOut className="w-5 h-5" />
+              <span className="font-semibold">Đăng xuất</span>
             </button>
           </div>
         </div>
@@ -99,10 +127,10 @@ const ConsultantDashboard = () => {
         <div className="md:hidden mb-6">
           <button 
             onClick={() => setSidebarOpen(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-white/80 backdrop-blur-lg rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-white/30"
+            className="flex items-center space-x-2 px-4 py-3 bg-white/80 backdrop-blur-lg rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-white/30"
           >
             <Menu className="w-5 h-5 text-blue-600" />
-            <span className="text-gray-700">Menu</span>
+            <span className="text-gray-700 font-medium">Menu</span>
           </button>
         </div>
 

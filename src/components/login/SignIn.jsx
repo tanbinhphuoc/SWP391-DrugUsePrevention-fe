@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
-import { User, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react"
+import { User, Lock, Eye, EyeOff, ArrowLeft, Shield, Sparkles, Users, CheckCircle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
-import "./SignIn.css" // Ensure this file exists in the same directory
+import "./SignIn.css"
 
 const demoAccounts = {
   demo_member: { role: "Member", roleId: 2 },
@@ -21,6 +21,7 @@ const SignIn = () => {
   const [errors, setErrors] = useState({})
   const [successMessage, setSuccessMessage] = useState("")
   const [useDemo, setUseDemo] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -58,7 +59,7 @@ const SignIn = () => {
   const getRouteByRole = (roleId) => {
     const routes = {
       1: "/",
-      2: "/",
+      2: "/member-dashboard",
       3: "/staff-dashboard",
       4: "/consultant-dashboard",
       5: "/manager-dashboard",
@@ -91,6 +92,8 @@ const SignIn = () => {
       return
     }
 
+    setIsLoading(true)
+
     if (useDemo && demoAccounts[loginEmail] && loginPassword === "123456") {
       const demo = demoAccounts[loginEmail]
       const fakeData = {
@@ -104,7 +107,10 @@ const SignIn = () => {
       }
       saveUserData(fakeData)
       setSuccessMessage(`Đăng nhập demo với quyền ${demo.role}!`)
-      setTimeout(() => navigate(getRouteByRole(demo.roleId), { replace: true }), 1200)
+      setTimeout(() => {
+        setIsLoading(false)
+        navigate(getRouteByRole(demo.roleId), { replace: true })
+      }, 1200)
       return
     }
 
@@ -113,7 +119,6 @@ const SignIn = () => {
         userName: loginEmail,
         password: loginPassword,
       })
-
 
       const { token, userName, email, expiresAt, role, userId } = res.data
       const roleMap = {
@@ -128,8 +133,12 @@ const SignIn = () => {
 
       saveUserData({ token, userName, email, expiresAt, roleId, roleName: role, userId })
       setSuccessMessage(`Đăng nhập thành công với quyền ${role}`)
-      setTimeout(() => navigate(getRouteByRole(roleId), { replace: true }), 1500)
+      setTimeout(() => {
+        setIsLoading(false)
+        navigate(getRouteByRole(roleId), { replace: true })
+      }, 1500)
     } catch (error) {
+      setIsLoading(false)
       let message = "Đăng nhập thất bại."
       if (error.response?.data?.message) {
         message = error.response.data.message
@@ -148,170 +157,194 @@ const SignIn = () => {
     setUseDemo(true)
   }
 
-  const BackToHomeButton = () => (
-    <button className="back-to-home-button group animate-slide-in-left" onClick={() => navigate("/")}>
-      <div className="icon-container">
-        <ArrowLeft className="w-4 h-4 text-white" />
-      </div>
-      <span>Quay lại trang chủ</span>
-    </button>
-  )
-
   return (
     <div className="signin-container">
-      <BackToHomeButton />
-      <div className="flex min-h-screen pt-20">
-        <div className="flex-1 flex flex-col justify-center items-center p-8 bg-white/10 backdrop-blur-sm">
-          <div className="decorative-element">
-            <div className="circle"></div>
-            <div className="square"></div>
-            <div className="dot dot-top"></div>
-            <div className="dot dot-left"></div>
-            <div className="dot dot-right"></div>
-            <div className="dot dot-bottom"></div>
-          </div>
-          <div className="text-center text-white max-w-md">
-            <h2 className="text-4xl font-bold mb-4 drop-shadow-lg">Đăng nhập ngay</h2>
-            <p className="text-lg opacity-90 leading-relaxed">
-              Đăng nhập để tham gia cộng đồng PreventionSupport và cùng nhau hỗ trợ phòng chống ma túy.
+      {/* Animated Background Elements */}
+      <div className="background-elements">
+        <div className="bg-element-1"></div>
+        <div className="bg-element-2"></div>
+        <div className="bg-element-3"></div>
+      </div>
+
+      {/* Back to Home Button */}
+      <button 
+        onClick={() => navigate("/")}
+        className="back-to-home-button animate-slide-in-left"
+      >
+        <div className="icon-container">
+          <ArrowLeft className="w-4 h-4 text-white" />
+        </div>
+        <span>Quay lại trang chủ</span>
+      </button>
+
+      <div className="main-container">
+        {/* Left Side - Welcome Section */}
+        <div className="welcome-section">
+          <div className="welcome-content">
+            {/* Logo/Icon */}
+            <div className="logo-container">
+              <div className="logo-main animate-fade-in">
+                <Shield className="w-12 h-12 text-white" />
+              </div>
+              <div className="logo-badge">
+                <Sparkles className="w-3 h-3 text-white" />
+              </div>
+            </div>
+
+            {/* Welcome Text */}
+            <h1 className="welcome-title animate-fade-in">
+              Chào mừng trở lại!
+            </h1>
+            <p className="welcome-description animate-fade-in">
+              Đăng nhập để tiếp tục hành trình cùng cộng đồng PreventionSupport trong việc phòng chống ma túy.
             </p>
+
+            {/* Feature Cards */}
+            <div className="feature-cards">
+              <div className="feature-card animate-fade-in">
+                <Users className="w-8 h-8 text-cyan-500" />
+                <h3>Cộng đồng</h3>
+                <p>Kết nối với cộng đồng hỗ trợ</p>
+              </div>
+              <div className="feature-card animate-fade-in">
+                <Shield className="w-8 h-8 text-blue-500" />
+                <h3>An toàn</h3>
+                <p>Môi trường an toàn và bảo mật</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex-1 flex justify-center items-center p-8">
-          <div className="form-container">
-            <div className="animate-fade-in">
-              <h2 className="text-3xl font-bold text-blue-600 text-center mb-2">Đăng nhập</h2>
-              <p className="text-gray-600 text-center mb-8 text-sm">
-                Chào mừng bạn trở lại! Vui lòng đăng nhập vào tài khoản của bạn.
-              </p>
-
-              {successMessage && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl mb-4 text-center text-sm">
-                  {successMessage}
+        {/* Right Side - Login Form */}
+        <div className="form-section">
+          <div className="form-wrapper">
+            <div className="form-container animate-fade-in">
+              {/* Form Background Pattern */}
+              <div className="form-background"></div>
+              
+              <div className="form-content">
+                {/* Form Header */}
+                <div className="form-header">
+                  <h2 className="form-title">Đăng nhập</h2>
+                  <p className="form-subtitle">Vui lòng đăng nhập vào tài khoản của bạn</p>
                 </div>
-              )}
-              {errors.api && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-4 text-center text-sm">
-                  {errors.api}
-                </div>
-              )}
 
-              <div className="mb-6 group">
-                <label className="block text-gray-700 font-medium text-sm mb-2">Tên đăng nhập</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none group-hover:text-cyan-500 transition-colors" />
-                  <input
-                    type="text"
-                    value={loginEmail}
-                    onChange={handleEmailChange}
-                    onKeyDown={handleKeyDown}
-                    placeholder="demo_admin, demo_member, ..."
-                    className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl bg-white/80 backdrop-blur-sm
-                               focus:outline-none focus:ring-4 transition-all duration-300 text-gray-800
-                               placeholder:text-gray-400 group-hover:shadow-md ${
-                                 errors.email
-                                   ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                                   : "border-gray-200 focus:border-cyan-500 focus:ring-cyan-500/20"
-                               }`}
-                  />
-                </div>
-                {errors.email && <p className="text-red-500 text-xs mt-1 ml-1">{errors.email}</p>}
-              </div>
+                {/* Messages */}
+                {successMessage && (
+                  <div className="success-message">
+                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                    <span>{successMessage}</span>
+                  </div>
+                )}
+                {errors.api && (
+                  <div className="error-message">
+                    <span>{errors.api}</span>
+                  </div>
+                )}
 
-              <div className="mb-6 group">
-                <label className="block text-gray-700 font-medium text-sm mb-2">Mật khẩu</label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none group-hover:text-cyan-500 transition-colors" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={loginPassword}
-                    onChange={handlePasswordChange}
-                    onKeyDown={handleKeyDown}
-                    placeholder="123456"
-                    className={`w-full pl-12 pr-12 py-3 border-2 rounded-xl bg-white/80 backdrop-blur-sm
-                               focus:outline-none focus:ring-4 transition-all duration-300 text-gray-800
-                               placeholder:text-gray-400 group-hover:shadow-md ${
-                                 errors.password
-                                   ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                                   : "border-gray-200 focus:border-cyan-500 focus:ring-cyan-500/20"
-                               }`}
-                  />
+                {/* Username Field */}
+                <div className="input-group">
+                  <label className="input-label">Tên đăng nhập</label>
+                  <div className="input-wrapper">
+                    <input
+                      type="text"
+                      value={loginEmail}
+                      onChange={handleEmailChange}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Nhập tên đăng nhập"
+                      className={`form-input ${errors.email ? 'error' : ''}`}
+                    />
+                  </div>
+                  {errors.email && <p className="input-error">{errors.email}</p>}
+                </div>
+
+                {/* Password Field */}
+                <div className="input-group">
+                  <label className="input-label">Mật khẩu</label>
+                  <div className="input-wrapper">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={loginPassword}
+                      onChange={handlePasswordChange}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Nhập mật khẩu"
+                      className={`form-input ${errors.password ? 'error' : ''}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="password-toggle"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  {errors.password && <p className="input-error">{errors.password}</p>}
+                </div>
+
+                {/* Demo Mode Toggle */}
+                <div className="checkbox-group">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={useDemo}
+                      onChange={toggleDemoMode}
+                      className="checkbox-input"
+                    />
+                    <span className="checkbox-text">Sử dụng tài khoản demo (bỏ qua API)</span>
+                  </label>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  onClick={handleSubmit}
+                  disabled={isLoading}
+                  className="submit-button"
+                >
+                  {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
+                </button>
+
+                {/* Register Link */}
+                <p className="register-link">
+                  Bạn chưa có tài khoản?{" "}
                   <button
-                    type="button"
-                    onClick={togglePasswordVisibility}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 
-                               focus:outline-none focus:text-gray-600 transition-colors hover:scale-110"
+                    onClick={() => navigate("/register")}
+                    className="register-button"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    Tạo tài khoản
                   </button>
-                </div>
-                {errors.password && <p className="text-red-500 text-xs mt-1 ml-1">{errors.password}</p>}
-              </div>
+                </p>
 
-              <div className="mb-6 flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="demo"
-                  checked={useDemo}
-                  onChange={toggleDemoMode}
-                  className="w-4 h-4 text-cyan-600 rounded focus:ring-cyan-500 focus:outline-none"
-                />
-                <label htmlFor="demo" className="text-sm text-gray-600 cursor-pointer">
-                  Sử dụng tài khoản demo (bỏ qua API)
-                </label>
-              </div>
-
-              <button
-                onClick={handleSubmit}
-                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white py-3 rounded-xl font-semibold
-                           focus:outline-none focus:ring-4 focus:ring-cyan-500/20 mb-4 hover:shadow-lg transition-all duration-300
-                           hover:scale-[1.02] hover:-translate-y-1"
-              >
-                Đăng nhập
-              </button>
-<p className="text-sm text-gray-600 text-center">
-  Bạn chưa có tài khoản?{" "}
-  <button
-    onClick={() => navigate("/register")}
-    className="text-cyan-600 hover:text-cyan-800 font-medium ml-1 underline underline-offset-2 transition-colors"
-  >
-    Tạo tài khoản
-  </button>
-</p>
-
-              {useDemo && (
-                <div className="mt-6 border-t border-gray-200 pt-6">
-                  <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-4 border border-cyan-200">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                      <span className="text-lg">🧪</span>
-                      Tài khoản demo có sẵn:
-                    </h3>
-                    <div className="grid grid-cols-1 gap-2">
-                      {Object.entries(demoAccounts).map(([username, info]) => (
-                        <button
-                          key={username}
-                          onClick={() => handleSelectDemo(username)}
-                          className="text-left p-3 bg-white rounded-lg border border-gray-200 hover:border-cyan-300 
-                                   hover:bg-cyan-50 transition-all duration-200 group"
-                        >
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <span className="text-sm font-medium text-cyan-600 group-hover:text-cyan-700">
-                                {username}
-                              </span>
-                              <span className="text-xs text-gray-500 ml-2">/ 123456</span>
+                {/* Demo Accounts */}
+                {useDemo && (
+                  <div className="demo-section">
+                    <div className="demo-container">
+                      <h3 className="demo-header">
+                        <div className="demo-badge">
+                          <Sparkles className="w-3 h-3 text-white" />
+                        </div>
+                        Tài khoản demo có sẵn:
+                      </h3>
+                      <div className="demo-accounts">
+                        {Object.entries(demoAccounts).map(([username, info]) => (
+                          <button
+                            key={username}
+                            onClick={() => handleSelectDemo(username)}
+                            className="demo-account"
+                          >
+                            <div className="demo-account-content">
+                              <div className="demo-account-info">
+                                <span className="demo-username">{username}</span>
+                                <span className="demo-password">/ 123456</span>
+                              </div>
+                              <span className="demo-role">{info.role}</span>
                             </div>
-                            <span className="text-xs bg-gradient-to-r from-cyan-100 to-blue-100 text-cyan-700 px-2 py-1 rounded-full">
-                              {info.role}
-                            </span>
-                          </div>
-                        </button>
-                      ))}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
