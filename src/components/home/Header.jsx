@@ -372,7 +372,7 @@ const NavLinks = ({ handleSmoothScroll, handleNavigation, activeSection }) => {
           <button
             onClick={() => {
               closeDropdown();
-              handleNavigation('/education-courses', 'Khóa học giáo dục');
+              handleNavigation('/UserCourses', 'Khóa học giáo dục');
             }}
             className="block w-full text-left px-4 py-3 text-sky-800 hover:bg-gradient-to-r hover:from-sky-50 hover:to-emerald-50 hover:text-orange-500 transition-all duration-200 text-sm font-medium"
           >
@@ -381,7 +381,7 @@ const NavLinks = ({ handleSmoothScroll, handleNavigation, activeSection }) => {
           <button
             onClick={() => {
               closeDropdown();
-              handleNavigation('/risk-assessment', 'Đánh giá rủi ro');
+              handleNavigation('/UserSurveys', 'Đánh giá rủi ro');
             }}
             className="block w-full text-left px-4 py-3 text-sky-800 hover:bg-gradient-to-r hover:from-sky-50 hover:to-emerald-50 hover:text-orange-500 transition-all duration-200 text-sm font-medium"
           >
@@ -390,7 +390,7 @@ const NavLinks = ({ handleSmoothScroll, handleNavigation, activeSection }) => {
           <button
             onClick={() => {
               closeDropdown();
-              handleNavigation('/consultation', 'Tư vấn');
+              handleNavigation('/UserAppointments', 'Tư vấn');
             }}
             className="block w-full text-left px-4 py-3 text-sky-800 hover:bg-gradient-to-r hover:from-sky-50 hover:to-emerald-50 hover:text-orange-500 transition-all duration-200 text-sm font-medium"
           >
@@ -399,7 +399,7 @@ const NavLinks = ({ handleSmoothScroll, handleNavigation, activeSection }) => {
           <button
             onClick={() => {
               closeDropdown();
-              handleNavigation('/community-programs', 'Chương trình cộng đồng');
+              handleNavigation('/UserAppointments', 'Chương trình cộng đồng');
             }}
             className="block w-full text-left px-4 py-3 text-sky-800 hover:bg-gradient-to-r hover:from-sky-50 hover:to-emerald-50 hover:text-orange-500 transition-all duration-200 text-sm font-medium"
           >
