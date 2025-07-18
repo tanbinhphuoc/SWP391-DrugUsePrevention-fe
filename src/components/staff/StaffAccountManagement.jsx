@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Search, Edit2, RefreshCw, Users } from "lucide-react";
+import { Search, Edit2, RefreshCw, Users, User } from "lucide-react";
 import { toast } from "react-toastify";
 
 class ErrorBoundary extends React.Component {
@@ -38,7 +38,9 @@ class StaffAccountManagement extends React.Component {
         loading: false,
         error: null,
         showViewModal: false,
+        showProfileModal: false,
         selectedUser: null,
+        selectedProfile: null,
         userHistory: {
             courses: [],
             appointments: [],
@@ -128,6 +130,58 @@ class StaffAccountManagement extends React.Component {
         }
     };
 
+    fetchUserProfile = async (userId) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("Vui lòng đăng nhập.");
+
+            const response = await fetch(
+                `http://localhost:7092/api/Users/GetMemberProfileWithFullOption?userId=${userId}`,
+                {
+                    headers: {
+                        Accept: "*/*",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Lấy hồ sơ thành viên thất bại. Mã lỗi: ${response.status} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log("API Response:", data); // Debug: Kiểm tra cấu trúc phản hồi
+
+            // Xử lý linh hoạt cấu trúc phản hồi
+            let profileData;
+            if (data.success !== undefined && data.data) {
+                profileData = data.data; // Trường hợp { success: true, data: {...} }
+            } else if (data.fullName !== undefined) {
+                profileData = data; // Trường hợp trả về trực tiếp { fullName: "tan dan", ... }
+            } else {
+                throw new Error("Dữ liệu API không hợp lệ hoặc không chứa thông tin hồ sơ.");
+            }
+
+            this.setState({
+                selectedProfile: {
+                    fullName: profileData.fullName || "Chưa cập nhật",
+                    age: profileData.age || "Chưa cập nhật",
+                    email: profileData.email || "Chưa cập nhật",
+                    phone: profileData.phone || "Chưa cập nhật",
+                    address: profileData.address || "Chưa cập nhật",
+                    registeredCourses: profileData.registeredCourses || [],
+                    completedCourses: profileData.completedCourses || [],
+                    assessmentResults: profileData.assessmentResults || [],
+                    previousConsultants: profileData.previousConsultants || [],
+                },
+                showProfileModal: true,
+            });
+        } catch (err) {
+            toast.error(err.message || "Không thể lấy hồ sơ thành viên.");
+        }
+    };
+
     componentDidMount() {
         this.fetchUsers();
     }
@@ -140,16 +194,23 @@ class StaffAccountManagement extends React.Component {
         this.fetchUserHistory(user.id);
     };
 
+    handleViewProfile = (user) => {
+        this.setState({ selectedUser: user });
+        this.fetchUserProfile(user.id);
+    };
+
     handleCloseModal = () => {
         this.setState({
             showViewModal: false,
+            showProfileModal: false,
             selectedUser: null,
+            selectedProfile: null,
             userHistory: { courses: [], appointments: [], assessments: [] },
         });
     };
 
     render() {
-        const { users, searchTerm, statusFilter, loading, error, showViewModal, selectedUser, userHistory } = this.state;
+        const { users, searchTerm, statusFilter, loading, error, showViewModal, showProfileModal, selectedUser, selectedProfile, userHistory } = this.state;
 
         const filteredUsers = users.filter(
             (user) =>
@@ -258,24 +319,32 @@ class StaffAccountManagement extends React.Component {
                                         <td className="px-4 py-2 border-b border-gray-200">{user.phone}</td>
                                         <td className="px-4 py-2 border-b border-gray-200">{user.address}</td>
                                         <td className="px-4 py-2 border-b border-gray-200">
-                        <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                user.status === "Active"
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-red-100 text-red-700"
-                            }`}
-                        >
-                          {user.status === "Active" ? "Đang hoạt động" : "Không hoạt động"}
-                        </span>
+                                            <span
+                                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                    user.status === "Active"
+                                                        ? "bg-green-100 text-green-700"
+                                                        : "bg-red-100 text-red-700"
+                                                }`}
+                                            >
+                                                {user.status === "Active" ? "Đang hoạt động" : "Không hoạt động"}
+                                            </span>
                                         </td>
                                         <td className="px-4 py-2 border-b border-gray-200">{user.createdAt}</td>
                                         <td className="px-4 py-2 border-b border-gray-200">{user.updatedAt}</td>
-                                        <td className="px-4 py-2 border-b border-gray-200">
+                                        <td className="px-4 py-2 border-b border-gray-200 flex gap-2">
                                             <button
                                                 onClick={() => this.handleViewHistory(user)}
                                                 className="text-blue-600 hover:text-blue-800 transition-all"
+                                                title="Xem lịch sử"
                                             >
                                                 <Edit2 className="w-5 h-5" />
+                                            </button>
+                                            <button
+                                                onClick={() => this.handleViewProfile(user)}
+                                                className="text-blue-600 hover:text-blue-800 transition-all"
+                                                title="Xem hồ sơ"
+                                            >
+                                                <User className="w-5 h-5" />
                                             </button>
                                         </td>
                                     </tr>
@@ -296,7 +365,9 @@ class StaffAccountManagement extends React.Component {
                                         onClick={this.handleCloseModal}
                                         className="text-gray-600 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition-all"
                                     >
-                                        <X className="w-6 h-6" />
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
                                     </button>
                                 </div>
                                 <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)] space-y-6">
@@ -352,6 +423,110 @@ class StaffAccountManagement extends React.Component {
                                             </ul>
                                         ) : (
                                             <p className="text-gray-500">Không có kết quả khảo sát nào.</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showProfileModal && selectedUser && selectedProfile && (
+                        <div className="fixed inset-0 bg-gray-900 bg-opacity-60 flex justify-center items-center z-50 p-4">
+                            <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-lg">
+                                <div className="flex justify-between items-center p-4 bg-gray-100 border-b border-gray-200">
+                                    <h3 className="text-xl font-semibold text-gray-800">
+                                        Hồ sơ của {selectedProfile.fullName} ({selectedUser.userName})
+                                    </h3>
+                                    <button
+                                        onClick={this.handleCloseModal}
+                                        className="text-gray-600 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition-all"
+                                    >
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)] space-y-6">
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <h4 className="text-lg font-semibold text-gray-700 mb-2">Thông tin cá nhân</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <p><strong>Họ tên:</strong> {selectedProfile.fullName}</p>
+                                            <p><strong>Tuổi:</strong> {selectedProfile.age}</p>
+                                            <p><strong>Email:</strong> {selectedProfile.email}</p>
+                                            <p><strong>Số điện thoại:</strong> {selectedProfile.phone}</p>
+                                            <p><strong>Địa chỉ:</strong> {selectedProfile.address}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <h4 className="text-lg font-semibold text-gray-700 mb-2">Khóa học đã đăng ký</h4>
+                                        {selectedProfile.registeredCourses.length > 0 ? (
+                                            <ul className="space-y-2">
+                                                {selectedProfile.registeredCourses.map((course, index) => (
+                                                    <li
+                                                        key={index}
+                                                        className="p-3 bg-white rounded-md border border-gray-100 hover:bg-gray-100 transition-all"
+                                                    >
+                                                        {course}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="text-gray-500">Không có khóa học nào.</p>
+                                        )}
+                                    </div>
+
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <h4 className="text-lg font-semibold text-gray-700 mb-2">Khóa học đã hoàn thành</h4>
+                                        {selectedProfile.completedCourses.length > 0 ? (
+                                            <ul className="space-y-2">
+                                                {selectedProfile.completedCourses.map((course, index) => (
+                                                    <li
+                                                        key={index}
+                                                        className="p-3 bg-white rounded-md border border-gray-100 hover:bg-gray-100 transition-all"
+                                                    >
+                                                        {course}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="text-gray-500">Không có khóa học nào.</p>
+                                        )}
+                                    </div>
+
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <h4 className="text-lg font-semibold text-gray-700 mb-2">Kết quả khảo sát</h4>
+                                        {selectedProfile.assessmentResults.length > 0 ? (
+                                            <ul className="space-y-2">
+                                                {selectedProfile.assessmentResults.map((assess, index) => (
+                                                    <li
+                                                        key={index}
+                                                        className="p-3 bg-white rounded-md border border-gray-100 hover:bg-gray-100 transition-all"
+                                                    >
+                                                        {assess.stage} - Điểm: {assess.score} (Thời gian: {new Date(assess.takeTime).toLocaleString("vi-VN")})
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="text-gray-500">Không có kết quả khảo sát nào.</p>
+                                        )}
+                                    </div>
+
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <h4 className="text-lg font-semibold text-gray-700 mb-2">Tư vấn viên trước đây</h4>
+                                        {selectedProfile.previousConsultants.length > 0 ? (
+                                            <ul className="space-y-2">
+                                                {selectedProfile.previousConsultants.map((consultant, index) => (
+                                                    <li
+                                                        key={consultant.consultantId}
+                                                        className="p-3 bg-white rounded-md border border-gray-100 hover:bg-gray-100 transition-all"
+                                                    >
+                                                        {consultant.consultantName} ({consultant.consultantEmail})
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="text-gray-500">Không có tư vấn viên nào.</p>
                                         )}
                                     </div>
                                 </div>
