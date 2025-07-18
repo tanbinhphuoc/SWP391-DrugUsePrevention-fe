@@ -1,18 +1,6 @@
 import { useState, useEffect } from "react";
-import { Search, Edit2, Trash2, UserPlus, Eye, Award, Calendar } from "lucide-react";
+import { Search, Edit2, UserPlus, Eye, Calendar } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
-
-// Giả lập API
-const mockApi = {
-  fetchStaff: async () => [
-    { id: 1, name: "Nguyễn Văn A", email: "nguyenvana@staff.com", role: "Staff", status: "Active", joinDate: "2024-01-15", lastLogin: "2024-05-20", department: "Quản lý khóa học", performance: "Xuất sắc", tasksCompleted: 45, coursesManaged: 12 },
-    { id: 2, name: "Trần Thị B", email: "tranthib@staff.com", role: "Staff", status: "Active", joinDate: "2024-02-10", lastLogin: "2024-05-19", department: "Quản lý khảo sát", performance: "Tốt", tasksCompleted: 38, coursesManaged: 8 },
-    { id: 3, name: "Lê Văn C", email: "levanc@staff.com", role: "Staff", status: "Inactive", joinDate: "2024-03-05", lastLogin: "2024-04-15", department: "Hỗ trợ người dùng", performance: "Trung bình", tasksCompleted: 22, coursesManaged: 5 },
-  ],
-  addStaff: async (data) => ({ id: Date.now(), ...data }),
-  updateStaff: async (id, data) => ({ id, ...data }),
-  deleteStaff: async (id) => id,
-};
 
 const StaffManagement = () => {
   const [staffMembers, setStaffMembers] = useState([]);
@@ -20,12 +8,56 @@ const StaffManagement = () => {
   const [filterDepartment, setFilterDepartment] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: "", email: "", department: "", performance: "Tốt" });
+  const [formData, setFormData] = useState({
+    userName: "",
+    password: "",
+    email: "",
+    fullName: "",
+    dateOfBirth: "",
+    phone: "",
+    address: "",
+    roleName: "Staff",
+  });
   const [editId, setEditId] = useState(null);
+  const token = localStorage.getItem("token") || sessionStorage.getItem("tempToken");
 
+  // Fetch staff from API
   useEffect(() => {
-    mockApi.fetchStaff().then(setStaffMembers);
-  }, []);
+    const fetchStaff = async () => {
+      try {
+        const response = await fetch("http://localhost:7092/api/Admin/GetAllUsers", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.success) {
+          const processedStaff = data.data
+            .filter(user => user.roleName === "Staff")
+            .map(user => ({
+              id: user.userID,
+              name: user.fullName || user.userName,
+              email: user.email,
+              department: user.roleName || "N/A",
+              status: user.status || "Inactive",
+              joinDate: user.createdAt ? new Date(user.createdAt).toISOString().split("T")[0] : "N/A",
+              lastLogin: user.updatedAt ? new Date(user.updatedAt).toISOString().split("T")[0] : "N/A",
+              tasksCompleted: 0,
+              coursesManaged: 0,
+            }));
+          setStaffMembers(processedStaff);
+        } else {
+          toast.error("Không thể tải danh sách nhân viên.");
+        }
+      } catch (error) {
+        console.error("Error fetching staff:", error.message);
+        toast.error("Lỗi tải danh sách nhân viên.");
+      }
+    };
+    if (token) fetchStaff();
+    else toast.error("Vui lòng đăng nhập để truy cập!");
+  }, [token]);
 
   const filteredStaff = staffMembers.filter(staff => {
     const matchesSearch = staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,36 +70,142 @@ const StaffManagement = () => {
   const handleAddOrUpdate = async (e) => {
     e.preventDefault();
     try {
-      if (editId) {
-        const updated = await mockApi.updateStaff(editId, { ...formData, status: "Active" });
-        setStaffMembers(staffMembers.map(s => s.id === editId ? updated : s));
-        toast.success("Cập nhật nhân viên thành công!");
-      } else {
-        const newStaff = await mockApi.addStaff({ ...formData, status: "Active", joinDate: new Date().toISOString().split("T")[0], lastLogin: "-", tasksCompleted: 0, coursesManaged: 0 });
+      const body = {
+        userName: formData.userName,
+        password: formData.password,
+        email: formData.email,
+        fullName: formData.fullName,
+        dateOfBirth: formData.dateOfBirth ? `${formData.dateOfBirth}T00:00:00Z` : null,
+        phone: formData.phone,
+        address: formData.address,
+        roleName: formData.roleName,
+      };
+
+      if (!editId) {
+        // Tạo mới
+        const response = await fetch("http://localhost:7092/api/Auth/admin/create-user", {
+          method: "POST",
+          headers: {
+            "Accept": "*/*",
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Create API Error:", response.status, errorText);
+          throw new Error(`Tạo tài khoản thất bại. Mã lỗi: ${response.status} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        const newStaff = {
+          id: data.userID,
+          name: data.fullName,
+          email: data.email,
+          department: data.roleName,
+          status: data.status || "Active",
+          joinDate: data.createdAt ? new Date(data.createdAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+          lastLogin: data.updatedAt ? new Date(data.updatedAt).toISOString().split("T")[0] : "-",
+          tasksCompleted: 0,
+          coursesManaged: 0,
+        };
         setStaffMembers([...staffMembers, newStaff]);
-        toast.success("Thêm nhân viên thành công!");
+        toast.success("Tạo tài khoản thành công!");
+      } else {
+        // Cập nhật
+        const updateBody = {
+          fullName: formData.fullName,
+          phone: formData.phone,
+          address: formData.address,
+          dateOfBirth: formData.dateOfBirth ? `${formData.dateOfBirth}T00:00:00Z` : null,
+          email: formData.email,
+        };
+        const response = await fetch(`http://localhost:7092/api/Users/${editId}/AdminUpdateProfileUser`, {
+          method: "PUT",
+          headers: {
+            "Accept": "*/*",
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updateBody),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Update API Error:", response.status, errorText);
+          throw new Error(`Cập nhật tài khoản thất bại. Mã lỗi: ${response.status} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        setStaffMembers(staffMembers.map(s => s.id === editId ? { ...s, ...updateBody, status: data.status, updatedAt: data.updatedAt } : s));
+        toast.success("Cập nhật tài khoản thành công!");
       }
+
       setIsModalOpen(false);
-      setFormData({ name: "", email: "", department: "", performance: "Tốt" });
+      setFormData({
+        userName: "",
+        password: "",
+        email: "",
+        fullName: "",
+        dateOfBirth: "",
+        phone: "",
+        address: "",
+        roleName: "Staff",
+      });
       setEditId(null);
-    } catch {
-      toast.error("Thao tác thất bại!");
+    } catch (err) {
+      console.error("Create/Update Error:", err);
+      toast.error(err.message || "Đã xảy ra lỗi khi thực hiện thao tác.");
     }
   };
 
   const handleEdit = (staff) => {
-    setFormData({ name: staff.name, email: staff.email, department: staff.department, performance: staff.performance });
+    setFormData({
+      userName: staff.email.split("@")[0],
+      password: "",
+      email: staff.email,
+      fullName: staff.name,
+      dateOfBirth: staff.dateOfBirth || "",
+      phone: staff.phone || "",
+      address: staff.address || "",
+      roleName: staff.department,
+    });
     setEditId(staff.id);
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleToggleStatus = async (userId, currentStatus) => {
     try {
-      await mockApi.deleteStaff(id);
-      setStaffMembers(staffMembers.filter(s => s.id !== id));
-      toast.success("Xóa nhân viên thành công!");
-    } catch {
-      toast.error("Xóa thất bại!");
+      const newStatus = currentStatus === "Active" ? "Inactive" : "Active";
+      const actionMessage = currentStatus === "Active" ? "ngưng kích hoạt" : "kích hoạt";
+      const response = await fetch(`http://localhost:7092/api/Admin/users/${userId}/SetStatusForUser`, {
+        method: "PUT",
+        headers: {
+          "Accept": "*/*",
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newStatus),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Toggle Status API Error:", response.status, errorText);
+        throw new Error(`Cập nhật trạng thái thất bại. Mã lỗi: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.message || "Cập nhật trạng thái không thành công.");
+      }
+
+      setStaffMembers(staffMembers.map(s => s.id === userId ? { ...s, status: newStatus } : s));
+      toast.success(`Đã ${actionMessage} tài khoản thành công!`);
+    } catch (err) {
+      console.error("Toggle Status Error:", err);
+      toast.error(err.message || "Đã xảy ra lỗi khi cập nhật trạng thái.");
     }
   };
 
@@ -98,9 +236,7 @@ const StaffManagement = () => {
           className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="">Tất cả phòng ban</option>
-          <option value="Quản lý khóa học">Quản lý khóa học</option>
-          <option value="Quản lý khảo sát">Quản lý khảo sát</option>
-          <option value="Hỗ trợ người dùng">Hỗ trợ người dùng</option>
+          <option value="Staff">Staff</option>
         </select>
         <select 
           value={filterStatus}
@@ -120,7 +256,6 @@ const StaffManagement = () => {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nhân viên</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phòng ban</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hiệu suất</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hoạt động</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
@@ -142,14 +277,6 @@ const StaffManagement = () => {
                     <div className="text-sm text-gray-900">{staff.department}</div>
                     <div className="text-sm text-gray-500">Tham gia: {staff.joinDate}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      staff.performance === "Xuất sắc" ? "bg-green-100 text-green-800" :
-                      staff.performance === "Tốt" ? "bg-blue-100 text-blue-800" :
-                      "bg-yellow-100 text-yellow-800"
-                    }`}>{staff.performance}</span>
-                    <div className="text-xs text-gray-500 mt-1"><Award className="w-3 h-3 inline mr-1" />{staff.tasksCompleted} nhiệm vụ</div>
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div>Khóa học: {staff.coursesManaged}</div>
                     <div>Đăng nhập cuối: {staff.lastLogin}</div>
@@ -162,7 +289,9 @@ const StaffManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-2">
                       <button onClick={() => handleEdit(staff)} className="text-indigo-600 hover:text-indigo-900 p-1"><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => handleDelete(staff.id)} className="text-red-600 hover:text-red-900 p-1"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => handleToggleStatus(staff.id, staff.status)} className="text-yellow-600 hover:text-yellow-900 p-1">
+                        {staff.status === "Active" ? "Ngưng kích hoạt" : "Kích hoạt"}
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -178,13 +307,23 @@ const StaffManagement = () => {
             <h3 className="text-lg font-semibold mb-4">{editId ? "Sửa nhân viên" : "Thêm nhân viên mới"}</h3>
             <form onSubmit={handleAddOrUpdate}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Tên</label>
+                <label className="block text-sm font-medium text-gray-700">Tên đăng nhập</label>
                 <input
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  value={formData.userName}
+                  onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
                   className="w-full p-2 border rounded"
                   required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Mật khẩu</label>
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full p-2 border rounded"
+                  required={!editId} // Chỉ yêu cầu khi tạo mới
                 />
               </div>
               <div className="mb-4">
@@ -198,30 +337,51 @@ const StaffManagement = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Phòng ban</label>
-                <select
-                  value={formData.department}
-                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                <label className="block text-sm font-medium text-gray-700">Họ và tên</label>
+                <input
+                  type="text"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                   className="w-full p-2 border rounded"
                   required
-                >
-                  <option value="">Chọn phòng ban</option>
-                  <option value="Quản lý khóa học">Quản lý khóa học</option>
-                  <option value="Quản lý khảo sát">Quản lý khảo sát</option>
-                  <option value="Hỗ trợ người dùng">Hỗ trợ người dùng</option>
-                </select>
+                />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Hiệu suất</label>
+                <label className="block text-sm font-medium text-gray-700">Ngày sinh</label>
+                <input
+                  type="date"
+                  value={formData.dateOfBirth}
+                  onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Số điện thoại</label>
+                <input
+                  type="text"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Địa chỉ</label>
+                <input
+                  type="text"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Phòng ban</label>
                 <select
-                  value={formData.performance}
-                  onChange={(e) => setFormData({ ...formData, performance: e.target.value })}
+                  value={formData.roleName}
+                  onChange={(e) => setFormData({ ...formData, roleName: e.target.value })}
                   className="w-full p-2 border rounded"
                   required
                 >
-                  <option value="Xuất sắc">Xuất sắc</option>
-                  <option value="Tốt">Tốt</option>
-                  <option value="Trung bình">Trung bình</option>
+                  <option value="Staff">Staff</option>
                 </select>
               </div>
               <div className="flex gap-2">
@@ -247,7 +407,7 @@ const StaffManagement = () => {
           <div className="text-sm text-gray-600">Tổng nhiệm vụ hoàn thành</div>
         </div>
         <div className="bg-white p-4 rounded-lg shadow">
-          <div className="text-2xl font-bold text-purple-600">{(staffMembers.reduce((sum, staff) => sum + staff.tasksCompleted, 0) / staffMembers.length).toFixed(1)}</div>
+          <div className="text-2xl font-bold text-purple-600">{(staffMembers.reduce((sum, staff) => sum + staff.tasksCompleted, 0) / staffMembers.length).toFixed(1) || 0}</div>
           <div className="text-sm text-gray-600">Nhiệm vụ TB/người</div>
         </div>
       </div>
