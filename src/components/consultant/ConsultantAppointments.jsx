@@ -1,6 +1,7 @@
-// ConsultantAppointments.jsx
-import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, User, CheckCircle, AlertCircle, XCircle, Loader } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Calendar, CheckCircle, XCircle, Loader, AlertCircle, User, BookOpen, BarChart2, MessageSquare } from "lucide-react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ConsultantAppointments = () => {
   const [appointments, setAppointments] = useState([]);
@@ -10,57 +11,53 @@ const ConsultantAppointments = () => {
   const [totalCanceled, setTotalCanceled] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
 
+  // Fetch appointments
   useEffect(() => {
     const fetchAppointments = async () => {
       setLoading(true);
       setError(null);
       try {
         const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Vui lòng đăng nhập để tiếp tục.");
-        }
+        if (!token) throw new Error("Please log in.");
 
         const response = await fetch("http://localhost:7092/api/Appointments/GetAllAppointmentAboutConsultant", {
           method: "GET",
           headers: {
-            "Accept": "*/*",
             "Authorization": `Bearer ${token}`,
           },
         });
 
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(`Lấy danh sách lịch hẹn thất bại: ${errorText}`);
+          throw new Error(`Failed to fetch appointments: ${response.status} ${response.statusText} - ${errorText}`);
         }
 
         const data = await response.json();
-        if (!data.success || !Array.isArray(data.data)) {
-          throw new Error("Dữ liệu không hợp lệ.");
-        }
+        if (!data.success || !Array.isArray(data.data)) throw new Error("Invalid data format.");
 
-        // Sort by startDateTime ascending
         const sortedData = data.data.sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
-
         const mappedAppointments = sortedData.map((apt) => ({
           id: apt.appointmentID,
-          date: new Date(apt.startDateTime).toLocaleDateString('vi-VN'),
-          time: new Date(apt.startDateTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+          userId: apt.userID,
+          date: new Date(apt.startDateTime).toLocaleDateString("vi-VN"),
+          time: new Date(apt.startDateTime).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
           client: apt.memberName,
           status: mapStatus(apt.status),
         }));
 
         setAppointments(mappedAppointments);
 
-        // Calculate today's confirmed and totals
-        const today = new Date().toLocaleDateString('vi-VN');
+        const today = new Date().toLocaleDateString("vi-VN");
         let confirmedTodayCount = 0;
         let pendingCount = 0;
         let confirmedCount = 0;
         let canceledCount = 0;
 
-        sortedData.forEach(apt => {
-          const aptDate = new Date(apt.startDateTime).toLocaleDateString('vi-VN');
+        sortedData.forEach((apt) => {
+          const aptDate = new Date(apt.startDateTime).toLocaleDateString("vi-VN");
           const statusMapped = mapStatus(apt.status);
 
           if (statusMapped === "Chờ xác nhận") pendingCount++;
@@ -77,6 +74,7 @@ const ConsultantAppointments = () => {
         setTotalCanceled(canceledCount);
       } catch (err) {
         setError(err.message);
+        toast.error(`Lỗi tải lịch hẹn: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -85,6 +83,37 @@ const ConsultantAppointments = () => {
     fetchAppointments();
   }, []);
 
+  // Fetch member profile
+  const fetchMemberProfile = async (userId) => {
+    setProfileLoading(true);
+    setSelectedMember(null); // Clear previous selection
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Please log in.");
+
+      const response = await fetch(`http://localhost:7092/api/Users/GetMemberProfileWithFullOption?userId=${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch profile: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      const profileData = data.success !== undefined && data.data ? data.data : data;
+      if (!profileData || typeof profileData !== "object") throw new Error("Invalid profile data.");
+
+      setSelectedMember(profileData);
+    } catch (err) {
+      setError(err.message);
+      toast.error(`Lỗi tải hồ sơ: ${err.message}`);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  // Map status to readable format
   const mapStatus = (status) => {
     switch (status) {
       case "PENDING_PAYMENT":
@@ -98,203 +127,261 @@ const ConsultantAppointments = () => {
     }
   };
 
+  // Get status badge styles
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "Đã xác nhận":
+        return "bg-green-100 text-green-700 ring-green-600/20";
+      case "Chờ xác nhận":
+        return "bg-yellow-100 text-yellow-700 ring-yellow-600/20";
+      case "Hủy":
+        return "bg-red-100 text-red-700 ring-red-600/20";
+      default:
+        return "bg-gray-100 text-gray-700 ring-gray-500/10";
+    }
+  };
+
+  // Modal close
+  const closeModal = () => {
+    setSelectedMember(null);
+  };
+
+  // If loading, show a loading spinner
   if (loading) {
     return (
-      <section className="bg-white p-6 rounded-lg shadow">
-        <div className="flex items-center justify-center py-12">
+        <section className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 min-h-[400px] flex items-center justify-center">
           <div className="flex flex-col items-center space-y-4">
-            <Loader className="w-8 h-8 animate-spin text-blue-500" />
-            <p className="text-gray-600">Đang tải...</p>
+            <Loader className="w-16 h-16 animate-spin text-blue-500" />
+            <p className="text-gray-600 text-lg font-medium">Đang tải dữ liệu lịch hẹn...</p>
           </div>
-        </div>
-      </section>
+        </section>
     );
   }
 
+  // If error, show error message
   if (error) {
     return (
-      <section className="bg-white p-6 rounded-lg shadow">
-        <div className="flex items-center justify-center py-12">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6 max-w-md">
-            <div className="flex items-center space-x-3">
-              <XCircle className="w-6 h-6 text-red-500" />
-              <p className="text-red-600 font-medium">{error}</p>
+        <section className="bg-white p-6 rounded-xl shadow-lg border border-red-300 min-h-[400px] flex items-center justify-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-8 max-w-lg text-center shadow-md">
+            <div className="flex flex-col items-center space-y-4">
+              <XCircle className="w-14 h-14 text-red-500" />
+              <p className="text-red-700 font-semibold text-xl">Đã xảy ra lỗi!</p>
+              <p className="text-red-600 text-base">{error}</p>
+              <button
+                  onClick={() => window.location.reload()}
+                  className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300 ease-in-out shadow-md"
+              >
+                Thử lại
+              </button>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
     );
   }
 
   return (
-    <section className="bg-white p-8 rounded-lg shadow">
-      {/* Header */}
-      <div className="flex items-center space-x-3 mb-8">
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-          <Calendar className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Lịch hẹn</h2>
-          <p className="text-gray-600 text-sm">Quản lý cuộc hẹn của bạn</p>
-        </div>
-      </div>
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        {/* Today's Confirmed */}
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl border border-blue-200 hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center shadow-md">
-              <Calendar className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-blue-600 text-xs font-semibold uppercase tracking-wide">Hôm nay</span>
+      <section className="bg-gray-50 p-6 rounded-xl shadow-lg border border-gray-200">
+        {/* Header */}
+        <div className="flex items-center space-x-5 mb-8 border-b pb-6 border-gray-200">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center shadow-lg">
+            <Calendar className="w-8 h-8 text-white" />
           </div>
-          <div className="space-y-1">
+          <div>
+            <h1 className="text-3xl font-extrabold text-gray-900">Tổng quan lịch hẹn</h1>
+            <p className="text-gray-600 text-lg mt-1">Quản lý và theo dõi các cuộc hẹn của bạn một cách hiệu quả.</p>
+          </div>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white p-5 rounded-xl border border-blue-200 shadow-md transform hover:scale-105 transition-transform duration-300 ease-in-out">
+            <div className="flex items-center justify-between mb-3">
+              <Calendar className="w-7 h-7 text-blue-600" />
+              <span className="text-blue-600 text-sm font-semibold px-3 py-1 bg-blue-100 rounded-full">Hôm nay</span>
+            </div>
             <p className="text-3xl font-bold text-blue-800">{todaysConfirmed}</p>
-            <p className="text-blue-700 text-sm font-medium">Lịch hẹn hôm nay (xác nhận)</p>
+            <p className="text-blue-700 text-base mt-1">Lịch hẹn đã xác nhận hôm nay</p>
           </div>
-        </div>
 
-        {/* Total Pending */}
-        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-2xl border border-yellow-200 hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-yellow-500 rounded-xl flex items-center justify-center shadow-md">
-              <AlertCircle className="w-6 h-6 text-white" />
+          <div className="bg-white p-5 rounded-xl border border-yellow-200 shadow-md transform hover:scale-105 transition-transform duration-300 ease-in-out">
+            <div className="flex items-center justify-between mb-3">
+              <AlertCircle className="w-7 h-7 text-yellow-600" />
+              <span className="text-yellow-600 text-sm font-semibold px-3 py-1 bg-yellow-100 rounded-full">Chờ</span>
             </div>
-            <span className="text-yellow-600 text-xs font-semibold uppercase tracking-wide">Chờ</span>
-          </div>
-          <div className="space-y-1">
             <p className="text-3xl font-bold text-yellow-800">{totalPending}</p>
-            <p className="text-yellow-700 text-sm font-medium">Tổng chờ xác nhận</p>
+            <p className="text-yellow-700 text-base mt-1">Tổng số lịch hẹn chờ xác nhận</p>
           </div>
-        </div>
 
-        {/* Total Confirmed */}
-        <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl border border-green-200 hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center shadow-md">
-              <CheckCircle className="w-6 h-6 text-white" />
+          <div className="bg-white p-5 rounded-xl border border-green-200 shadow-md transform hover:scale-105 transition-transform duration-300 ease-in-out">
+            <div className="flex items-center justify-between mb-3">
+              <CheckCircle className="w-7 h-7 text-green-600" />
+              <span className="text-green-600 text-sm font-semibold px-3 py-1 bg-green-100 rounded-full">Hoàn thành</span>
             </div>
-            <span className="text-green-600 text-xs font-semibold uppercase tracking-wide">Hoàn thành</span>
-          </div>
-          <div className="space-y-1">
             <p className="text-3xl font-bold text-green-800">{totalConfirmed}</p>
-            <p className="text-green-700 text-sm font-medium">Tổng đã xác nhận</p>
+            <p className="text-green-700 text-base mt-1">Tổng số lịch hẹn đã xác nhận</p>
           </div>
-        </div>
 
-        {/* Total Canceled */}
-        <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-2xl border border-red-200 hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center shadow-md">
-              <XCircle className="w-6 h-6 text-white" />
+          <div className="bg-white p-5 rounded-xl border border-red-200 shadow-md transform hover:scale-105 transition-transform duration-300 ease-in-out">
+            <div className="flex items-center justify-between mb-3">
+              <XCircle className="w-7 h-7 text-red-600" />
+              <span className="text-red-600 text-sm font-semibold px-3 py-1 bg-red-100 rounded-full">Hủy bỏ</span>
             </div>
-            <span className="text-red-600 text-xs font-semibold uppercase tracking-wide">Hủy bỏ</span>
-          </div>
-          <div className="space-y-1">
             <p className="text-3xl font-bold text-red-800">{totalCanceled}</p>
-            <p className="text-red-700 text-sm font-medium">Tổng hủy</p>
+            <p className="text-red-700 text-base mt-1">Tổng số lịch hẹn đã hủy</p>
           </div>
         </div>
-      </div>
 
-      {/* Appointments Table */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800">Danh sách lịch hẹn</h3>
-          <p className="text-gray-600 text-sm mt-1">Tổng cộng {appointments.length} cuộc hẹn</p>
-        </div>
+        {/* Appointments Table */}
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-lg">
+          <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">Danh sách lịch hẹn chi tiết</h3>
+              <p className="text-gray-600 text-sm mt-1">Tổng cộng {appointments.length} cuộc hẹn</p>
+            </div>
+          </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-100 border-b border-gray-200">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-100">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4" />
-                    <span>Ngày</span>
-                  </div>
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4" />
-                    <span>Thời gian</span>
-                  </div>
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  <div className="flex items-center space-x-2">
-                    <User className="w-4 h-4" />
-                    <span>Khách hàng</span>
-                  </div>
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Trạng thái
-                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ngày</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Thời gian</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Khách hàng</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Trạng thái</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Hành động</th>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
               {appointments.length === 0 ? (
-                <tr>
-                  <td colSpan="4" className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center space-y-3">
-                      <Calendar className="w-12 h-12 text-gray-300" />
-                      <p className="text-gray-500 font-medium">Chưa có lịch hẹn nào</p>
-                      <p className="text-gray-400 text-sm">Các cuộc hẹn sẽ xuất hiện tại đây</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                appointments.map((apt, index) => (
-                  <tr key={apt.id} className="hover:bg-gray-50 transition-colors duration-200">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <Calendar className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-900">{apt.date}</span>
+                  <tr>
+                    <td colSpan="5" className="px-6 py-16 text-center text-gray-500">
+                      <div className="flex flex-col items-center space-y-4">
+                        <Calendar className="w-16 h-16 text-gray-300" />
+                        <p className="text-lg font-medium">Bạn chưa có lịch hẹn nào.</p>
+                        <p className="text-sm text-gray-500">Hãy chờ đợi các yêu cầu tư vấn mới.</p>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                          <Clock className="w-4 h-4 text-indigo-600" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-900">{apt.time}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <User className="w-4 h-4 text-purple-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{apt.client}</p>
-                          <p className="text-xs text-gray-500">Khách hàng #{index + 1}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                        apt.status === 'Đã xác nhận' 
-                          ? 'bg-green-100 text-green-800 border border-green-200' 
-                          : apt.status === 'Chờ xác nhận' 
-                          ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' 
-                          : 'bg-red-100 text-red-800 border border-red-200'
-                      }`}>
-                        {apt.status === 'Đã xác nhận' && <CheckCircle className="w-3 h-3 mr-1" />}
-                        {apt.status === 'Chờ xác nhận' && <AlertCircle className="w-3 h-3 mr-1" />}
-                        {apt.status === 'Hủy' && <XCircle className="w-3 h-3 mr-1" />}
-                        {apt.status}
-                      </span>
                     </td>
                   </tr>
-                ))
+              ) : (
+                  appointments.map((apt) => (
+                      <tr key={apt.id} className="hover:bg-gray-50 transition duration-150 ease-in-out">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{apt.date}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{apt.time}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{apt.client}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getStatusBadge(apt.status)}`}
+                      >
+                        {apt.status}
+                      </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {/* IMPROVED "Xem hồ sơ" BUTTON */}
+                          <button
+                              onClick={() => fetchMemberProfile(apt.userId)}
+                              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg shadow-md hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 ease-in-out transform hover:scale-105"
+                          >
+                            <User className="w-4 h-4 mr-2" />
+                            Xem hồ sơ
+                          </button>
+                        </td>
+                      </tr>
+                  ))
               )}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-    </section>
+
+        {/* Modal for Member Profile */}
+        {selectedMember && !profileLoading && (
+            <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4 animate-fade-in">
+              <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl transform scale-95 animate-scale-in">
+                <div className="flex justify-between items-center p-5 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-t-xl shadow-md">
+                  <h3 className="text-2xl font-bold flex items-center">
+                    <User className="w-6 h-6 mr-3" />
+                    Hồ sơ thành viên: {selectedMember.fullName || "Chưa xác định"}
+                  </h3>
+                  <button onClick={closeModal} className="text-gray-200 hover:text-white transition duration-200">
+                    <XCircle className="w-8 h-8" />
+                  </button>
+                </div>
+                <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(90vh - 120px)' }}> {/* Adjusted for header/footer */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-lg">
+                    <p><strong className="font-semibold text-gray-700 flex items-center"><User className="w-5 h-5 mr-2 text-blue-500" /> Họ tên:</strong> {selectedMember.fullName || <span className="text-gray-500 italic">Chưa cập nhật</span>}</p>
+                    <p><strong className="font-semibold text-gray-700 flex items-center"><Calendar className="w-5 h-5 mr-2 text-blue-500" /> Tuổi:</strong> {selectedMember.age || <span className="text-gray-500 italic">Chưa cập nhật</span>}</p>
+                    <p><strong className="font-semibold text-gray-700 flex items-center"><MessageSquare className="w-5 h-5 mr-2 text-blue-500" /> Email:</strong> {selectedMember.email || <span className="text-gray-500 italic">Chưa cập nhật</span>}</p>
+                    <p><strong className="font-semibold text-gray-700 flex items-center"><BookOpen className="w-5 h-5 mr-2 text-blue-500" /> Số điện thoại:</strong> {selectedMember.phone || <span className="text-gray-500 italic">Chưa cập nhật</span>}</p>
+                    <p className="col-span-1 md:col-span-2"><strong className="font-semibold text-gray-700 flex items-center"><AlertCircle className="w-5 h-5 mr-2 text-blue-500" /> Địa chỉ:</strong> {selectedMember.address || <span className="text-gray-500 italic">Chưa cập nhật</span>}</p>
+                  </div>
+
+                  <div className="bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm">
+                    <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center"><BookOpen className="w-5 h-5 mr-2 text-indigo-600" /> Khóa học đã đăng ký</h4>
+                    {selectedMember.registeredCourses && selectedMember.registeredCourses.length > 0 ? (
+                        <ul className="list-disc list-inside text-gray-700 text-base space-y-1 ml-4">
+                          {selectedMember.registeredCourses.map((course, index) => (
+                              <li key={index}>{course}</li>
+                          ))}
+                        </ul>
+                    ) : (
+                        <p className="text-gray-500 italic">Không có khóa học nào được đăng ký.</p>
+                    )}
+                  </div>
+
+                  <div className="bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm">
+                    <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center"><BarChart2 className="w-5 h-5 mr-2 text-green-600" /> Kết quả khảo sát</h4>
+                    {selectedMember.assessmentResults && selectedMember.assessmentResults.length > 0 ? (
+                        <ul className="space-y-3">
+                          {selectedMember.assessmentResults.map((result, index) => (
+                              <li key={index} className="flex items-center text-gray-700 text-base">
+                                <CheckCircle className="w-4 h-4 mr-2 text-green-500 flex-shrink-0" />
+                                <span className="font-medium">{result.stage}</span> - Điểm: <span className="font-semibold text-green-700 ml-1">{result.score}</span> (Thời gian: {new Date(result.takeTime).toLocaleString("vi-VN")})
+                              </li>
+                          ))}
+                        </ul>
+                    ) : (
+                        <p className="text-gray-500 italic">Không có kết quả khảo sát nào.</p>
+                    )}
+                  </div>
+
+                  <div className="bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm">
+                    <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center"><MessageSquare className="w-5 h-5 mr-2 text-purple-600" /> Tư vấn viên trước đây</h4>
+                    {selectedMember.previousConsultants && selectedMember.previousConsultants.length > 0 ? (
+                        <ul className="space-y-3">
+                          {selectedMember.previousConsultants.map((consultant, index) => (
+                              <li key={index} className="flex items-center text-gray-700 text-base">
+                                <User className="w-4 h-4 mr-2 text-purple-500 flex-shrink-0" />
+                                <span className="font-medium">{consultant.consultantName}</span> (<span className="text-gray-600 italic">{consultant.consultantEmail}</span>)
+                              </li>
+                          ))}
+                        </ul>
+                    ) : (
+                        <p className="text-gray-500 italic">Không có tư vấn viên nào trước đây.</p>
+                    )}
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-100 border-t border-gray-200 flex justify-end rounded-b-xl">
+                  <button
+                      onClick={closeModal}
+                      className="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition duration-300 ease-in-out shadow-md"
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </div>
+            </div>
+        )}
+
+        {/* Loading overlay for profile */}
+        {profileLoading && (
+            <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 animate-fade-in">
+              <div className="flex flex-col items-center space-y-4">
+                <Loader className="w-16 h-16 animate-spin text-blue-400" />
+                <p className="text-white font-semibold text-lg">Đang tải hồ sơ thành viên...</p>
+              </div>
+            </div>
+        )}
+      </section>
   );
 };
 

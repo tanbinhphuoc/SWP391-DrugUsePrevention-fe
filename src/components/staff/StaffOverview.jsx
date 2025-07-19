@@ -254,7 +254,7 @@ const StaffOverview = () => {
                   ))}
                 </ul>
             ) : (
-                <p className="text-gray-500 text-lg">Không có lịch hẹn nào.</p>
+                <p className="text-gray-n500 text-lg">Không có lịch hẹn nào.</p>
             )}
           </div>
         </div>
