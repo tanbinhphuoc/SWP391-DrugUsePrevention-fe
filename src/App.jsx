@@ -7,9 +7,6 @@ import SignIn from "./components/login/SignIn.jsx";
 import Dashboard from "./components/admin/Dashboard.jsx";
 import ResourcesPage from "./components/resource/ResourcesPage.jsx";
 import CommunityProgramsPage from "./components/dichvu/community/CommunityProgramPage.jsx";
-import ConsultationPage from "./components/dichvu/consultant/ui/ConsultantPage.jsx";
-import EducationCoursesPage from "./components/dichvu/education/EducationCoursePage.jsx";
-import RiskAssessmentPage from "./components/dichvu/risk/RiskAssessmentPage.jsx";
 import UserDashboard from "./components/user/UserDashboard.jsx";
 // import ConsultantDashboard from "./components/dichvu/consultant/ux/ConsultantDashboard.jsx";
 import "react-toastify/dist/ReactToastify.css";
@@ -20,7 +17,7 @@ import CourseLearning from "./components/user/CourseLearning.jsx";
 import OutputAssessment from "./components/user/OutputAssessment.jsx";
 import ConsultantDashboard from "./components/consultant/ConsultantDashboard.jsx";
 import UserCourses from "./components/serviceuser/UserCourses.jsx";
-import UserAppointments from "./components/serviceuser/UserAppointments.jsx";
+import UserAppointments from "./components/serviceuser/UserAppointments.jsx"
 import UserSurveys from "./components/serviceuser/UserSurveys.jsx";
 function App() {
   return (
@@ -39,9 +36,9 @@ function App() {
           {/* <Route path="/consultant-dashboard" element={<ConsultantDashboard />} /> */}
           <Route path="/consultant-dashboard" element={<ConsultantDashboard />} />
           <Route path="/resources" element={<ResourcesPage />} />
-          <Route path="/education-courses" element={<EducationCoursesPage />} />
-          <Route path="/risk-assessment" element={<RiskAssessmentPage />} />
-          <Route path="/consultation" element={<ConsultationPage />} />
+          <Route path="/education-courses" element={<UserCourses />} />
+          <Route path="/risk-assessment" element={<UserSurveys />} />
+          <Route path="/consultation" element={<UserAppointments />} />
           <Route path="/community-programs" element={<CommunityProgramsPage />} />
           <Route path="/articles" element={<ArticlesPage />} />
           <Route path="/output-assessment/:assessmentId" element={<OutputAssessment />} />
