@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   ArrowLeft, Shield, Users, Star, Clock, Check, Heart,
   BookOpen, Calendar, MapPin, CreditCard, FileText, XCircle, CheckCircle, X,
 } from 'lucide-react';
-import { ToastContainer } from "react-toastify";
 
 const formatPrice = (price) => {
   return price?.toLocaleString("vi-VN", {
@@ -15,13 +16,6 @@ const formatPrice = (price) => {
 };
 const UserAppointments = ({ appointmentId }) => {
   const navigate = useNavigate();
-
-  // Mock toast functions for demo
-  const toast = {
-    error: (message) => alert(`Error: ${message}`),
-    success: (message) => alert(`Success: ${message}`),
-    info: (message) => alert(`Info: ${message}`)
-  };
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [selectedTimes, setSelectedTimes] = useState([]); 
   const [consultantId, setConsultantId] = useState(null);
