@@ -217,6 +217,37 @@ const UserAppointments = ({ appointmentId }) => {
       setIsLoading(false);
     }
   };
+   
+  const services = [
+  {
+    id: 1,
+    name: 'Tư vấn Phòng chống Ma túy',
+    description: 'Tư vấn về tác hại của ma túy, cách phòng chống và nhận biết',
+    icon: '🛡️',
+    category: 'prevention'
+  },
+  {
+    id: 2,
+    name: 'Tư vấn Cai nghiện',
+    description: 'Hỗ trợ cai nghiện ma túy, lập kế hoạch điều trị',
+    icon: '💪',
+    category: 'treatment'
+  },
+  {
+    id: 3,
+    name: 'Tư vấn Gia đình',
+    description: 'Hỗ trợ gia đình có người thân nghiện ma túy',
+    icon: '👨‍👩‍👧‍👦',
+    category: 'family'
+  },
+  {
+    id: 4,
+    name: 'Tư vấn Giáo dục',
+    description: 'Giáo dục về tác hại ma túy cho học sinh, sinh viên',
+    icon: '📚',
+    category: 'education'
+  }
+];
 
   const experts = [
   {
@@ -641,8 +672,7 @@ const UserAppointments = ({ appointmentId }) => {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 flex items-center justify-center min-h-screen p-6">
-        <div className="max-w-4xl mx-auto text-center">
+      <div className="relative z-10 container mx-auto px-6 pb-12">
           {/* Hero Section */}
           <div className="text-center mb-12">
             <div className="flex justify-center mb-4">
@@ -679,33 +709,22 @@ const UserAppointments = ({ appointmentId }) => {
             </button>
           </div>
 
-          {/* Service Cards */}
-          <div className="mt-16">
-            <h2 className="text-3xl font-bold text-white mb-8">Dịch vụ tư vấn</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-white hover:bg-white/20 transition-all duration-300">
-                <div className="text-4xl mb-4">🛡️</div>
-                <h3 className="text-xl font-semibold mb-2">Tư vấn Phòng chống Ma túy</h3>
-                <p className="text-white/80 text-sm">Hướng dẫn phòng chống tệ nạn xã hội</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-white hover:bg-white/20 transition-all duration-300">
-                <div className="text-4xl mb-4">👥</div>
-                <h3 className="text-xl font-semibold mb-2">Tư vấn Cai nghiện</h3>
-                <p className="text-white/80 text-sm">Hỗ trợ quá trình cai nghiện hiệu quả</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-white hover:bg-white/20 transition-all duration-300">
-                <div className="text-4xl mb-4">🏠</div>
-                <h3 className="text-xl font-semibold mb-2">Tư vấn Gia đình</h3>
-                <p className="text-white/80 text-sm">Tư vấn cho gia đình có người nghiện</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-white hover:bg-white/20 transition-all duration-300">
-                <div className="text-4xl mb-4">📚</div>
-                <h3 className="text-xl font-semibold mb-2">Tư vấn Giáo dục</h3>
-                <p className="text-white/80 text-sm">Giáo dục về tác hại của ma túy</p>
-              </div>
+          {/*Services Section */}
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold text-white text-center mb-8">Lĩnh vực tư vấn</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {services.map((service) => (
+                <div key={service.id} className="bg-white/10 backdrop-blur-lg rounded-xl p-6 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
+                  <div className="text-4xl mb-4 text-center">{service.icon}</div>
+                  <h3 className="text-white font-semibold text-lg mb-2">{service.name}</h3>
+                  <p className="text-white/70 text-sm mb-4">{service.description}</p>
+                  <button className="text-green-300 text-sm font-medium hover:text-green-200 transition-colors">
+                    Tìm hiểu thêm →
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
       </div>
 
       {/*Why Choose Us Section */}
@@ -733,6 +752,7 @@ const UserAppointments = ({ appointmentId }) => {
 
     {/* Booking Modal */}
     <BookingModalEnhanced />
+    
     {/* Expert Profiles */}
         <div className="max-w-6xl mx-auto mt-20">
           <div className="text-center mb-12">
