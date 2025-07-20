@@ -59,7 +59,7 @@ const SignIn = () => {
   const getRouteByRole = (roleId) => {
     const routes = {
       1: "/",
-      2: "/member-dashboard",
+      2: "/",
       3: "/staff-dashboard",
       4: "/consultant-dashboard",
       5: "/manager-dashboard",
