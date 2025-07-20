@@ -44,11 +44,12 @@ const AppointmentManagement = () => {
           expertName: apt.consultantName,
           date: new Date(apt.startDateTime).toLocaleDateString('vi-VN'),
           time: new Date(apt.startDateTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-          type: "Tư vấn online", // Assuming all are online since no type in API
+          type: "Tư vấn online",
           status: mapStatus(apt.status, apt.paymentStatus),
-          location: "Google Meet", // Assuming online
+          location: "Google Meet",
           rawStatus: apt.status,
           rawPaymentStatus: apt.paymentStatus,
+          rawDateTime: new Date(apt.startDateTime), // Store raw date for sorting
         }));
 
         setAppointments(mappedAppointments);
@@ -83,6 +84,8 @@ const AppointmentManagement = () => {
 
   useEffect(() => {
     let filtered = appointments;
+
+    // Apply search filter
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -93,9 +96,15 @@ const AppointmentManagement = () => {
           apt.time.toLowerCase().includes(lowerSearch)
       );
     }
+
+    // Apply status filter
     if (statusFilter) {
       filtered = filtered.filter((apt) => apt.status === statusFilter);
     }
+
+    // Sort appointments by date descending (newest first)
+    filtered = filtered.sort((a, b) => b.rawDateTime - a.rawDateTime);
+
     setFilteredAppointments(filtered);
   }, [searchTerm, statusFilter, appointments]);
 
