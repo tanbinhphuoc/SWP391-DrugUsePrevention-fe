@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from "react-router-dom";
 import { Heart, Book, Calendar, FileCheck, ArrowRight, Megaphone } from 'lucide-react';
 
 const FeatureCard = ({ icon, title, description }) => (
@@ -15,6 +16,8 @@ const FeatureCard = ({ icon, title, description }) => (
 );
 
 const Hero = () => {
+
+  const navigate = useNavigate();
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-sky-600 via-sky-500 to-emerald-500 text-white overflow-hidden">
       {/* Animated background elements */}
@@ -56,8 +59,10 @@ const Hero = () => {
               </p>
 
               {/* CTA buttons */}
+              
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <button className="group relative bg-white text-sky-700 font-semibold px-8 py-4 rounded-full overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                <button className="group relative bg-white text-sky-700 font-semibold px-8 py-4 rounded-full overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+                onClick={() => navigate("/UserCourses")}>
                   <span className="relative z-10 flex items-center gap-2">
                     Khám phá khóa học
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
@@ -66,7 +71,8 @@ const Hero = () => {
                   <div className="absolute inset-0 bg-white group-hover:opacity-0 transition-opacity duration-300"></div>
                 </button>
                 
-                <button className="group relative border-2 border-white/60 text-white font-semibold px-8 py-4 rounded-full overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                <button onClick={() => navigate("/UserSurveys")}
+                 className="group relative border-2 border-white/60 text-white font-semibold px-8 py-4 rounded-full overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                   <span className="relative z-10 flex items-center gap-2">
                     Đánh giá rủi ro
                     <FileCheck className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />

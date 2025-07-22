@@ -419,7 +419,7 @@ const NavLinks = ({ handleSmoothScroll, handleNavigation, activeSection }) => {
           <button
             onClick={() => {
               closeDropdown();
-              handleNavigation('/UserAppointments', 'Chương trình cộng đồng');
+              handleNavigation('/community-programs', 'Chương trình cộng đồng');
             }}
             className="block w-full text-left px-4 py-3 text-sky-800 hover:bg-gradient-to-r hover:from-sky-50 hover:to-emerald-50 hover:text-orange-500 transition-all duration-200 text-sm font-medium"
           >
