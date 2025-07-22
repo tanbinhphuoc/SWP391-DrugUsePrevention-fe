@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { Search, Edit2, Power, RefreshCw, Users, UserPlus } from "lucide-react"
-import toast, { Toaster } from 'react-hot-toast'; // Assuming react-hot-toast is installed; install via npm if not
+import toast, { Toaster } from 'react-hot-toast'
 
 class ErrorBoundary extends React.Component {
   state = { hasError: false, error: null }
@@ -111,6 +111,7 @@ const AccountManagement = () => {
         email: user.email || "Không có email",
         role: user.roleName || "Unknown",
         status: user.status || "Inactive",
+        createdAt: user.createdDate ? new Date(user.createdDate) : new Date(), // Assume createdDate exists; fallback to current date
       })))
     } catch (err) {
       console.error("Fetch Error:", err)
@@ -130,17 +131,25 @@ const AccountManagement = () => {
   const handleStatusFilter = (e) => setStatusFilter(e.target.value)
 
   const filteredUsers = Array.isArray(users)
-    ? users.filter(
-        (user) =>
-          user &&
-          (
-            user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-          ) &&
-          (roleFilter ? user.role === roleFilter : true) &&
-          (statusFilter ? user.status === statusFilter : true)
-      )
+    ? users
+        .filter(
+          (user) =>
+            user &&
+            (
+              user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              user.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+            ) &&
+            (roleFilter ? user.role === roleFilter : true) &&
+            (statusFilter ? user.status === statusFilter : true)
+        )
+        .sort((a, b) => {
+          // Prioritize Active status
+          if (a.status === "Active" && b.status !== "Active") return -1
+          if (a.status !== "Active" && b.status === "Active") return 1
+          // Within same status, sort by createdAt descending (newest first)
+          return b.createdAt - a.createdAt
+        })
     : []
 
   const handleFormChange = (e) => {
@@ -148,22 +157,21 @@ const AccountManagement = () => {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  // Thêm validation cho form data
   const validateFormData = (data) => {
     if (!data.email?.includes('@')) {
-      toast.error('Email không hợp lệ');
-      return false;
+      toast.error('Email không hợp lệ')
+      return false
     }
     if (data.roleName === 'Consultant' && !data.hourlyRate) {
-      toast.error('Vui lòng nhập giá tư vấn');
-      return false;
+      toast.error('Vui lòng nhập giá tư vấn')
+      return false
     }
-    return true;
-  };
+    return true
+  }
 
   const handleCreate = async (e) => {
     e.preventDefault()
-    if (!validateFormData(formData)) return;
+    if (!validateFormData(formData)) return
     try {
       const token = localStorage.getItem("token")
       if (!token) {
@@ -227,7 +235,7 @@ const AccountManagement = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault()
-    if (!validateFormData(formData)) return;
+    if (!validateFormData(formData)) return
     try {
       const token = localStorage.getItem("token")
       if (!token) {
@@ -288,10 +296,10 @@ const AccountManagement = () => {
   }
 
   const handleToggleStatus = async (user) => {
-    const newStatus = user.status === "Active" ? "Inactive" : "Active";
-    const actionMessage = newStatus === "Inactive" ? "vô hiệu hóa" : "kích hoạt";
+    const newStatus = user.status === "Active" ? "Inactive" : "Active"
+    const actionMessage = newStatus === "Inactive" ? "vô hiệu hóa" : "kích hoạt"
 
-    if (!window.confirm(`Bạn có chắc chắn muốn ${actionMessage} tài khoản này?`)) return;
+    if (!window.confirm(`Bạn có chắc chắn muốn ${actionMessage} tài khoản này?`)) return
 
     try {
       const token = localStorage.getItem("token")
@@ -299,7 +307,7 @@ const AccountManagement = () => {
         throw new Error("Vui lòng đăng nhập với vai trò Admin để tiếp tục.")
       }
 
-      const url = `http://localhost:7092/api/Admin/users/${user.id}/SetStatusForUser`;
+      const url = `http://localhost:7092/api/Admin/users/${user.id}/SetStatusForUser`
 
       const response = await fetch(url, {
         method: "PUT",
@@ -309,26 +317,26 @@ const AccountManagement = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newStatus),
-      });
+      })
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Toggle Status API Error:", response.status, errorText);
-        throw new Error(`Cập nhật trạng thái thất bại. Mã lỗi: ${response.status} - ${errorText}`);
+        const errorText = await response.text()
+        console.error("Toggle Status API Error:", response.status, errorText)
+        throw new Error(`Cập nhật trạng thái thất bại. Mã lỗi: ${response.status} - ${errorText}`)
       }
 
-      const data = await response.json();
+      const data = await response.json()
       if (!data.success) {
-        throw new Error(data.message || "Cập nhật trạng thái không thành công.");
+        throw new Error(data.message || "Cập nhật trạng thái không thành công.")
       }
 
-      toast.success(`Đã ${actionMessage} tài khoản thành công!`);
-      fetchUsers();
+      toast.success(`Đã ${actionMessage} tài khoản thành công!`)
+      fetchUsers()
     } catch (err) {
-      console.error("Toggle Status Error:", err);
-      toast.error(err.message || "Đã xảy ra lỗi khi cập nhật trạng thái.");
+      console.error("Toggle Status Error:", err)
+      toast.error(err.message || "Đã xảy ra lỗi khi cập nhật trạng thái.")
     }
-  };
+  }
 
   const handleEditClick = (user) => {
     setSelectedUser(user)
