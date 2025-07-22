@@ -11,6 +11,7 @@ import StaffCourseManagement from "./StaffCourseManagement";
 import StaffAppointmentManagement from "./StaffAppointmentManagement";
 import StaffAssessmentManagement from "./StaffAssessmentManagement";
 import StaffCampaignManagement from "./StaffCampaignManagement";
+import StaffBlogManagement from "./StaffBlogManagement"; // Import component mới
 
 const StaffDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -93,14 +94,16 @@ const StaffDashboard = () => {
     { id: "appointments", label: "Quản lý lịch hẹn", icon: <Calendar className="h-5 w-5" /> },
     { id: "assessments", label: "Đánh giá rủi ro", icon: <FileText className="h-5 w-5" /> },
     { id: "campaigns", label: "Chương trình truyền thông", icon: <Megaphone className="h-5 w-5" /> },
+    { id: "blogs", label: "Quản lý Blogs", icon: <FileText className="h-5 w-5" /> }
   ];
 
   return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
         <ToastContainer position="top-right" autoClose={3000} />
         {/* Sidebar */}
-        <div className="fixed inset-y-0 left-0 w-72 bg-white/95 backdrop-blur-sm border-r border-slate-200 shadow-xl">
-          <div className="p-6">
+        <div className="fixed inset-y-0 left-0 w-72 bg-white/95 backdrop-blur-sm border-r border-slate-200 shadow-xl flex flex-col">
+          {/* Header - Fixed */}
+          <div className="p-6 flex-shrink-0">
             <div className="flex items-center space-x-3 mb-8">
               <div className="h-12 w-12 rounded-xl bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 flex items-center justify-center shadow-lg">
                 <BarChart2 className="h-7 w-7 text-white" />
@@ -112,6 +115,10 @@ const StaffDashboard = () => {
                 <p className="text-xs text-slate-500 font-medium">Staff Dashboard</p>
               </div>
             </div>
+          </div>
+
+          {/* Navigation - Scrollable */}
+          <div className="flex-1 overflow-y-auto px-6 pb-6 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
             <nav className="space-y-2">
               {menuItems.map((item) => (
                   <button
@@ -136,7 +143,9 @@ const StaffDashboard = () => {
               ))}
             </nav>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-100/80 to-transparent backdrop-blur-sm border-t border-slate-200">
+
+          {/* Footer - Fixed */}
+          <div className="flex-shrink-0 p-6 bg-gradient-to-t from-slate-100/80 to-transparent backdrop-blur-sm border-t border-slate-200">
             {userInfo && (
                 <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 mb-4">
                   <div className="flex items-center space-x-3 mb-3">
@@ -172,6 +181,7 @@ const StaffDashboard = () => {
           {activeTab === "appointments" && <StaffAppointmentManagement />}
           {activeTab === "assessments" && <StaffAssessmentManagement />}
           {activeTab === "campaigns" && <StaffCampaignManagement />}
+          {activeTab === "blogs" && <StaffBlogManagement />}
         </div>
       </div>
   );

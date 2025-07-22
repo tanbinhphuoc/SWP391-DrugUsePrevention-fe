@@ -206,8 +206,8 @@ const SignIn = () => {
 
       {/* Back Button */}
       <button 
-        onClick={() => navigate("/")}
-        className={`absolute top-6 left-6 z-10 flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-500 hover:bg-white group transform ${isPageLoaded ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}
+        onClick={() => navigate("/", { replace: true })}
+        className={`absolute top-6 left-6 z-50 flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-500 hover:bg-white group transform ${isPageLoaded ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}
       >
         <ArrowLeft className="w-4 h-4 text-slate-600 group-hover:text-emerald-600 transition-colors" />
         <span className="text-slate-600 group-hover:text-emerald-600 transition-colors text-sm font-medium">Quay lại trang chủ</span>
