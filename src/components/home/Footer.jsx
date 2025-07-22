@@ -136,7 +136,7 @@ const Footer = () => {
                 </li>
                 
                 {/* Resources - Navigate to resources page */}
-                <li className="transform transition-all duration-300 hover:translate-x-2">
+                {/* <li className="transform transition-all duration-300 hover:translate-x-2">
                   <button 
                     onClick={() => handleNavigation('/resources', 'Tài nguyên')}
                     className="text-slate-400 hover:text-emerald-400 transition-all duration-300 text-sm relative group"
@@ -146,10 +146,10 @@ const Footer = () => {
                     <span className="relative z-10">Tài nguyên</span>
                     <div className={`absolute inset-0 bg-gradient-to-r from-emerald-400/10 to-transparent rounded px-2 py-1 -mx-2 -my-1 transform transition-all duration-300 ${isHovered === 'quick-resources' ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}></div>
                   </button>
-                </li>
+                </li> */}
                 
                 {/* Contact - Smooth scroll */}
-                <li className="transform transition-all duration-300 hover:translate-x-2">
+                {/* <li className="transform transition-all duration-300 hover:translate-x-2">
                   <a 
                     href="#contact"
                     onClick={(e) => handleSmoothScroll(e, '#contact')}
@@ -160,7 +160,7 @@ const Footer = () => {
                     <span className="relative z-10">Liên hệ</span>
                     <div className={`absolute inset-0 bg-gradient-to-r from-emerald-400/10 to-transparent rounded px-2 py-1 -mx-2 -my-1 transform transition-all duration-300 ${isHovered === 'quick-contact' ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}></div>
                   </a>
-                </li>
+                </li> */}
               </ul>
             </div>
 
@@ -175,8 +175,8 @@ const Footer = () => {
                   { href: '/education-courses', text: 'Khóa học giáo dục', name: 'Khóa học giáo dục' },
                   { href: '/risk-assessment', text: 'Đánh giá rủi ro', name: 'Đánh giá rủi ro' },
                   { href: '/consultation', text: 'Tư vấn', name: 'Tư vấn' },
-                  { href: '/community-programs', text: 'Chương trình cộng đồng', name: 'Chương trình cộng đồng' },
-                  { href: '/resources', text: 'Tài nguyên', name: 'Tài nguyên' }
+                  // { href: '/community-programs', text: 'Chương trình cộng đồng', name: 'Chương trình cộng đồng' },
+                  // { href: '/resources', text: 'Tài nguyên', name: 'Tài nguyên' }
                 ].map((service, index) => (
                   <li key={index} className="transform transition-all duration-300 hover:translate-x-2">
                     <button 

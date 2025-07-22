@@ -133,7 +133,7 @@ const UserCourses = () => {
     <section className="bg-white p-6 rounded-2xl shadow-xl border border-blue-100">
       <div className="flex items-center mb-6 border-b pb-4 border-blue-200">
         <BookOpen className="w-8 h-8 text-blue-600 mr-3" />
-        <h2 className="text-2xl font-bold text-gray-800">Khóa học của bạn</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Khóa học của tôi</h2>
       </div>
 
       {/* Purchased Courses Section */}

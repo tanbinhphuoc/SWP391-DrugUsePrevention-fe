@@ -38,6 +38,7 @@ const Dashboard = () => {
   const [users, setUsers] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [assessments, setAssessments] = useState({ totalAssessments: 0, scoreSummary: null });
   const navigate = useNavigate();
 
   const getToken = useCallback(() => {
@@ -87,6 +88,7 @@ const Dashboard = () => {
       console.error("Error fetching appointments:", error.message);
     } finally {
       setLoading(false);
+      setLastUpdated(new Date());
     }
   }, [getToken, navigate]);
 
@@ -110,6 +112,46 @@ const Dashboard = () => {
       console.error("Error fetching courses:", error.message);
     } finally {
       setLoading(false);
+      setLastUpdated(new Date());
+    }
+  }, [getToken, navigate]);
+
+  // Fetch assessments
+  const fetchAssessments = useCallback(async () => {
+    const token = getToken();
+    if (!token) {
+      navigate("/login", { replace: true });
+      return;
+    }
+    setLoading(true);
+    try {
+      // Fetch total assessments
+      const totalResponse = await fetch("http://localhost:7092/api/AssessmentStatistics/total", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}`, Accept: "*/*" },
+      });
+      if (!totalResponse.ok) throw new Error(`HTTP error! Status: ${totalResponse.status}`);
+      const totalData = await totalResponse.json();
+
+      // Fetch score summary
+      const summaryResponse = await fetch("http://localhost:7092/api/AssessmentStatistics/score-summary", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}`, Accept: "*/*" },
+      });
+      if (!summaryResponse.ok) throw new Error(`HTTP error! Status: ${summaryResponse.status}`);
+      const summaryData = await summaryResponse.json();
+
+      if (totalData.success && summaryData.success) {
+        setAssessments({
+          totalAssessments: totalData.totalAssessments || 0,
+          scoreSummary: summaryData.data || null,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching assessments:", error.message);
+    } finally {
+      setLoading(false);
+      setLastUpdated(new Date());
     }
   }, [getToken, navigate]);
 
@@ -119,14 +161,16 @@ const Dashboard = () => {
       fetchUsers();
       fetchAppointments();
       fetchCourses();
+      fetchAssessments();
       const interval = setInterval(() => {
         fetchUsers();
         fetchAppointments();
         fetchCourses();
+        fetchAssessments();
       }, 30000);
       return () => clearInterval(interval);
     }
-  }, [activeTab, fetchUsers, fetchAppointments, fetchCourses]);
+  }, [activeTab, fetchUsers, fetchAppointments, fetchCourses, fetchAssessments]);
 
   // Authentication check
   useEffect(() => {
@@ -191,7 +235,7 @@ const Dashboard = () => {
     datasets: [
       {
         label: "Tổng số",
-        data: [users.length, courses.length, appointments.length, 0], // Dữ liệu động
+        data: [users.length, courses.length, appointments.length, assessments.totalAssessments],
         backgroundColor: ["rgba(99, 102, 241, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(245, 158, 11, 0.8)", "rgba(239, 68, 68, 0.8)"],
         borderWidth: 0,
       },
@@ -287,6 +331,7 @@ const Dashboard = () => {
                     fetchUsers();
                     fetchAppointments();
                     fetchCourses();
+                    fetchAssessments();
                   }}
                   disabled={loading}
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -346,7 +391,7 @@ const Dashboard = () => {
                     <FileText className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-slate-900">0</div>
+                    <div className="text-2xl font-bold text-slate-900">{assessments.totalAssessments}</div>
                     <div className="text-xs text-slate-500 font-medium">Đánh giá rủi ro</div>
                   </div>
                 </div>
@@ -370,7 +415,7 @@ const Dashboard = () => {
                   ) : (
                     <Pie
                       data={{
-                        labels: ["Admin", "Member", "Consultant", "Staff"],
+                        labels: ["Admin", "Member", "Consultant", "Staff", "Manager"],
                         datasets: [
                           {
                             label: "Số lượng",
@@ -379,8 +424,15 @@ const Dashboard = () => {
                               users.filter(u => u.roleName === "Member").length,
                               users.filter(u => u.roleName === "Consultant").length,
                               users.filter(u => u.roleName === "Staff").length,
+                              users.filter(u => u.roleName === "Manager").length,
                             ],
-                            backgroundColor: ["rgba(99, 102, 241, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(245, 158, 11, 0.8)", "rgba(239, 68, 68, 0.8)"],
+                            backgroundColor: [
+                              "rgba(99, 102, 241, 0.8)",
+                              "rgba(16, 185, 129, 0.8)",
+                              "rgba(245, 158, 11, 0.8)",
+                              "rgba(239, 68, 68, 0.8)",
+                              "rgba(100, 116, 139, 0.8)",
+                            ],
                             borderWidth: 0,
                           },
                         ],
@@ -415,6 +467,45 @@ const Dashboard = () => {
                             borderWidth: 0,
                           },
                         ],
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg">
+                    <FileText className="h-5 w-5 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900">Tóm tắt điểm đánh giá rủi ro</h3>
+                </div>
+                <div className="h-80 flex items-center justify-center">
+                  {loading || !assessments.scoreSummary ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  ) : (
+                    <Bar
+                      data={{
+                        labels: ["Điểm trung bình", "Điểm tối đa", "Điểm tối thiểu"],
+                        datasets: [
+                          {
+                            label: ["Điểm",],
+                            data: [
+                              assessments.scoreSummary.averageScore,
+                              assessments.scoreSummary.maxScore,
+                              assessments.scoreSummary.minScore,
+                            ],
+                            backgroundColor: ["rgba(99, 102, 241, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(239, 68, 68, 0.8)"],
+                            borderWidth: 0,
+                          },
+                        ],
+                      }}
+                      options={{
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            max: 10,
+                          },
+                        },
                       }}
                     />
                   )}
@@ -485,7 +576,7 @@ const Dashboard = () => {
         {activeTab === "accounts" && <AccountManagement />}
         {activeTab === "courses" && <CourseManagement />}
         {activeTab === "appointments" && <AppointmentManagement />}
-        {activeTab === "assessments" && <RiskAssessmentManagement />}
+        {activeTab === "assessments" && <RiskAssessmentManagement assessments={assessments} />}
       </div>
     </div>
   );
