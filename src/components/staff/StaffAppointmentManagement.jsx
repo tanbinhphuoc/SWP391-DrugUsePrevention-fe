@@ -39,27 +39,34 @@ class StaffAppointmentManagement extends React.Component {
                 throw new Error("Dữ liệu không hợp lệ từ API.");
             }
 
-            const mappedAppointments = data.data.map((apt) => {
-                if (!apt.appointmentID || !apt.startDateTime) {
-                    console.warn("Dữ liệu thiếu cho appointment:", apt);
-                    return null;
-                }
-                return {
-                    id: apt.appointmentID,
-                    patientName: apt.userName || "Chưa có tên",
-                    expertName: apt.consultantName || "Chưa có chuyên gia",
-                    date: new Date(apt.startDateTime).toLocaleDateString("vi-VN"),
-                    time: new Date(apt.startDateTime).toLocaleTimeString("vi-VN", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    }),
-                    type: apt.type || "Tư vấn online",
-                    status: this.mapStatus(apt.status, apt.paymentStatus),
-                    location: apt.location || "Google Meet",
-                    rawStatus: apt.status || "UNKNOWN",
-                    rawPaymentStatus: apt.paymentStatus || "UNKNOWN",
-                };
-            }).filter((apt) => apt !== null); // Loại bỏ các bản ghi lỗi
+            const mappedAppointments = data.data
+                .map((apt) => {
+                    if (!apt.appointmentID || !apt.startDateTime) {
+                        console.warn("Dữ liệu thiếu cho appointment:", apt);
+                        return null;
+                    }
+                    return {
+                        id: apt.appointmentID,
+                        patientName: apt.userName || "Chưa có tên",
+                        expertName: apt.consultantName || "Chưa có chuyên gia",
+                        date: new Date(apt.startDateTime).toLocaleDateString("vi-VN"),
+                        timeRange: `${new Date(apt.startDateTime).toLocaleTimeString("vi-VN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })} - ${new Date(apt.endDateTime).toLocaleTimeString("vi-VN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })}`, // Hiển thị khoảng thời gian
+                        type: apt.type || "Tư vấn online",
+                        status: this.mapStatus(apt.status, apt.paymentStatus),
+                        location: apt.location || "Google Meet",
+                        rawStatus: apt.status || "UNKNOWN",
+                        rawPaymentStatus: apt.paymentStatus || "UNKNOWN",
+                        startDateTime: new Date(apt.startDateTime), // Lưu thời gian gốc để sắp xếp
+                    };
+                })
+                .filter((apt) => apt !== null)
+                .sort((a, b) => b.startDateTime - a.startDateTime); // Sắp xếp theo thời gian giảm dần
 
             const total = mappedAppointments.length;
             const pending = mappedAppointments.filter((apt) => apt.status === "Chờ xác nhận").length;
@@ -82,12 +89,14 @@ class StaffAppointmentManagement extends React.Component {
     mapStatus = (status, paymentStatus) => {
         if (!status) return "Không xác định";
         if (status === "CANCELED") return "Đã hủy";
+        if (status === "PENDING") return "Chờ xác nhận"; // Thêm xử lý cho PENDING
         if (status === "PENDING_PAYMENT") {
             if (paymentStatus === "PENDING") return "Chờ xác nhận";
             if (paymentStatus === "SUCCESS") return "Đã xác nhận";
             if (paymentStatus === "FAILED") return "Thất bại";
         }
-        return "Không xác định"; // Trường hợp mặc định
+        if (status === "CONFIRMED") return "Đã xác nhận"; // Thêm xử lý cho CONFIRMED
+        return "Không xác định";
     };
 
     handleSearch = (e) => {
@@ -99,7 +108,7 @@ class StaffAppointmentManagement extends React.Component {
                     apt.patientName.toLowerCase().includes(searchTerm) ||
                     apt.expertName.toLowerCase().includes(searchTerm) ||
                     apt.date.includes(searchTerm) ||
-                    apt.time.toLowerCase().includes(searchTerm)
+                    apt.timeRange.toLowerCase().includes(searchTerm) // Cập nhật để tìm kiếm trong timeRange
             ),
         }));
     };
@@ -114,33 +123,37 @@ class StaffAppointmentManagement extends React.Component {
         }));
     };
 
-    handleUpdateStatus = async (appointmentId, newStatus) => {
+    handleUpdateStatus = async (appointmentId, action) => {
         try {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("Vui lòng đăng nhập.");
 
-            const statusMap = {
-                "CANCELED": "Đã hủy",
-                "PENDING_PAYMENT": "Chờ xác nhận",
-            };
-
-            const response = await fetch(
-                `http://localhost:7092/api/Appointments/UpdateAppointmentStatus?appointmentId=${appointmentId}`,
-                {
-                    method: "PUT",
+            let response;
+            if (action === "confirm") {
+                response = await fetch(`http://localhost:7092/api/Appointments/${appointmentId}/ConfirmFreeAppointment`, {
+                    method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`,
                     },
-                    body: JSON.stringify({ status: newStatus }),
-                }
-            );
+                });
+            } else if (action === "cancel") {
+                response = await fetch(`http://localhost:7092/api/Appointments/${appointmentId}/CancelAppointment`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+            } else {
+                throw new Error("Hành động không hợp lệ.");
+            }
 
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || `Cập nhật thất bại. Mã: ${response.status}`);
 
             await this.fetchAppointments(); // Làm mới danh sách
-            toast.success(`Cập nhật trạng thái thành ${statusMap[newStatus] || newStatus} thành công!`);
+            toast.success(`Cập nhật trạng thái thành ${action === "confirm" ? "Đã xác nhận" : "Đã hủy"} thành công!`);
         } catch (err) {
             toast.error(err.message || "Lỗi cập nhật trạng thái lịch hẹn.");
         }
@@ -279,7 +292,7 @@ class StaffAppointmentManagement extends React.Component {
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Clock className="w-5 h-5" />
-                                                <span className="text-base">Thời gian: {appointment.time}</span>
+                                                <span className="text-base">Thời gian: {appointment.timeRange}</span> {/* Sử dụng timeRange */}
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <MapPin className="w-5 h-5" />
@@ -289,22 +302,20 @@ class StaffAppointmentManagement extends React.Component {
                                     </div>
                                     <div className="flex flex-col gap-2">
                                         <button
-                                            onClick={() =>
-                                                this.handleUpdateStatus(
-                                                    appointment.id,
-                                                    appointment.rawStatus === "CANCELED" ? "PENDING_PAYMENT" : "CANCELED"
-                                                )
-                                            }
-                                            className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2"
+                                            onClick={() => this.handleUpdateStatus(appointment.id, "confirm")}
+                                            disabled={appointment.rawStatus === "CONFIRMED" || appointment.rawStatus === "CANCELED"}
+                                            className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            {appointment.rawStatus === "CANCELED" ? (
-                                                <CheckCircle className="w-5 h-5" />
-                                            ) : (
-                                                <XCircle className="w-5 h-5" />
-                                            )}
-                                            <span>
-                        {appointment.rawStatus === "CANCELED" ? "Xác nhận lại" : "Hủy bỏ"}
-                      </span>
+                                            <CheckCircle className="w-5 h-5" />
+                                            <span>Xác nhận</span>
+                                        </button>
+                                        <button
+                                            onClick={() => this.handleUpdateStatus(appointment.id, "cancel")}
+                                            disabled={appointment.rawStatus === "CANCELED"}
+                                            className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <XCircle className="w-5 h-5" />
+                                            <span>Hủy bỏ</span>
                                         </button>
                                     </div>
                                 </div>
