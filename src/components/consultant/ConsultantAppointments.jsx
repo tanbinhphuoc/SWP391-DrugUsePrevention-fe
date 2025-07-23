@@ -38,14 +38,16 @@ const ConsultantAppointments = () => {
         const data = await response.json();
         if (!data.success || !Array.isArray(data.data)) throw new Error("Invalid data format.");
 
-        const sortedData = data.data.sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
+        const sortedData = data.data.sort((a, b) => new Date(b.startDateTime) - new Date(a.startDateTime)); // Sắp xếp giảm dần
         const mappedAppointments = sortedData.map((apt) => ({
           id: apt.appointmentID,
           userId: apt.userID,
           date: new Date(apt.startDateTime).toLocaleDateString("vi-VN"),
-          time: new Date(apt.startDateTime).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+          timeRange: `${new Date(apt.startDateTime).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })} - ${new Date(apt.endDateTime).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}`, // Thêm khoảng thời gian
           client: apt.memberName,
           status: mapStatus(apt.status),
+          rawStatus: apt.status || "UNKNOWN",
+          startDateTime: new Date(apt.startDateTime),
         }));
 
         setAppointments(mappedAppointments);
@@ -86,7 +88,7 @@ const ConsultantAppointments = () => {
   // Fetch member profile
   const fetchMemberProfile = async (userId) => {
     setProfileLoading(true);
-    setSelectedMember(null); // Clear previous selection
+    setSelectedMember(null);
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Please log in.");
@@ -116,6 +118,8 @@ const ConsultantAppointments = () => {
   // Map status to readable format
   const mapStatus = (status) => {
     switch (status) {
+      case "PENDING":
+        return "Chờ xác nhận";
       case "PENDING_PAYMENT":
         return "Chờ xác nhận";
       case "CANCELED":
@@ -144,6 +148,90 @@ const ConsultantAppointments = () => {
   // Modal close
   const closeModal = () => {
     setSelectedMember(null);
+  };
+
+  // Handle status update (Confirm or Cancel)
+  const handleUpdateStatus = async (appointmentId, action) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Please log in.");
+
+      let response;
+      if (action === "confirm") {
+        response = await fetch(`http://localhost:7092/api/Appointments/${appointmentId}/ConfirmFreeAppointment`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } else if (action === "cancel") {
+        response = await fetch(`http://localhost:7092/api/Appointments/${appointmentId}/CancelAppointment`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } else {
+        throw new Error("Hành động không hợp lệ.");
+      }
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || `Cập nhật thất bại. Mã: ${response.status}`);
+
+      // Refresh appointments
+      const fetchResponse = await fetch("http://localhost:7092/api/Appointments/GetAllAppointmentAboutConsultant", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+      const fetchData = await fetchResponse.json();
+      if (!fetchResponse.ok || !fetchData.success || !Array.isArray(fetchData.data)) throw new Error("Lỗi làm mới danh sách.");
+
+      const sortedData = fetchData.data.sort((a, b) => new Date(b.startDateTime) - new Date(a.startDateTime));
+      const mappedAppointments = sortedData.map((apt) => ({
+        id: apt.appointmentID,
+        userId: apt.userID,
+        date: new Date(apt.startDateTime).toLocaleDateString("vi-VN"),
+        timeRange: `${new Date(apt.startDateTime).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })} - ${new Date(apt.endDateTime).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}`,
+        client: apt.memberName,
+        status: mapStatus(apt.status),
+        rawStatus: apt.status || "UNKNOWN",
+        startDateTime: new Date(apt.startDateTime),
+      }));
+
+      setAppointments(mappedAppointments);
+
+      const today = new Date().toLocaleDateString("vi-VN");
+      let confirmedTodayCount = 0;
+      let pendingCount = 0;
+      let confirmedCount = 0;
+      let canceledCount = 0;
+
+      sortedData.forEach((apt) => {
+        const aptDate = new Date(apt.startDateTime).toLocaleDateString("vi-VN");
+        const statusMapped = mapStatus(apt.status);
+
+        if (statusMapped === "Chờ xác nhận") pendingCount++;
+        if (statusMapped === "Đã xác nhận") {
+          confirmedCount++;
+          if (aptDate === today) confirmedTodayCount++;
+        }
+        if (statusMapped === "Hủy") canceledCount++;
+      });
+
+      setTodaysConfirmed(confirmedTodayCount);
+      setTotalPending(pendingCount);
+      setTotalConfirmed(confirmedCount);
+      setTotalCanceled(canceledCount);
+
+      toast.success(`Cập nhật trạng thái thành ${action === "confirm" ? "Đã xác nhận" : "Đã hủy"} thành công!`);
+    } catch (err) {
+      setError(err.message);
+      toast.error(`Lỗi cập nhật trạng thái: ${err.message}`);
+    }
   };
 
   // If loading, show a loading spinner
@@ -266,23 +354,38 @@ const ConsultantAppointments = () => {
                   appointments.map((apt) => (
                       <tr key={apt.id} className="hover:bg-gray-50 transition duration-150 ease-in-out">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{apt.date}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{apt.time}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{apt.timeRange}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{apt.client}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getStatusBadge(apt.status)}`}
-                      >
-                        {apt.status}
-                      </span>
+                    <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${getStatusBadge(apt.status)}`}
+                    >
+                      {apt.status}
+                    </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          {/* IMPROVED "Xem hồ sơ" BUTTON */}
                           <button
                               onClick={() => fetchMemberProfile(apt.userId)}
-                              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg shadow-md hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 ease-in-out transform hover:scale-105"
+                              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg shadow-md hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 ease-in-out transform hover:scale-105 mr-2"
                           >
                             <User className="w-4 h-4 mr-2" />
                             Xem hồ sơ
+                          </button>
+                          <button
+                              onClick={() => handleUpdateStatus(apt.id, "confirm")}
+                              disabled={apt.rawStatus === "CONFIRMED" || apt.rawStatus === "CANCELED"}
+                              className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 ease-in-out transform hover:scale-105 mr-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Xác nhận
+                          </button>
+                          <button
+                              onClick={() => handleUpdateStatus(apt.id, "cancel")}
+                              disabled={apt.rawStatus === "CANCELED"}
+                              className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <XCircle className="w-4 h-4 mr-2" />
+                            Hủy
                           </button>
                         </td>
                       </tr>
@@ -306,7 +409,7 @@ const ConsultantAppointments = () => {
                     <XCircle className="w-8 h-8" />
                   </button>
                 </div>
-                <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(90vh - 120px)' }}> {/* Adjusted for header/footer */}
+                <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar" style={{ maxHeight: "calc(90vh - 120px)" }}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-lg">
                     <p><strong className="font-semibold text-gray-700 flex items-center"><User className="w-5 h-5 mr-2 text-blue-500" /> Họ tên:</strong> {selectedMember.fullName || <span className="text-gray-500 italic">Chưa cập nhật</span>}</p>
                     <p><strong className="font-semibold text-gray-700 flex items-center"><Calendar className="w-5 h-5 mr-2 text-blue-500" /> Tuổi:</strong> {selectedMember.age || <span className="text-gray-500 italic">Chưa cập nhật</span>}</p>
