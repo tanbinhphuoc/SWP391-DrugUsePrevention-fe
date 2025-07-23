@@ -8,6 +8,7 @@ import {
   UserPrograms,
   UserProfile,
 } from "./";
+import UserAppointmentHistory from "./UserAppointmentHistory";
 import { toast, ToastContainer } from "react-toastify";
 import { LogOut, Shield, BookOpen, FileText, Calendar, Megaphone, User, Home, Heart } from "lucide-react";
 
@@ -135,9 +136,10 @@ const UserDashboard = () => {
   const menuItems = [
     { id: "overview", label: "Tổng quan", icon: Shield, color: "text-emerald-400" },
     { id: "courses", label: "Khóa học", icon: BookOpen, color: "text-purple-400" },
-    { id: "surveys", label: "Khảo sát", icon: FileText, color: "text-amber-400" },
-    { id: "appointments", label: "Tư vấn", icon: Calendar, color: "text-emerald-400" },
-    { id: "programs", label: "Chương trình", icon: Megaphone, color: "text-purple-400" },
+    // { id: "surveys", label: "Khảo sát", icon: FileText, color: "text-amber-400" },
+    // { id: "appointments", label: "Tư vấn", icon: Calendar, color: "text-emerald-400" },
+    // { id: "programs", label: "Chương trình", icon: Megaphone, color: "text-purple-400" },
+    { id: "appointmentHistory", label: "Lịch sử cuộc hẹn", icon: Calendar, color: "text-emerald-400" },
     { id: "profile", label: "Hồ sơ", icon: User, color: "text-amber-400" },
     { id: "home", label: "Trang chủ", icon: Home, color: "text-gray-300", path: "/" },
   ];
@@ -254,9 +256,10 @@ const UserDashboard = () => {
             <div className="p-6">
               {activeTab === "overview" && <UserOverview />}
               {activeTab === "courses" && <UserCourses />}
-              {activeTab === "surveys" && <UserSurveys />}
-              {activeTab === "appointments" && <UserAppointments appointmentId={searchParams.get("appointmentId")} />}
-              {activeTab === "programs" && <UserPrograms />}
+              {/* {activeTab === "surveys" && <UserSurveys />} */}
+              {/* {activeTab === "appointments" && <UserAppointments appointmentId={searchParams.get("appointmentId")} />} */}
+              {/* {activeTab === "programs" && <UserPrograms />} */}
+              {activeTab === "appointmentHistory" && <UserAppointmentHistory />}
               {activeTab === "profile" && <UserProfile />}
               {activeTab === "home" && navigate("/")}
             </div>

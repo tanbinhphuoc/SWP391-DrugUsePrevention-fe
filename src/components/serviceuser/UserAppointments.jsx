@@ -38,8 +38,8 @@ const UserAppointments = ({ appointmentId }) => {
     });
   };
 
-  const getSortedConsultants = () => {
-    return [...consultants].sort((a, b) => {
+  const getSortedConsultants = (consultantList) => {
+    return [...consultantList].sort((a, b) => {
       const aIsFavorite = favoriteConsultants.includes(a.id);
       const bIsFavorite = favoriteConsultants.includes(b.id);
       if (aIsFavorite && !bIsFavorite) return -1;
@@ -416,7 +416,13 @@ const UserAppointments = ({ appointmentId }) => {
   const BookingModalEnhanced = () => {
     if (!showBookingForm) return null;
 
-    const sortedConsultants = getSortedConsultants();
+    // Split consultants into free and paid
+    const freeConsultants = consultants.filter((c) => c.hourlyRate === 0);
+    const paidConsultants = consultants.filter((c) => c.hourlyRate > 0);
+
+    // Sort consultants with favorites first
+    const sortedFreeConsultants = getSortedConsultants(freeConsultants);
+    const sortedPaidConsultants = getSortedConsultants(paidConsultants);
 
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -466,25 +472,55 @@ const UserAppointments = ({ appointmentId }) => {
                   <Users className="w-4 h-4 text-emerald-500" />
                   <span>Chọn tư vấn viên</span>
                 </label>
-                <select
-                  value={consultantId || ""}
-                  onChange={(e) => {
-                    const newConsultantId = Number(e.target.value);
-                    setConsultantId(newConsultantId);
-                    setSelectedTimes([]);
-                  }}
-                  className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm"
-                  disabled={!consultants.length}
-                >
-                  <option value="" disabled>
-                    Chọn tư vấn viên
-                  </option>
-                  {sortedConsultants.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {favoriteConsultants.includes(c.id) ? "⭐ " : ""}{c.name} {c.hourlyRate === 0 ? "(Miễn phí)" : ""}
-                    </option>
-                  ))}
-                </select>
+                <div className="grid grid-cols-1 gap-4">
+                  {/* Free Consultants Dropdown */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-600 mb-1 block">Tư vấn viên miễn phí</label>
+                    <select
+                      value={consultantId && freeConsultants.some((c) => c.id === consultantId) ? consultantId : ""}
+                      onChange={(e) => {
+                        const newConsultantId = Number(e.target.value);
+                        setConsultantId(newConsultantId);
+                        setSelectedTimes([]);
+                      }}
+                      className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                      disabled={!freeConsultants.length}
+                    >
+                      <option value="" disabled>
+                        Chọn tư vấn viên miễn phí
+                      </option>
+                      {sortedFreeConsultants.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {favoriteConsultants.includes(c.id) ? "⭐ " : ""}{c.name} (Miễn phí)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Paid Consultants Dropdown */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-600 mb-1 block">Tư vấn viên có phí</label>
+                    <select
+                      value={consultantId && paidConsultants.some((c) => c.id === consultantId) ? consultantId : ""}
+                      onChange={(e) => {
+                        const newConsultantId = Number(e.target.value);
+                        setConsultantId(newConsultantId);
+                        setSelectedTimes([]);
+                      }}
+                      className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                      disabled={!paidConsultants.length}
+                    >
+                      <option value="" disabled>
+                        Chọn tư vấn viên có phí
+                      </option>
+                      {sortedPaidConsultants.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {favoriteConsultants.includes(c.id) ? "⭐ " : ""}{c.name} ({formatPrice(c.hourlyRate)}/h)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
 
