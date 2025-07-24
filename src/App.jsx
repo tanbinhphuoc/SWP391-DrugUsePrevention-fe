@@ -19,6 +19,7 @@ import ConsultantDashboard from "./components/consultant/ConsultantDashboard.jsx
 import UserCourses from "./components/serviceuser/UserCourses.jsx";
 import UserAppointments from "./components/serviceuser/UserAppointments.jsx"
 import UserSurveys from "./components/serviceuser/UserSurveys.jsx";
+import StaffBlogManagement from "./components/staff/StaffBlogManagement.jsx";
 function App() {
   return (
     <Router>
@@ -45,6 +46,7 @@ function App() {
           <Route path="/UserCourses" element={<UserCourses />} />
           <Route path="/UserAppointments" element={<UserAppointments />} />
           <Route path="/UserSurveys" element={<UserSurveys />} />
+          <Route path="/staff-blogs" element={<StaffBlogManagement />} />
         </Routes>
       </div>
     </Router>
