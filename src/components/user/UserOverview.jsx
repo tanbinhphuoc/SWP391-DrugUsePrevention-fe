@@ -67,7 +67,17 @@ const UserOverview = ({ userId = 5 }) => {
       }
 
       const data = await response.json()
-      setProfileData(data)
+      // Loại bỏ các mục trùng lặp trong registeredCourses và previousConsultants
+      const uniqueRegisteredCourses = [...new Set(data.registeredCourses)]
+      const uniquePreviousConsultants = data.previousConsultants.filter(
+        (consultant, index, self) =>
+          index === self.findIndex((c) => c.consultantId === consultant.consultantId)
+      )
+      setProfileData({
+        ...data,
+        registeredCourses: uniqueRegisteredCourses,
+        previousConsultants: uniquePreviousConsultants,
+      })
       setLastUpdated(new Date())
     } catch (err) {
       console.error("Error fetching profile data:", err)
@@ -190,7 +200,7 @@ const UserOverview = ({ userId = 5 }) => {
               <p className="text-slate-600 mt-2 font-medium">Thông tin chi tiết và tiến độ học tập</p>
               {lastUpdated && (
                 <p className="text-xs text-slate-500 mt-1">
-                  Cập nhật lần cuối: {lastUpdated.toLocaleTimeString("vi-VN")}
+                  Cập nhật lần cuối: {lastUpdated.toLocaleTimeString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
                 </p>
               )}
             </div>
@@ -539,7 +549,7 @@ const UserOverview = ({ userId = 5 }) => {
                           </td>
                           <td className="py-3 px-4 font-semibold">{result.score}</td>
                           <td className="py-3 px-4 text-slate-600">
-                            {new Date(result.takeTime).toLocaleString("vi-VN")}
+                            {new Date(result.takeTime).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
                           </td>
                           <td className="py-3 px-4">
                             <span

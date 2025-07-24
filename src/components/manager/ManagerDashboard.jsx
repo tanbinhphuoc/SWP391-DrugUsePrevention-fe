@@ -15,9 +15,6 @@ import { toast, ToastContainer } from "react-toastify";
 import ManagerOverview from "./ManagerOverview";
 import StaffManagement from "./StaffManagement";
 import ConsultantManagement from "./ConsultantManagement";
-import SystemReports from "./SystemReports";
-import SystemSettings from "./SystemSettings";
-
 const ManagerDashboard = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");

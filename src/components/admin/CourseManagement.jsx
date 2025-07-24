@@ -126,24 +126,29 @@ const CourseManagement = () => {
   };
 
   // Validate course form
-  const validateForm = () => {
-    const requiredFields = {
-      courseName: "Tên khóa học",
-      price: "Giá",
-    };
-    for (const [field, label] of Object.entries(requiredFields)) {
-      if (!formData[field]) {
-        setError(`Vui lòng điền ${label} hợp lệ.`);
-        return false;
-      }
-      if (typeof formData[field] === "number" && formData[field] < 0) {
-        setError(`${label} phải là số không âm.`);
-        return false;
-      }
-    }
-    return true;
+const validateForm = () => {
+  const requiredFields = {
+    courseName: "Tên khóa học",
+    price: "Giá",
   };
 
+  if (!formData) {
+    setError("Dữ liệu biểu mẫu không hợp lệ.");
+    return false;
+  }
+
+  for (const [field, label] of Object.entries(requiredFields)) {
+    if (!formData[field] && formData[field] !== 0) { // Thay đổi để chấp nhận 0
+      setError(`Vui lòng điền ${label} hợp lệ.`);
+      return false;
+    }
+    if (field === "price" && isNaN(Number(formData[field]))) {
+      setError(`${label} phải là một số hợp lệ.`);
+      return false;
+    }
+  }
+  return true;
+};
   // Create course
   const handleCreateCourse = async (e) => {
     e.preventDefault();
@@ -604,21 +609,21 @@ const CourseManagement = () => {
                             />
                           </div>
                           <div>
-                            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                              Giá (VNĐ) <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                id="price"
-                                name="price"
-                                type="number"
-                                value={formData.price || ""}
-                                onChange={handleInputChange}
-                                placeholder="0"
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                min="0"
-                                required
-                            />
-                          </div>
+                          <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
+                            Giá (VNĐ) <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            id="price"
+                            name="price"
+                            type="number"
+                            value={formData.price === 0 ? "0" : formData.price || ""} // Đảm bảo "0" được hiển thị đúng
+                            onChange={handleInputChange}
+                            placeholder="0"
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            min="0"
+                            // Xóa "required" nếu validateForm đã xử lý, hoặc giữ nếu cần kiểm tra trình duyệt
+                          />
+                        </div>
                         </div>
                         {error && (
                             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
