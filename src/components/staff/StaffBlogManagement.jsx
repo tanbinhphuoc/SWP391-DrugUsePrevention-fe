@@ -202,17 +202,7 @@ const StaffBlogManagement = () => {
       }
 
       const data = await response.json();
-      setBlogs(Array.isArray(data) ? data.map(blog => ({
-        ...blog,
-        blogID: blog.BlogID, // Đồng bộ hóa tên trường nếu cần
-        title: blog.Title,
-        content: blog.Content,
-        publishDate: blog.PublishDate,
-        status: blog.Status,
-        thumbnail: blog.Thumbnail,
-        authorAvatar: blog.AuthorAvatar,
-        createdBy: blog.CreatedBy
-      })) : []);
+      setBlogs(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching blogs:", error);
       toast.error(`Không thể tải danh sách blog: ${error.message}`);
