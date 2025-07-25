@@ -18,7 +18,7 @@ const formatPrice = (price) => {
 const UserAppointments = ({ appointmentId }) => {
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
-  const [selectedTimes, setSelectedTimes] = useState([]); 
+  const [selectedTimes, setSelectedTimes] = useState([]);
   const [consultantId, setConsultantId] = useState(null);
   const [bookedSlots, setBookedSlots] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +27,7 @@ const UserAppointments = ({ appointmentId }) => {
   const [showBookingForm, setShowBookingForm] = useState(false);
 
   const token = localStorage.getItem("token") || sessionStorage.getItem("tempToken");
-  
+
   const toggleTimeSelection = (time) => {
     setSelectedTimes(prev => {
       if (prev.includes(time)) {
@@ -75,6 +75,8 @@ const UserAppointments = ({ appointmentId }) => {
           specialty: c.specialty || "N/A",
           hourlyRate: c.hourlyRate || 0,
           googleMeetLink: c.googleMeetLink || null,
+          bio: c.bio || "Chuyên gia tư vấn với nhiều năm kinh nghiệm",
+          rating: c.rating || 4.5, // Giả sử API cung cấp rating, nếu không thì mặc định 4.5
         }));
         setConsultants(fetchedConsultants);
         if (fetchedConsultants.length > 0 && !consultantId) {
@@ -145,7 +147,7 @@ const UserAppointments = ({ appointmentId }) => {
       toast.error("Vui lòng chọn ít nhất một giờ hẹn!");
       return;
     }
-    
+
     setIsLoading(true);
     try {
       const now = new Date();
@@ -209,7 +211,7 @@ const UserAppointments = ({ appointmentId }) => {
       toast.error("Vui lòng chọn ít nhất một giờ hẹn!");
       return;
     }
-    
+
     setIsLoading(true);
     try {
       const now = new Date();
@@ -294,117 +296,6 @@ const UserAppointments = ({ appointmentId }) => {
       description: 'Giáo dục về tác hại ma túy cho học sinh, sinh viên',
       icon: '📚',
       category: 'education'
-    }
-  ];
-
-  const experts = [
-    {
-      id: 1,
-      name: 'TS. Nguyễn Văn An',
-      specialty: 'Chuyên gia Phòng chống Ma túy',
-      experience: '15 năm kinh nghiệm',
-      rating: 4.9,
-      image: '👨‍⚕️',
-      available: true,
-      category: 'prevention',
-      hourlyRate: 150000,
-      bio: 'Tiến sĩ Y học, chuyên về phòng chống tệ nạn xã hội'
-    },
-    {
-      id: 2,
-      name: 'ThS. Trần Thị Bình',
-      specialty: 'Chuyên gia Tâm lý Phòng chống',
-      experience: '12 năm kinh nghiệm',
-      rating: 4.8,
-      image: '👩‍⚕️',
-      available: true,
-      category: 'prevention',
-      hourlyRate: 120000,
-      bio: 'Thạc sĩ Tâm lý học, chuyên tư vấn phòng chống ma túy'
-    },
-    {
-      id: 3,
-      name: 'BS. Lê Minh Cường',
-      specialty: 'Bác sĩ Cai nghiện',
-      experience: '20 năm kinh nghiệm',
-      rating: 4.9,
-      image: '👨‍⚕️',
-      available: true,
-      category: 'treatment',
-      hourlyRate: 200000,
-      bio: 'Bác sĩ chuyên khoa, giám đốc trung tâm cai nghiện'
-    },
-    {
-      id: 4,
-      name: 'TS. Phạm Thị Dung',
-      specialty: 'Chuyên gia Tâm thần - Cai nghiện',
-      experience: '18 năm kinh nghiệm',
-      rating: 4.7,
-      image: '👩‍⚕️',
-      available: true,
-      category: 'treatment',
-      hourlyRate: 180000,
-      bio: 'Tiến sĩ Y học, chuyên về tâm thần và cai nghiện'
-    },
-    {
-      id: 5,
-      name: 'ThS. Hoàng Văn Em',
-      specialty: 'Tư vấn Gia đình',
-      experience: '10 năm kinh nghiệm',
-      rating: 4.6,
-      image: '👨‍🏫',
-      available: true,
-      category: 'family',
-      hourlyRate: 100000,
-      bio: 'Thạc sĩ Công tác xã hội, chuyên tư vấn gia đình'
-    },
-    {
-      id: 6,
-      name: 'Cô Nguyễn Thị Phương',
-      specialty: 'Chuyên viên Tâm lý Gia đình',
-      experience: '8 năm kinh nghiệm',
-      rating: 4.5,
-      image: '👩‍🏫',
-      available: true,
-      category: 'family',
-      hourlyRate: 90000,
-      bio: 'Cử nhân Tâm lý học, chuyên hỗ trợ gia đình'
-    },
-    {
-      id: 7,
-      name: 'ThS. Võ Thành Giang',
-      specialty: 'Chuyên gia Giáo dục Phòng chống',
-      experience: '14 năm kinh nghiệm',
-      rating: 4.8,
-      image: '👨‍🎓',
-      available: true,
-      category: 'education',
-      hourlyRate: 110000,
-      bio: 'Thạc sĩ Giáo dục học, chuyên giáo dục phòng chống tệ nạn'
-    },
-    {
-      id: 8,
-      name: 'Cô Trần Thị Hạnh',
-      specialty: 'Giáo viên Tâm lý Trường học',
-      experience: '9 năm kinh nghiệm',
-      rating: 4.4,
-      image: '👩‍🎓',
-      available: true,
-      category: 'education',
-      hourlyRate: 80000,
-      bio: 'Cử nhân Tâm lý học, giáo viên tâm lý trường học'
-    },
-    {
-      id: 9,
-      name: 'ThS. Nguyễn Văn Tâm',
-      specialty: 'Tư vấn Miễn phí',
-      experience: '5 năm kinh nghiệm',
-      rating: 4.5,
-      image: '👨‍🏫',
-      available: true,
-      category: 'free',
-      hourlyRate: 0,
-      bio: 'Thạc sĩ Tâm lý học, cung cấp tư vấn miễn phí cho cộng đồng'
     }
   ];
 
@@ -541,7 +432,7 @@ const UserAppointments = ({ appointmentId }) => {
                     <h3 className="font-bold text-xl text-gray-800">{selectedConsultant.name}</h3>
                     <p className="text-emerald-600 font-medium">{selectedConsultant.specialty}</p>
                     <p className="text-sm text-gray-600 mt-1">
-                      Chuyên gia tư vấn {selectedConsultant.hourlyRate === 0 ? "miễn phí" : "phòng chống ma túy"} với nhiều năm kinh nghiệm
+                      {selectedConsultant.bio}
                     </p>
                   </div>
                   <button
@@ -578,7 +469,7 @@ const UserAppointments = ({ appointmentId }) => {
                   </div>
                 )}
               </div>
-              
+
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {timeSlots.map((time) => {
                   const isToday = selectedDate === new Date().toLocaleDateString("en-CA");
@@ -656,7 +547,7 @@ const UserAppointments = ({ appointmentId }) => {
                   </div>
                   <h3 className="text-2xl font-bold text-gray-800">Thông tin đặt lịch</h3>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <div className="space-y-4">
                     <div className="flex items-center space-x-3">
@@ -674,7 +565,7 @@ const UserAppointments = ({ appointmentId }) => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div className="flex items-center space-x-3">
                       <Users className="w-5 h-5 text-emerald-500" />
@@ -776,8 +667,7 @@ const UserAppointments = ({ appointmentId }) => {
           </p>
           <div className="flex items-center justify-center space-x-6 mb-8 flex-wrap gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">0 - 200k đ</div>
-              <div className="text-white/70 text-sm">/ 1 giờ tư vấn</div>
+              <div className="text-2xl font-bold text-white">Miễn phí</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-white">7h - 19h</div>
@@ -838,10 +728,10 @@ const UserAppointments = ({ appointmentId }) => {
             <h2 className="text-3xl font-bold text-white mb-4">Đội ngũ chuyên gia hàng đầu</h2>
             <p className="text-white/80 text-lg">Được đào tạo bài bản, kinh nghiệm thực tế phong phú</p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {experts.map((expert, index) => (
-              <div key={index} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-105">
+            {consultants.map((expert) => (
+              <div key={expert.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-105">
                 <div className="flex items-center space-x-4 mb-4">
                   <div className="w-16 h-16 rounded-full bg-gradient-to-r from-emerald-400 to-blue-500 flex items-center justify-center text-white font-bold text-xl">
                     {expert.name.charAt(0)}
@@ -866,140 +756,13 @@ const UserAppointments = ({ appointmentId }) => {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto mt-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">Câu chuyện thành công</h2>
-            <p className="text-white/80 text-lg">Những phản hồi tích cực từ khách hàng đã sử dụng dịch vụ</p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Anh Minh",
-                service: "Phòng chống Ma túy",
-                story: "Sau 3 tháng tư vấn, tôi đã hoàn toàn cai được chất kích thích. Cuộc sống gia đình hạnh phúc trở lại.",
-                rating: 5
-              },
-              {
-                name: "Chị Lan",
-                service: "Tư vấn Cai nghiện",
-                story: "Đội ngũ chuyên gia rất tận tâm, phương pháp khoa học. Con trai tôi đã trở lại trường học bình thường.",
-                rating: 5
-              },
-              {
-                name: "Anh Tuấn",
-                service: "Tư vấn Gia đình",
-                story: "Vợ chồng tôi đã tìm lại được sự hiểu biết. Cảm ơn các chuyên gia đã cứu vãn hôn nhân của chúng tôi.",
-                rating: 5
-              },
-              {
-                name: "Chị Hương",
-                service: "Tư vấn Giáo dục",
-                story: "Con tôi từ nghiện game đã trở thành học sinh giỏi. Phương pháp giáo dục thật hiệu quả!",
-                rating: 5
-              },
-              {
-                name: "Anh Nam",
-                service: "Phòng chống Ma túy",
-                story: "Tôi đã thoát khỏi vòng xoáy tệ nạn xã hội. Giờ đây có công việc ổn định và gia đình hạnh phúc.",
-                rating: 5
-              },
-              {
-                name: "Chị Mai",
-                service: "Tư vấn Gia đình",
-                story: "Dịch vụ tư vấn trực tuyến rất tiện lợi. Tôi có thể nhận được sự hỗ trợ ngay tại nhà.",
-                rating: 5
-              }
-            ].map((story, index) => (
-              <div key={index} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
-                <div className="flex items-center space-x-1 mb-3">
-                  {[...Array(story.rating)].map((_, i) => (
-                    <Star key={i} className="text-yellow-400 fill-current" size={16} />
-                  ))}
-                </div>
-                <p className="text-white/90 mb-4 italic">"{story.story}"</p>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-white font-semibold">{story.name}</p>
-                    <p className="text-emerald-300 text-sm">{story.service}</p>
-                  </div>
-                  <Heart className="text-red-400" size={20} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="max-w-6xl mx-auto mt-20">
-          <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-4">Thành tích đạt được</h2>
-              <p className="text-white/80 text-lg">Những con số ấn tượng trong hành trình phục vụ cộng đồng</p>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {[
-                { number: "5,000+", label: "Khách hàng đã tư vấn", icon: Users },
-                { number: "98%", label: "Tỷ lệ thành công", icon: Check },
-                { number: "24/7", label: "Hỗ trợ liên tục", icon: Clock },
-                { number: "50+", label: "Chuyên gia kinh nghiệm", icon: Star }
-              ].map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full flex items-center justify-center">
-                    <stat.icon className="text-white" size={24} />
-                  </div>
-                  <div className="text-3xl font-bold text-white mb-2">{stat.number}</div>
-                  <div className="text-white/80">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-4xl mx-auto mt-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">Câu hỏi thường gặp</h2>
-            <p className="text-white/80 text-lg">Những thắc mắc phổ biến về dịch vụ tư vấn</p>
-          </div>
-          
-          <div className="space-y-4">
-            {[
-              {
-                question: "Dịch vụ tư vấn có hiệu quả không?",
-                answer: "Với đội ngũ chuyên gia được đào tạo bài bản và phương pháp khoa học, tỷ lệ thành công của chúng tôi lên đến 98%. Mỗi trường hợp đều được tư vấn cá nhân hóa phù hợp."
-              },
-              {
-                question: "Chi phí tư vấn như thế nào?",
-                answer: "Chúng tôi cung cấp cả tư vấn miễn phí và có phí (80k-200k/giờ) tùy theo chuyên gia và loại hình tư vấn. Giá cả minh bạch, không phát sinh chi phí ẩn."
-              },
-              {
-                question: "Có tư vấn trực tuyến không?",
-                answer: "Có, chúng tôi cung cấp dịch vụ tư vấn trực tuyến 24/7 qua video call, chat, hoặc điện thoại. Đặc biệt phù hợp cho những ai khó sắp xếp thời gian."
-              },
-              {
-                question: "Thông tin cá nhân có được bảo mật?",
-                answer: "Chúng tôi cam kết bảo mật tuyệt đối thông tin khách hàng. Mọi thông tin tư vấn đều được mã hóa và chỉ chuyên gia phụ trách mới có quyền truy cập."
-              },
-              {
-                question: "Bao lâu thì thấy hiệu quả?",
-                answer: "Tùy theo từng trường hợp, thông thường sau 2-4 buổi tư vấn đầu tiên, khách hàng đã thấy sự thay đổi tích cực. Quá trình hoàn toàn phục hồi thường mất 3-6 tháng."
-              }
-            ].map((faq, index) => (
-              <div key={index} className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                <h3 className="text-white font-semibold text-lg mb-3">{faq.question}</h3>
-                <p className="text-white/80">{faq.answer}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
         <div className="max-w-4xl mx-auto mt-20">
           <div className="bg-gradient-to-r from-emerald-500/20 to-blue-500/20 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-white mb-4">Liên hệ ngay hôm nay</h2>
               <p className="text-white/80 text-lg">Đừng để vấn đề kéo dài, hãy bắt đầu hành trình thay đổi tích cực</p>
             </div>
-            
+
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-4 bg-emerald-500 rounded-full flex items-center justify-center">
@@ -1008,7 +771,7 @@ const UserAppointments = ({ appointmentId }) => {
                 <h3 className="text-white font-semibold mb-2">Địa chỉ</h3>
                 <p className="text-white/80">123 Nguyễn Văn Cừ, Q.1, TP.HCM</p>
               </div>
-              
+
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-4 bg-blue-500 rounded-full flex items-center justify-center">
                   <Clock className="text-white" size={24} />
@@ -1016,7 +779,7 @@ const UserAppointments = ({ appointmentId }) => {
                 <h3 className="text-white font-semibold mb-2">Giờ làm việc</h3>
                 <p className="text-white/80">7h - 19h (Thứ 2 - Chủ nhật)</p>
               </div>
-              
+
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-4 bg-purple-500 rounded-full flex items-center justify-center">
                   <Calendar className="text-white" size={24} />
@@ -1026,7 +789,7 @@ const UserAppointments = ({ appointmentId }) => {
               </div>
             </div>
           </div>
-        </div>          
+        </div>
       </div>
 
       <BookingModalEnhanced />

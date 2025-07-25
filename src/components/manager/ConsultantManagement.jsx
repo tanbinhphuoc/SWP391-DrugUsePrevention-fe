@@ -57,6 +57,7 @@ const ConsultantManagement = () => {
       if (data.success) {
         const processedConsultants = data.data.map((c) => ({
           id: c.consultantID,
+          userId: c.userId, // Lưu userId để sử dụng trong SetStatusForUser
           userName: c.userName || "",
           name: c.fullName || c.userName,
           email: c.email,
@@ -119,7 +120,7 @@ const ConsultantManagement = () => {
         throw new Error(data.message || "Cập nhật trạng thái không thành công.")
       }
 
-      setConsultants(consultants.map((c) => (c.id === userId ? { ...c, status: newStatus } : c)))
+      setConsultants(consultants.map((c) => (c.userId === userId ? { ...c, status: newStatus } : c)))
       showNotification(`Đã ${currentStatus === "Active" ? "ngưng kích hoạt" : "kích hoạt"} tài khoản thành công!`)
     } catch (err) {
       console.error("Toggle Status Error:", err)
@@ -294,6 +295,11 @@ const ConsultantManagement = () => {
               <option value="Tư vấn gia đình">Tư vấn gia đình</option>
               <option value="Y học cộng đồng">Y học cộng đồng</option>
               <option value="suport prevention">Hỗ trợ phòng ngừa</option>
+              <option value="cai nghiện">Cai nghiện</option>
+              <option value="10 năm">10 năm</option>
+              <option value="Good">Good</option>
+              <option value="asdsa">asdsa</option>
+              <option value="string">string</option>
             </select>
             <select
               value={filterStatus}
@@ -349,6 +355,14 @@ const ConsultantManagement = () => {
                   <GraduationCap className="w-4 h-4 text-purple-500" />
                   <span>{consultant.specialty}</span>
                 </div>
+                {consultant.googleMeetLink && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Globe className="w-4 h-4 text-indigo-500" />
+                    <a href={consultant.googleMeetLink} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
+                      {consultant.googleMeetLink.length > 30 ? `${consultant.googleMeetLink.slice(0, 30)}...` : consultant.googleMeetLink}
+                    </a>
+                  </div>
+                )}
               </div>
 
               {/* Details Grid */}
@@ -391,7 +405,7 @@ const ConsultantManagement = () => {
                   Chỉnh sửa
                 </button>
                 <button
-                  onClick={() => handleToggleStatus(consultant.id, consultant.status)}
+                  onClick={() => handleToggleStatus(consultant.userId, consultant.status)}
                   className={`py-2 px-3 rounded-xl transition-all duration-300 text-sm font-medium border ${
                     consultant.status === "Active"
                       ? "bg-gradient-to-r from-red-50 to-red-100 text-red-600 border-red-200 hover:from-red-100 hover:to-red-200"
@@ -550,6 +564,11 @@ const ConsultantManagement = () => {
                       <option value="Tư vấn gia đình">Tư vấn gia đình</option>
                       <option value="Y học cộng đồng">Y học cộng đồng</option>
                       <option value="suport prevention">Hỗ trợ phòng ngừa</option>
+                      <option value="cai nghiện">Cai nghiện</option>
+                      <option value="10 năm">10 năm</option>
+                      <option value="Good">Good</option>
+                      <option value="asdsa">asdsa</option>
+                      <option value="string">string</option>
                     </select>
                   </div>
 
