@@ -12,54 +12,55 @@ const Services = () => {
 
 
   const services = [
+{
+  icon: <BookOpen className="h-8 w-8 text-emerald-600" />,
+  title: 'Các Khóa học Giáo dục',
+  description: 'Các khóa học phù hợp với lứa tuổi về nhận thức về ma túy, kỹ năng phòng ngừa và kỹ thuật từ chối cho học sinh, phụ huynh, giáo viên và thành viên cộng đồng.',
+  features: ['Thiết kế theo nhóm tuổi', 'Học trực tuyến', 'Module tương tác', 'Chứng chỉ hoàn thành'],
+  cta: 'Duyệt Khóa học',
+  route: '/education-courses',
+  gradient: 'from-emerald-400 to-teal-500',
+  bgGradient: 'from-emerald-50 to-teal-50',
+  shadowColor: 'shadow-emerald-200',
+  iconBg: 'bg-emerald-100'
+},
+{
+  icon: <ClipboardCheck className="h-8 w-8 text-sky-600" />,
+  title: 'Đánh giá Rủi ro',
+  description: 'Thực hiện các bảng câu hỏi dựa trên nghiên cứu như ASSIST và CRAFFT để đánh giá mức độ rủi ro sử dụng chất gây nghiện và nhận các đề xuất cá nhân hóa.',
+  features: ['Sàng lọc bảo mật', 'Kết quả tức thì', 'Kế hoạch hành động tùy chỉnh', 'Tài nguyên hỗ trợ theo dõi'],
+  cta: 'Thực hiện Đánh giá',
+  route: '/risk-assessment',
+  gradient: 'from-sky-400 to-blue-500',
+  bgGradient: 'from-sky-50 to-blue-50',
+  shadowColor: 'shadow-sky-200',
+  iconBg: 'bg-sky-100'
+},
+{
+  icon: <CalendarClock className="h-8 w-8 text-indigo-600" />,
+  title: 'Dịch vụ Tư vấn',
+  description: 'Đặt lịch hẹn trực tuyến với các chuyên gia và cố vấn phòng ngừa đủ điều kiện để nhận được hướng dẫn và hỗ trợ cá nhân hóa.',
+  features: ['Tư vấn ảo', 'Lịch hẹn linh hoạt', 'Chuyên gia cố vấn', 'Hỗ trợ liên tục'],
+  cta: 'Đặt lịch hẹn',
+  route: '/consultation',
+  gradient: 'from-indigo-400 to-purple-500',
+  bgGradient: 'from-indigo-50 to-purple-50',
+  shadowColor: 'shadow-indigo-200',
+  iconBg: 'bg-indigo-100'
+},
     {
-      icon: <BookOpen className="h-8 w-8 text-emerald-600" />,
-      title: 'Educational Courses',
-      description: 'Age-appropriate courses on drug awareness, prevention skills, and refusal techniques for students, parents, teachers, and community members.',
-      features: ['Tailored by age group', 'Online learning', 'Interactive modules', 'Completion certificates'],
-      cta: 'Browse Courses',
-      route: '/education-courses',
-      gradient: 'from-emerald-400 to-teal-500',
-      bgGradient: 'from-emerald-50 to-teal-50',
-      shadowColor: 'shadow-emerald-200',
-      iconBg: 'bg-emerald-100'
-    },
-    {
-      icon: <ClipboardCheck className="h-8 w-8 text-sky-600" />,
-      title: 'Risk Assessment',
-      description: 'Take research-based questionnaires like ASSIST and CRAFFT to evaluate substance use risk levels and receive personalized recommendations.',
-      features: ['Confidential screening', 'Instant results', 'Custom action plans', 'Follow-up resources'],
-      cta: 'Take Assessment',
-      route: '/risk-assessment',
-      gradient: 'from-sky-400 to-blue-500',
-      bgGradient: 'from-sky-50 to-blue-50',
-      shadowColor: 'shadow-sky-200',
-      iconBg: 'bg-sky-100'
-    },
-    {
-      icon: <CalendarClock className="h-8 w-8 text-indigo-600" />,
-      title: 'Counseling Services',
-      description: 'Schedule online appointments with qualified prevention specialists and counselors for personalized guidance and support.',
-      features: ['Virtual consultations', 'Flexible scheduling', 'Expert advisors', 'Ongoing support'],
-      cta: 'Book Appointment',
-      route: '/consultation',
-      gradient: 'from-indigo-400 to-purple-500',
-      bgGradient: 'from-indigo-50 to-purple-50',
-      shadowColor: 'shadow-indigo-200',
-      iconBg: 'bg-indigo-100'
-    },
-    {
-      icon: <Users className="h-8 w-8 text-purple-600" />,
-      title: 'Community Programs',
-      description: 'Join awareness campaigns, workshops, and educational events designed to strengthen community knowledge and resilience against substance abuse.',
-      features: ['Local events', 'Volunteer opportunities', 'Impact measurement', 'Resource sharing'],
-      cta: 'Explore Programs',
-      route: '/community-programs',
-      gradient: 'from-purple-400 to-pink-500',
-      bgGradient: 'from-purple-50 to-pink-50',
-      shadowColor: 'shadow-purple-200',
-      iconBg: 'bg-purple-100'
-    }
+  icon: <Users className="h-8 w-8 text-purple-600" />,
+  title: 'Chương trình Cộng đồng(chức năng sắp tới)',
+  description: 'Tham gia các chiến dịch nâng cao nhận thức, hội thảo và sự kiện giáo dục được thiết kế để tăng cường kiến thức và khả năng phục hồi của cộng đồng chống lại việc lạm dụng chất gây nghiện.',
+  features: ['Sự kiện địa phương', 'Cơ hội tình nguyện', 'Đo lường tác động', 'Chia sẻ tài nguyên'],
+  upcomingFeatures: ['Diễn đàn trực tuyến', 'Chương trình cố vấn', 'Hợp tác với các trường học địa phương'], // Đã thêm dòng này
+  cta: 'Khám phá Chương trình',
+  route: '/community-programs',
+  gradient: 'from-purple-400 to-pink-500',
+  bgGradient: 'from-purple-50 to-pink-50',
+  shadowColor: 'shadow-purple-200',
+  iconBg: 'bg-purple-100',
+}
   ];
 
   const handleServiceNavigation = (route) => {
@@ -211,7 +212,7 @@ const Services = () => {
                   ? 'scale-100 opacity-100' 
                   : 'scale-95 opacity-0'
               }`}>
-                Our Services
+                Dịch vụ của Chúng tôi
               </h2>
               
               <div className={`w-32 h-1 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto mb-6 rounded-full transition-all duration-1000 delay-500 transform ${
@@ -225,7 +226,7 @@ const Services = () => {
                   ? 'translate-y-0 opacity-100' 
                   : 'translate-y-5 opacity-0'
               }`}>
-                Comprehensive resources and support to prevent substance abuse and promote healthier communities.
+                Tài nguyên và hỗ trợ toàn diện để ngăn chặn lạm dụng chất gây nghiện và thúc đẩy các cộng đồng khỏe mạnh hơn.
               </p>
             </div>
           </div>
