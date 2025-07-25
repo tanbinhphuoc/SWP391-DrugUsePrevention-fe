@@ -19,12 +19,12 @@ const UserDashboard = () => {
     if (hour < 18) return "🌤️ Chào buổi chiều";
     return "🌙 Chào buổi tối";
   }, []);
-  
+
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("overview");
   const [userInfo, setUserInfo] = useState(null);
-  
+
   useEffect(() => {
     const localToken = localStorage.getItem("token");
     const sessionToken = sessionStorage.getItem("tempToken");
@@ -75,23 +75,24 @@ const UserDashboard = () => {
 
       setUserInfo(userData);
 
-      // Fetch profile to check assessmentStage
+      // Fetch profile to check assessmentStage and get userId
       const fetchAssessmentStage = async () => {
         try {
           const response = await fetch("http://localhost:7092/api/Users/GetProfileMember", {
             headers: {
               Authorization: `Bearer ${localToken || sessionToken}`,
+              "Cache-Control": "no-cache",
             },
           });
           if (!response.ok) {
             throw new Error("Failed to fetch profile");
           }
           const data = await response.json();
-          console.log("Profile data:", data);
-          console.log("Assessment Stage:", data.assessmentStage);
+          console.log("Profile data from GetProfileMember:", data);
+          setUserInfo((prev) => ({ ...prev, userId: data.userId })); // Giả sử API trả về userId
           if (data.assessmentStage === null) {
-            console.log("Setting active tab to surveys");
-            setActiveTab("surveys");
+            console.log("Setting active tab to surveys due to null assessmentStage");
+            navigate("/UserSurveys", { replace: true });
             toast.info("Vui lòng hoàn thành bài khảo sát đầu vào trước!");
           }
         } catch (error) {
@@ -118,7 +119,6 @@ const UserDashboard = () => {
 
     if (vnp_ResponseCode === "00" && appointmentId) {
       toast.success(`Thanh toán lịch hẹn ${appointmentId} thành công!`);
-      // Xóa query params sau khi xử lý
       setSearchParams({}, { replace: true });
     } else if (vnp_ResponseCode && appointmentId) {
       toast.error(`Thanh toán lịch hẹn ${appointmentId} thất bại!`);
@@ -188,7 +188,7 @@ const UserDashboard = () => {
                         : "hover:bg-blue-500 text-blue-100 hover:text-white hover:scale-102"
                     }`}
                   >
-                    <div className={`flex-shrink-0 ${activeTab === item.id ? 'text-white' : item.color}`}>
+                    <div className={`flex-shrink-0 ${activeTab === item.id ? "text-white" : item.color}`}>
                       <IconComponent className="w-5 h-5" />
                     </div>
                     <span className="font-medium">{item.label}</span>
@@ -229,32 +229,32 @@ const UserDashboard = () => {
       <main className="flex-1 overflow-auto">
         <div className="p-8">
           {/* Welcome Header */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-8 border border-emerald-200/50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center">
-                <Heart className="w-8 h-8 text-white" />
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-8 border border-emerald-200/50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center">
+                  <Heart className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-800">
+                    {greeting}, <span className="text-emerald-600">{userInfo.userName}</span>!
+                  </h1>
+                  <p className="text-gray-600 mt-1">
+                    Cùng nhau xây dựng một tương lai khỏe mạnh, tích cực và không có ma túy
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">
-                  {greeting}, <span className="text-emerald-600">{userInfo.userName}</span>!
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Cùng nhau xây dựng một tương lai khỏe mạnh, tích cực và không có ma túy
-                </p>
+              <div className="hidden md:flex items-center space-x-2 text-sm text-gray-500">
+                <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span>Đang hoạt động</span>
               </div>
-            </div>
-            <div className="hidden md:flex items-center space-x-2 text-sm text-gray-500">
-              <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
-              <span>Đang hoạt động</span>
             </div>
           </div>
-        </div>
 
           {/* Tab Content */}
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-emerald-200/50 min-h-96">
             <div className="p-6">
-              {activeTab === "overview" && <UserOverview />}
+              {activeTab === "overview" && <UserOverview userId={userInfo.userId} />}
               {activeTab === "courses" && <UserCourses />}
               {/* {activeTab === "surveys" && <UserSurveys />} */}
               {/* {activeTab === "appointments" && <UserAppointments appointmentId={searchParams.get("appointmentId")} />} */}
@@ -268,8 +268,8 @@ const UserDashboard = () => {
       </main>
 
       {/* Toast Container */}
-      <ToastContainer 
-        position="top-right" 
+      <ToastContainer
+        position="top-right"
         autoClose={3000}
         hideProgressBar={false}
         newestOnTop={false}
