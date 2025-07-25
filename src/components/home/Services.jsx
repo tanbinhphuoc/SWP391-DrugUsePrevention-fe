@@ -16,7 +16,7 @@ const Services = () => {
   icon: <BookOpen className="h-8 w-8 text-emerald-600" />,
   title: 'Các Khóa học Giáo dục',
   description: 'Các khóa học phù hợp với lứa tuổi về nhận thức về ma túy, kỹ năng phòng ngừa và kỹ thuật từ chối cho học sinh, phụ huynh, giáo viên và thành viên cộng đồng.',
-  features: ['Thiết kế theo nhóm tuổi', 'Học trực tuyến', 'Module tương tác', 'Chứng chỉ hoàn thành'],
+  features: ['Thiết kế theo nhóm tuổi', 'Học trực tuyến', 'Chứng chỉ hoàn thành'],
   cta: 'Duyệt Khóa học',
   route: '/education-courses',
   gradient: 'from-emerald-400 to-teal-500',
@@ -40,7 +40,7 @@ const Services = () => {
   icon: <CalendarClock className="h-8 w-8 text-indigo-600" />,
   title: 'Dịch vụ Tư vấn',
   description: 'Đặt lịch hẹn trực tuyến với các chuyên gia và cố vấn phòng ngừa đủ điều kiện để nhận được hướng dẫn và hỗ trợ cá nhân hóa.',
-  features: ['Tư vấn ảo', 'Lịch hẹn linh hoạt', 'Chuyên gia cố vấn', 'Hỗ trợ liên tục'],
+  features: ['Tư vấn online', 'Lịch hẹn linh hoạt', 'Chuyên gia cố vấn', 'Hỗ trợ liên tục'],
   cta: 'Đặt lịch hẹn',
   route: '/consultation',
   gradient: 'from-indigo-400 to-purple-500',
@@ -50,7 +50,7 @@ const Services = () => {
 },
     {
   icon: <Users className="h-8 w-8 text-purple-600" />,
-  title: 'Chương trình Cộng đồng(chức năng sắp tới)',
+  title: 'Chương trình Cộng đồng(Dự kiến sắp tới sẽ ra mắt)',
   description: 'Tham gia các chiến dịch nâng cao nhận thức, hội thảo và sự kiện giáo dục được thiết kế để tăng cường kiến thức và khả năng phục hồi của cộng đồng chống lại việc lạm dụng chất gây nghiện.',
   features: ['Sự kiện địa phương', 'Cơ hội tình nguyện', 'Đo lường tác động', 'Chia sẻ tài nguyên'],
   upcomingFeatures: ['Diễn đàn trực tuyến', 'Chương trình cố vấn', 'Hợp tác với các trường học địa phương'], // Đã thêm dòng này
