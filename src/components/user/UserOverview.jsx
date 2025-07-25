@@ -1,6 +1,6 @@
-"use client"
-import { useState, useEffect, useCallback } from "react"
-import { Line, Doughnut } from "react-chartjs-2"
+"use client";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Line, Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,8 +11,7 @@ import {
   Tooltip,
   Legend,
   ArcElement,
-  BarElement,
-} from "chart.js"
+} from "chart.js";
 import {
   User,
   BookOpen,
@@ -27,96 +26,142 @@ import {
   CheckCircle,
   Clock,
   Target,
-} from "lucide-react"
+} from "lucide-react";
 
 // Register ChartJS components
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement, BarElement)
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
+
+// Tách component nhỏ để hiển thị thông báo loading
+const LoadingSpinner = () => (
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p className="text-slate-600 font-medium">Đang tải thông tin người dùng...</p>
+    </div>
+  </div>
+);
+
+// Tách component nhỏ để hiển thị lỗi
+const ErrorMessage = ({ error, onRetry }) => (
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+    <div className="bg-white rounded-2xl p-8 shadow-xl border border-red-200 max-w-md w-full mx-4">
+      <div className="text-center">
+        <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">Lỗi tải dữ liệu</h3>
+        <p className="text-slate-600 mb-4">{error}</p>
+        <button
+          onClick={onRetry}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Thử lại
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+// Tách component hiển thị thẻ thống kê
+const StatCard = ({ icon: Icon, gradient, title, value, subtitle, statusIcon: StatusIcon, statusText }) => (
+  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:transform hover:scale-[1.02] group">
+    <div className="flex items-center justify-between mb-4">
+      <div className={`p-3 bg-gradient-to-r ${gradient} rounded-xl shadow-lg group-hover:shadow-${gradient.split('-')[1]}-500/25`}>
+        <Icon className="h-6 w-6 text-white" />
+      </div>
+      <div className="text-right">
+        <div className="text-2xl font-bold text-slate-900">{value}</div>
+        <div className="text-xs text-slate-500 font-medium">{subtitle}</div>
+      </div>
+    </div>
+    <div className="flex items-center text-sm font-medium text-blue-600">
+      <StatusIcon className="h-4 w-4 mr-1" />
+      {statusText}
+    </div>
+  </div>
+);
 
 const UserOverview = ({ userId = 5 }) => {
-  const [profileData, setProfileData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [lastUpdated, setLastUpdated] = useState(null)
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
-  // Get token from storage
+  // Lấy token từ storage
   const getToken = useCallback(() => {
-    return localStorage.getItem("token") || sessionStorage.getItem("tempToken")
-  }, [])
+    return localStorage.getItem("token") || sessionStorage.getItem("tempToken");
+  }, []);
 
-  // Fetch profile data
+  // Fetch dữ liệu từ API
   const fetchProfileData = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
-      const token = getToken()
-      if (!token) {
-        throw new Error("Không tìm thấy token xác thực")
-      }
+      const token = getToken();
+      if (!token) throw new Error("Không tìm thấy token xác thực");
 
-      const response = await fetch(`http://localhost:7092/api/Users/GetMemberProfileWithFullOption?userId=${userId}`, {
-        method: "GET",
-        headers: {
-          accept: "*/*",
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const response = await fetch(
+        `http://localhost:7092/api/Users/GetMemberProfileWithFullOption?userId=${userId}`,
+        {
+          method: "GET",
+          headers: {
+            accept: "*/*",
+            Authorization: `Bearer ${token}`,
+            "Cache-Control": "no-cache",
+          },
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const data = await response.json()
-      // Loại bỏ các mục trùng lặp trong registeredCourses và previousConsultants
-      const uniqueRegisteredCourses = [...new Set(data.registeredCourses)]
-      const uniquePreviousConsultants = data.previousConsultants.filter(
+      const data = await response.json();
+      console.log("API Response from GetMemberProfileWithFullOption:", data); // Log để debug
+      // Loại bỏ các mục trùng lặp
+      const uniqueRegisteredCourses = [...new Set(data.registeredCourses)];
+      const uniquePreviousConsultants = data.previousConsultants?.filter(
         (consultant, index, self) =>
           index === self.findIndex((c) => c.consultantId === consultant.consultantId)
-      )
+      ) || [];
       setProfileData({
         ...data,
         registeredCourses: uniqueRegisteredCourses,
         previousConsultants: uniquePreviousConsultants,
-      })
-      setLastUpdated(new Date())
+      });
+      setLastUpdated(new Date());
     } catch (err) {
-      console.error("Error fetching profile data:", err)
-      setError(err.message)
+      console.error("Error fetching profile data:", err);
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [userId, getToken])
+  }, [userId, getToken]);
 
   useEffect(() => {
-    fetchProfileData()
-  }, [fetchProfileData])
+    fetchProfileData();
+  }, [fetchProfileData]);
 
-  // Calculate drug risk level based on assessment results
-  const calculateDrugRiskLevel = (assessmentResults) => {
-    if (!assessmentResults || assessmentResults.length === 0) {
-      return { level: "Không có dữ liệu", color: "gray", bgColor: "bg-gray-100" }
-    }
+  // Tính mức độ rủi ro ma túy
+  const calculateDrugRiskLevel = useMemo(() => {
+    return (assessmentResults) => {
+      if (!assessmentResults?.length) {
+        return { level: "Không có dữ liệu", color: "gray", bgColor: "bg-gray-100" };
+      }
+      const latestScore = assessmentResults[assessmentResults.length - 1].score;
+      if (latestScore <= 3) return { level: "Thấp", color: "green", bgColor: "bg-green-100" };
+      if (latestScore <= 7) return { level: "Trung bình", color: "yellow", bgColor: "bg-yellow-100" };
+      return { level: "Cao", color: "red", bgColor: "bg-red-100" };
+    };
+  }, []);
 
-    const latestScore = assessmentResults[assessmentResults.length - 1].score
-    if (latestScore <= 3) {
-      return { level: "Thấp", color: "green", bgColor: "bg-green-100" }
-    }
-    if (latestScore <= 7) {
-      return { level: "Trung bình", color: "yellow", bgColor: "bg-yellow-100" }
-    }
-    return { level: "Cao", color: "red", bgColor: "bg-red-100" }
-  }
+  // Tạo dữ liệu cho biểu đồ xu hướng đánh giá
+  const assessmentChartData = useMemo(() => {
+    if (!profileData?.assessmentResults?.length) return { labels: [], datasets: [] };
 
-  // Create assessment trend chart data
-  const createAssessmentChartData = (assessmentResults) => {
-    if (!assessmentResults || assessmentResults.length === 0) {
-      return { labels: [], datasets: [] }
-    }
-
-    const sortedResults = [...assessmentResults].sort((a, b) => new Date(a.takeTime) - new Date(b.takeTime))
+    const sortedResults = [...profileData.assessmentResults].sort(
+      (a, b) => new Date(a.takeTime) - new Date(b.takeTime)
+    );
 
     return {
-      labels: sortedResults.map((result, index) => `Lần ${index + 1}`),
+      labels: sortedResults.map((_, index) => `Lần ${index + 1}`),
       datasets: [
         {
           label: "Điểm đánh giá",
@@ -130,14 +175,14 @@ const UserOverview = ({ userId = 5 }) => {
           fill: true,
         },
       ],
-    }
-  }
+    };
+  }, [profileData?.assessmentResults]);
 
-  // Create course progress chart data
-  const createCourseProgressData = (registeredCourses, completedCourses) => {
-    const registered = registeredCourses?.length || 0
-    const completed = completedCourses?.length || 0
-    const inProgress = registered - completed
+  // Tạo dữ liệu cho biểu đồ tiến độ khóa học
+  const courseProgressData = useMemo(() => {
+    const registered = profileData?.registeredCourses?.length || 0;
+    const completed = profileData?.completedCourses?.length || 0;
+    const inProgress = registered - completed;
 
     return {
       labels: ["Đã hoàn thành", "Đang học", "Chưa bắt đầu"],
@@ -149,43 +194,23 @@ const UserOverview = ({ userId = 5 }) => {
           hoverBackgroundColor: ["rgba(16, 185, 129, 1)", "rgba(245, 158, 11, 1)", "rgba(156, 163, 175, 1)"],
         },
       ],
-    }
-  }
+    };
+  }, [profileData?.registeredCourses, profileData?.completedCourses]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600 font-medium">Đang tải thông tin người dùng...</p>
-        </div>
-      </div>
-    )
-  }
+  // Định dạng thời gian
+  const formatDateTime = (dateString) =>
+    dateString
+      ? new Date(dateString).toLocaleString("vi-VN", {
+          timeZone: "Asia/Ho_Chi_Minh",
+          dateStyle: "short",
+          timeStyle: "short",
+        })
+      : "Chưa cập nhật";
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
-        <div className="bg-white rounded-2xl p-8 shadow-xl border border-red-200 max-w-md w-full mx-4">
-          <div className="text-center">
-            <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">Lỗi tải dữ liệu</h3>
-            <p className="text-slate-600 mb-4">{error}</p>
-            <button
-              onClick={fetchProfileData}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Thử lại
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  if (loading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage error={error} onRetry={fetchProfileData} />;
 
-  const riskData = calculateDrugRiskLevel(profileData?.assessmentResults)
-  const assessmentChartData = createAssessmentChartData(profileData?.assessmentResults)
-  const courseProgressData = createCourseProgressData(profileData?.registeredCourses, profileData?.completedCourses)
+  const riskData = calculateDrugRiskLevel(profileData?.assessmentResults);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
@@ -200,7 +225,7 @@ const UserOverview = ({ userId = 5 }) => {
               <p className="text-slate-600 mt-2 font-medium">Thông tin chi tiết và tiến độ học tập</p>
               {lastUpdated && (
                 <p className="text-xs text-slate-500 mt-1">
-                  Cập nhật lần cuối: {lastUpdated.toLocaleTimeString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
+                  Cập nhật lần cuối: {formatDateTime(lastUpdated)}
                 </p>
               )}
             </div>
@@ -222,25 +247,23 @@ const UserOverview = ({ userId = 5 }) => {
               {profileData?.fullName?.charAt(0)?.toUpperCase() || "U"}
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-slate-900 mb-2">{profileData?.fullName || "Không có tên"}</h2>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">{profileData?.fullName || "Chưa cung cấp tên"}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="flex items-center space-x-2 text-slate-600">
                   <Mail className="h-4 w-4" />
-                  <span className="text-sm">{profileData?.email || "Không có email"}</span>
+                  <span className="text-sm">{profileData?.email || "Chưa cung cấp email"}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-slate-600">
                   <Phone className="h-4 w-4" />
-                  <span className="text-sm">{profileData?.phone || "Không có SĐT"}</span>
+                  <span className="text-sm">{profileData?.phone || "Chưa cung cấp số điện thoại"}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-slate-600">
                   <MapPin className="h-4 w-4" />
-                  <span className="text-sm">{profileData?.address || "Không có địa chỉ"}</span>
+                  <span className="text-sm">{profileData?.address || "Chưa cung cấp địa chỉ"}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-slate-600">
                   <User className="h-4 w-4" />
-                  <span className="text-sm">
-                    {profileData?.age ? `${profileData.age} tuổi` : "Không có thông tin tuổi"}
-                  </span>
+                  <span className="text-sm">{profileData?.age ? `${profileData.age} tuổi` : "Chưa cung cấp tuổi"}</span>
                 </div>
               </div>
             </div>
@@ -249,93 +272,42 @@ const UserOverview = ({ userId = 5 }) => {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Registered Courses */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:transform hover:scale-[1.02] group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:shadow-blue-500/25">
-                <BookOpen className="h-6 w-6 text-white" />
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-slate-900">{profileData?.registeredCourses?.length || 0}</div>
-                <div className="text-xs text-slate-500 font-medium">Khóa học đã đăng ký</div>
-              </div>
-            </div>
-            <div className="flex items-center text-blue-600 text-sm font-medium">
-              <TrendingUp className="h-4 w-4 mr-1" />
-              Đang tham gia
-            </div>
-          </div>
-
-          {/* Completed Courses */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:transform hover:scale-[1.02] group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg group-hover:shadow-green-500/25">
-                <Award className="h-6 w-6 text-white" />
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-slate-900">{profileData?.completedCourses?.length || 0}</div>
-                <div className="text-xs text-slate-500 font-medium">Khóa học hoàn thành</div>
-              </div>
-            </div>
-            <div className="flex items-center text-green-600 text-sm font-medium">
-              <CheckCircle className="h-4 w-4 mr-1" />
-              Đã hoàn thành
-            </div>
-          </div>
-
-          {/* Assessment Count */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:transform hover:scale-[1.02] group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg group-hover:shadow-purple-500/25">
-                <Target className="h-6 w-6 text-white" />
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-slate-900">{profileData?.assessmentResults?.length || 0}</div>
-                <div className="text-xs text-slate-500 font-medium">Lần đánh giá</div>
-              </div>
-            </div>
-            <div className="flex items-center text-purple-600 text-sm font-medium">
-              <Clock className="h-4 w-4 mr-1" />
-              Đã thực hiện
-            </div>
-          </div>
-
-          {/* Drug Risk Level */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:transform hover:scale-[1.02] group">
-            <div className="flex items-center justify-between mb-4">
-              <div
-                className={`p-3 rounded-xl shadow-lg ${
-                  riskData.color === "green"
-                    ? "bg-gradient-to-r from-green-500 to-green-600 group-hover:shadow-green-500/25"
-                    : riskData.color === "yellow"
-                      ? "bg-gradient-to-r from-yellow-500 to-yellow-600 group-hover:shadow-yellow-500/25"
-                      : riskData.color === "red"
-                        ? "bg-gradient-to-r from-red-500 to-red-600 group-hover:shadow-red-500/25"
-                        : "bg-gradient-to-r from-gray-500 to-gray-600 group-hover:shadow-gray-500/25"
-                }`}
-              >
-                <AlertTriangle className="h-6 w-6 text-white" />
-              </div>
-              <div className="text-right">
-                <div className="text-lg font-bold text-slate-900">{riskData.level}</div>
-                <div className="text-xs text-slate-500 font-medium">Mức độ rủi ro</div>
-              </div>
-            </div>
-            <div
-              className={`flex items-center text-sm font-medium ${
-                riskData.color === "green"
-                  ? "text-green-600"
-                  : riskData.color === "yellow"
-                    ? "text-yellow-600"
-                    : riskData.color === "red"
-                      ? "text-red-600"
-                      : "text-gray-600"
-              }`}
-            >
-              <AlertTriangle className="h-4 w-4 mr-1" />
-              Đánh giá gần nhất
-            </div>
-          </div>
+          <StatCard
+            icon={BookOpen}
+            gradient="from-blue-500 to-blue-600"
+            title={profileData?.registeredCourses?.length || 0}
+            value={profileData?.registeredCourses?.length || 0}
+            subtitle="Khóa học đã đăng ký"
+            statusIcon={TrendingUp}
+            statusText="Đang tham gia"
+          />
+          <StatCard
+            icon={Award}
+            gradient="from-green-500 to-green-600"
+            title={profileData?.completedCourses?.length || 0}
+            value={profileData?.completedCourses?.length || 0}
+            subtitle="Khóa học hoàn thành"
+            statusIcon={CheckCircle}
+            statusText="Đã hoàn thành"
+          />
+          <StatCard
+            icon={Target}
+            gradient="from-purple-500 to-purple-600"
+            title={profileData?.assessmentResults?.length || 0}
+            value={profileData?.assessmentResults?.length || 0}
+            subtitle="Lần đánh giá"
+            statusIcon={Clock}
+            statusText="Đã thực hiện"
+          />
+          <StatCard
+            icon={AlertTriangle}
+            gradient={`from-${riskData.color}-500 to-${riskData.color}-600`}
+            title={riskData.level}
+            value={riskData.level}
+            subtitle="Mức độ rủi ro"
+            statusIcon={AlertTriangle}
+            statusText="Đánh giá gần nhất"
+          />
         </div>
 
         {/* Charts Section */}
@@ -358,24 +330,8 @@ const UserOverview = ({ userId = 5 }) => {
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: "top",
-                        labels: {
-                          usePointStyle: true,
-                          font: { weight: "500" },
-                        },
-                      },
-                    },
-                    scales: {
-                      y: {
-                        beginAtZero: true,
-                        grid: { color: "rgba(0,0,0,0.1)" },
-                      },
-                      x: {
-                        grid: { display: false },
-                      },
-                    },
+                    plugins: { legend: { position: "top", labels: { usePointStyle: true, font: { weight: "500" } } } },
+                    scales: { y: { beginAtZero: true, grid: { color: "rgba(0,0,0,0.1)" } }, x: { grid: { display: false } } },
                   }}
                 />
               ) : (
@@ -408,14 +364,7 @@ const UserOverview = ({ userId = 5 }) => {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                      legend: {
-                        position: "bottom",
-                        labels: {
-                          padding: 20,
-                          usePointStyle: true,
-                          font: { size: 12, weight: "500" },
-                        },
-                      },
+                      legend: { position: "bottom", labels: { padding: 20, usePointStyle: true, font: { size: 12, weight: "500" } } },
                     },
                   }}
                 />
@@ -484,7 +433,7 @@ const UserOverview = ({ userId = 5 }) => {
             </div>
             <div className="space-y-3 max-h-80 overflow-y-auto">
               {profileData?.previousConsultants?.length > 0 ? (
-                profileData.previousConsultants.map((consultant, index) => (
+                profileData.previousConsultants.map((consultant) => (
                   <div
                     key={consultant.consultantId}
                     className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors"
@@ -493,8 +442,8 @@ const UserOverview = ({ userId = 5 }) => {
                       {consultant.consultantName?.charAt(0)?.toUpperCase() || "C"}
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-slate-900">{consultant.consultantName}</p>
-                      <p className="text-sm text-slate-600">{consultant.consultantEmail}</p>
+                      <p className="font-medium text-slate-900">{consultant.consultantName || "Chưa cung cấp tên"}</p>
+                      <p className="text-sm text-slate-600">{consultant.consultantEmail || "Chưa cung cấp email"}</p>
                     </div>
                     <div className="text-purple-600">
                       <User className="h-4 w-4" />
@@ -538,36 +487,26 @@ const UserOverview = ({ userId = 5 }) => {
                   {profileData.assessmentResults
                     .sort((a, b) => new Date(b.takeTime) - new Date(a.takeTime))
                     .map((result, index) => {
-                      const riskLevel = calculateDrugRiskLevel([result])
+                      const riskLevel = calculateDrugRiskLevel([result]);
                       return (
                         <tr key={index} className="border-b border-slate-100 hover:bg-slate-50">
                           <td className="py-3 px-4">{profileData.assessmentResults.length - index}</td>
                           <td className="py-3 px-4">
                             <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                              {result.stage}
+                              {result.stage || "Chưa xác định"}
                             </span>
                           </td>
-                          <td className="py-3 px-4 font-semibold">{result.score}</td>
-                          <td className="py-3 px-4 text-slate-600">
-                            {new Date(result.takeTime).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
-                          </td>
+                          <td className="py-3 px-4 font-semibold">{result.score ?? "N/A"}</td>
+                          <td className="py-3 px-4 text-slate-600">{formatDateTime(result.takeTime)}</td>
                           <td className="py-3 px-4">
                             <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                riskLevel.color === "green"
-                                  ? "bg-green-100 text-green-800"
-                                  : riskLevel.color === "yellow"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : riskLevel.color === "red"
-                                      ? "bg-red-100 text-red-800"
-                                      : "bg-gray-100 text-gray-800"
-                              }`}
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${riskLevel.bgColor} text-${riskLevel.color}-800`}
                             >
                               {riskLevel.level}
                             </span>
                           </td>
                         </tr>
-                      )
+                      );
                     })}
                 </tbody>
               </table>
@@ -576,7 +515,7 @@ const UserOverview = ({ userId = 5 }) => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default UserOverview
+export default UserOverview;
