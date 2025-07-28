@@ -329,7 +329,7 @@ const Dashboard = () => {
             </div>
             <div>
               <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                EduManage Pro
+                Manage Pro
               </h2>
               <p className="text-xs text-slate-500 font-medium">Admin Dashboard</p>
             </div>

@@ -158,12 +158,11 @@ const UserAppointmentHistory = () => {
                         <Shield className="w-5 h-5 text-emerald-500" />
                         <div>
                           <p className="font-medium text-gray-800">
-                            {appointment.consultantName} - {appointment.status === "CONFIRMED" ? "Đã xác nhận" : appointment.status === "CANCELED" ? "Đã hủy" : "Chờ thanh toán"}
+                            {appointment.consultantName} - {appointment.status === "CONFIRMED" ? "Đã xác nhận" : appointment.status === "CANCELED" ? "Đã hủy" : "Chờ xác nhận"}
                           </p>
                           <p className="text-sm text-gray-600">
                             {formatDateTime(appointment.startDateTime)} - {formatDateTime(appointment.endDateTime)}
                           </p>
-                          <p className="text-sm text-gray-600">Ghi chú: {appointment.note || "Không có"}</p>
                           {appointment.price > 0 && (
                             <p className="text-sm text-emerald-600">Phí: {formatPrice(appointment.price)}</p>
                           )}
