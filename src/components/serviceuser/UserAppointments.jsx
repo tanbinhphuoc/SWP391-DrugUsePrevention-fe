@@ -736,9 +736,6 @@ const UserAppointments = ({ appointmentId }) => {
                 <div className="text-4xl mb-4 text-center">{service.icon}</div>
                 <h3 className="text-white font-semibold text-lg mb-2">{service.name}</h3>
                 <p className="text-white/70 text-sm mb-4">{service.description}</p>
-                <button className="text-green-300 text-sm font-medium hover:text-green-200 transition-colors">
-                  Tìm hiểu thêm →
-                </button>
               </div>
             ))}
           </div>

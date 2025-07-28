@@ -3,9 +3,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   UserOverview,
   UserCourses,
-  UserSurveys,
-  UserAppointments,
-  UserPrograms,
   UserProfile,
 } from "./";
 import UserAppointmentHistory from "./UserAppointmentHistory";
@@ -56,6 +53,7 @@ const UserDashboard = () => {
         navigate("/login", { replace: true });
         return;
       }
+      
       const roleId = userData.roleId;
       const roleRoutes = {
         1: "/",
@@ -114,7 +112,7 @@ const UserDashboard = () => {
     const appointmentId = searchParams.get("appointmentId");
 
     if (tab) {
-      setActiveTab(tab); // Kích hoạt tab từ query param (appointments)
+      setActiveTab(tab); // Kích hoạt tab từ query param
     }
 
     if (vnp_ResponseCode === "00" && appointmentId) {
@@ -136,9 +134,6 @@ const UserDashboard = () => {
   const menuItems = [
     { id: "overview", label: "Tổng quan", icon: Shield, color: "text-emerald-400" },
     { id: "courses", label: "Khóa học của tôi", icon: BookOpen, color: "text-purple-400" },
-    // { id: "surveys", label: "Khảo sát", icon: FileText, color: "text-amber-400" },
-    // { id: "appointments", label: "Tư vấn", icon: Calendar, color: "text-emerald-400" },
-    // { id: "programs", label: "Chương trình", icon: Megaphone, color: "text-purple-400" },
     { id: "appointmentHistory", label: "Lịch sử cuộc hẹn", icon: Calendar, color: "text-emerald-400" },
     { id: "profile", label: "Hồ sơ", icon: User, color: "text-amber-400" },
     { id: "home", label: "Trang chủ", icon: Home, color: "text-gray-300", path: "/" },
@@ -256,9 +251,6 @@ const UserDashboard = () => {
             <div className="p-6">
               {activeTab === "overview" && <UserOverview userId={userInfo.userId} />}
               {activeTab === "courses" && <UserCourses />}
-              {/* {activeTab === "surveys" && <UserSurveys />} */}
-              {/* {activeTab === "appointments" && <UserAppointments appointmentId={searchParams.get("appointmentId")} />} */}
-              {/* {activeTab === "programs" && <UserPrograms />} */}
               {activeTab === "appointmentHistory" && <UserAppointmentHistory />}
               {activeTab === "profile" && <UserProfile />}
               {activeTab === "home" && navigate("/")}
