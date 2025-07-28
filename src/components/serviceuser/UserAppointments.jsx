@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -17,6 +17,7 @@ const formatPrice = (price) => {
 
 const UserAppointments = ({ appointmentId }) => {
   const navigate = useNavigate();
+  const location = useLocation(); // Added for query parameter parsing
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [selectedTimes, setSelectedTimes] = useState([]);
   const [consultantId, setConsultantId] = useState(null);
@@ -27,6 +28,49 @@ const UserAppointments = ({ appointmentId }) => {
   const [showBookingForm, setShowBookingForm] = useState(false);
 
   const token = localStorage.getItem("token") || sessionStorage.getItem("tempToken");
+
+  // VNPay response code mapping
+  const vnPayErrorMessages = {
+    "24": "Bạn đã hủy thanh toán lịch hẹn.",
+    // Add more VNPay error codes here if available, e.g.:
+    // "09": "Thẻ không hợp lệ.",
+    // "07": "Giao dịch bị nghi ngờ gian lận.",
+  };
+
+  // Parse query parameters and show notifications
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const status = params.get("status");
+    const code = params.get("code");
+
+    if (status === "success") {
+      toast.success("Thanh toán lịch hẹn thành công!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      // Refresh booked slots to reflect the new appointment
+      if (consultantId && token) {
+        fetchBookedSlots();
+      }
+    } else if (status === "error") {
+      if (code === "24") {
+        toast.warning(vnPayErrorMessages["24"], {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      } else {
+        toast.error(`Thanh toán lịch hẹn thất bại! Mã lỗi: ${code || "Không xác định"}`, {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+    }
+
+    // Clear query parameters to prevent repeated toasts
+    if (status) {
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location, navigate, consultantId, token]);
 
   const toggleTimeSelection = (time) => {
     setSelectedTimes(prev => {
@@ -53,72 +97,73 @@ const UserAppointments = ({ appointmentId }) => {
     return selectedConsultant.hourlyRate * selectedTimes.length;
   };
 
+  const fetchConsultants = async () => {
+    try {
+      const response = await fetch("http://localhost:7092/api/Appointments/GetAllConsultant", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      const fetchedConsultants = data.data.map((c) => ({
+        id: c.consultantID,
+        name: c.fullName,
+        specialty: c.specialty || "N/A",
+        hourlyRate: c.hourlyRate || 0,
+        googleMeetLink: c.googleMeetLink || null,
+        bio: c.bio || "Chuyên gia tư vấn với nhiều năm kinh nghiệm",
+        rating: c.rating || 4.5,
+      }));
+      setConsultants(fetchedConsultants);
+      if (fetchedConsultants.length > 0 && !consultantId) {
+        setConsultantId(fetchedConsultants[0].id);
+      }
+    } catch (error) {
+      console.error("Error fetching consultants:", error.message);
+      toast.error("Không thể tải danh sách tư vấn viên.");
+    }
+  };
+
+  const fetchBookedSlots = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:7092/api/Appointments/${consultantId}/ConsultantSchedules?startDate=${selectedDate}&endDate=${selectedDate}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setBookedSlots(
+        data.data.map((slot) => ({
+          date: slot.schedule.date.split("T")[0],
+          time: slot.schedule.startTime.slice(0, 5),
+          scheduleId: slot.schedule.scheduleID,
+          isAvailable: slot.appointmentStatus === null && slot.paymentStatus === null,
+          isPendingPayment: slot.paymentStatus === "PENDING",
+          isBooked: slot.paymentStatus === "SUCCESS" || slot.appointmentStatus === "PENDING_PAYMENT",
+        }))
+      );
+    } catch (error) {
+      console.error("Error fetching booked slots:", error.message);
+      setBookedSlots([]);
+    }
+  };
+
   useEffect(() => {
     if (!token) {
       toast.error("Vui lòng đăng nhập để đặt lịch hẹn!");
       navigate("/login", { replace: true });
       return;
     }
-
-    const fetchConsultants = async () => {
-      try {
-        const response = await fetch("http://localhost:7092/api/Appointments/GetAllConsultant", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        const fetchedConsultants = data.data.map((c) => ({
-          id: c.consultantID,
-          name: c.fullName,
-          specialty: c.specialty || "N/A",
-          hourlyRate: c.hourlyRate || 0,
-          googleMeetLink: c.googleMeetLink || null,
-          bio: c.bio || "Chuyên gia tư vấn với nhiều năm kinh nghiệm",
-          rating: c.rating || 4.5, // Giả sử API cung cấp rating, nếu không thì mặc định 4.5
-        }));
-        setConsultants(fetchedConsultants);
-        if (fetchedConsultants.length > 0 && !consultantId) {
-          setConsultantId(fetchedConsultants[0].id);
-        }
-      } catch (error) {
-        console.error("Error fetching consultants:", error.message);
-        toast.error("Không thể tải danh sách tư vấn viên.");
-      }
-    };
     fetchConsultants();
-  }, [token]);
+  }, [token, navigate]);
 
   useEffect(() => {
     if (consultantId && token) {
-      const fetchBookedSlots = async () => {
-        try {
-          const response = await fetch(
-            `http://localhost:7092/api/Appointments/${consultantId}/ConsultantSchedules?startDate=${selectedDate}&endDate=${selectedDate}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          setBookedSlots(
-            data.data.map((slot) => ({
-              date: slot.schedule.date.split("T")[0],
-              time: slot.schedule.startTime.slice(0, 5),
-              scheduleId: slot.schedule.scheduleID,
-              isAvailable: slot.appointmentStatus === null && slot.paymentStatus === null,
-              isPendingPayment: slot.paymentStatus === "PENDING",
-              isBooked: slot.paymentStatus === "SUCCESS" || slot.appointmentStatus === "PENDING_PAYMENT",
-            }))
-          );
-        } catch (error) {
-          console.error("Error fetching booked slots:", error.message);
-          setBookedSlots([]);
-        }
-      };
       fetchBookedSlots();
     }
   }, [selectedDate, consultantId, token]);
@@ -193,6 +238,7 @@ const UserAppointments = ({ appointmentId }) => {
       toast.success("Đặt lịch miễn phí thành công, đang chờ xác nhận!");
       setShowBookingForm(false);
       setSelectedTimes([]);
+      fetchBookedSlots(); // Refresh booked slots
     } catch (error) {
       console.error("Error booking free appointment:", error.message);
       toast.error("Đặt lịch miễn phí thất bại!");
@@ -260,6 +306,7 @@ const UserAppointments = ({ appointmentId }) => {
       }
 
       toast.success("Đặt lịch thành công!");
+      fetchBookedSlots(); // Refresh booked slots
     } catch (error) {
       console.error("Error booking appointment:", error.message);
       toast.error("Đặt lịch thất bại!");
@@ -307,11 +354,8 @@ const UserAppointments = ({ appointmentId }) => {
   const BookingModalEnhanced = () => {
     if (!showBookingForm) return null;
 
-    // Split consultants into free and paid
     const freeConsultants = consultants.filter((c) => c.hourlyRate === 0);
     const paidConsultants = consultants.filter((c) => c.hourlyRate > 0);
-
-    // Sort consultants with favorites first
     const sortedFreeConsultants = getSortedConsultants(freeConsultants);
     const sortedPaidConsultants = getSortedConsultants(paidConsultants);
 
@@ -364,7 +408,6 @@ const UserAppointments = ({ appointmentId }) => {
                   <span>Chọn tư vấn viên</span>
                 </label>
                 <div className="grid grid-cols-1 gap-4">
-                  {/* Free Consultants Dropdown */}
                   <div>
                     <label className="text-sm font-medium text-gray-600 mb-1 block">Tư vấn viên miễn phí</label>
                     <select
@@ -388,7 +431,6 @@ const UserAppointments = ({ appointmentId }) => {
                     </select>
                   </div>
 
-                  {/* Paid Consultants Dropdown */}
                   <div>
                     <label className="text-sm font-medium text-gray-600 mb-1 block">Tư vấn viên có phí</label>
                     <select

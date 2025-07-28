@@ -135,7 +135,7 @@ const UserDashboard = () => {
 
   const menuItems = [
     { id: "overview", label: "Tổng quan", icon: Shield, color: "text-emerald-400" },
-    { id: "courses", label: "Khóa học", icon: BookOpen, color: "text-purple-400" },
+    { id: "courses", label: "Khóa học của tôi", icon: BookOpen, color: "text-purple-400" },
     // { id: "surveys", label: "Khảo sát", icon: FileText, color: "text-amber-400" },
     // { id: "appointments", label: "Tư vấn", icon: Calendar, color: "text-emerald-400" },
     // { id: "programs", label: "Chương trình", icon: Megaphone, color: "text-purple-400" },
@@ -167,7 +167,7 @@ const UserDashboard = () => {
                 <Shield className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-white whitespace-nowrap">Trung tâm Phòng chống</h1>
+                <h1 className="text-lg font-bold text-white whitespace-nowrap">Phòng Ngừa Ma Túy</h1>
                 <p className="text-sm text-blue-200 whitespace-nowrap">Ma túy & Tệ nạn xã hội</p>
               </div>
             </div>

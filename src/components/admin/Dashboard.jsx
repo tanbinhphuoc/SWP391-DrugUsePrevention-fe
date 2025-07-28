@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { Pie, Bar } from "react-chartjs-2";
+import { useEffect, useState, useCallback } from "react"
+import { useNavigate } from "react-router-dom"
+import { Pie, Bar } from "react-chartjs-2"
 import {
   Chart as ChartJS,
   ArcElement,
@@ -12,172 +12,226 @@ import {
   LinearScale,
   BarElement,
   PointElement,
-} from "chart.js";
-import AccountManagement from "./AccountManagement";
-import CourseManagement from "./CourseManagement";
-import AppointmentManagement from "./AppointmentManagement";
-import RiskAssessmentManagement from "./RiskAssessmentManagement";
-import {
-  Users,
-  BookOpen,
-  Calendar,
-  LogOut,
-  FileText,
-  BarChart2,
-  RefreshCw,
-} from "lucide-react";
+} from "chart.js"
+import AccountManagement from "./AccountManagement"
+import CourseManagement from "./CourseManagement"
+import AppointmentManagement from "./AppointmentManagement"
+import RiskAssessmentManagement from "./RiskAssessmentManagement"
+import { Users, BookOpen, Calendar, LogOut, FileText, BarChart2, RefreshCw, DollarSign } from "lucide-react"
 
 // Register ChartJS components
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement)
+
+// Helper function to get current month date range
+const getCurrentMonthDateRange = () => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth()
+
+  const startDate = new Date(year, month, 1)
+  const endDate = new Date(year, month + 1, 0)
+
+  const formatDate = (date) => {
+    return date.toISOString().split("T")[0]
+  }
+
+  return {
+    startDate: formatDate(startDate),
+    endDate: formatDate(endDate),
+  }
+}
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState("overview");
-  const [userInfo, setUserInfo] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [appointments, setAppointments] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [assessments, setAssessments] = useState({ totalAssessments: 0, scoreSummary: null });
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("overview")
+  const [userInfo, setUserInfo] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState(null)
+  const [users, setUsers] = useState([])
+  const [appointments, setAppointments] = useState([])
+  const [courses, setCourses] = useState([])
+  const [assessments, setAssessments] = useState({ totalAssessments: 0, scoreSummary: null })
+  const [paymentStats, setPaymentStats] = useState({
+    totalPayments: 0,
+    totalSuccessfulPayments: 0,
+    totalAmountPaid: 0,
+    totalPendingPayments: 0,
+  })
+  const navigate = useNavigate()
 
   const getToken = useCallback(() => {
-    return localStorage.getItem("token") || sessionStorage.getItem("tempToken");
-  }, []);
+    return localStorage.getItem("token") || sessionStorage.getItem("tempToken")
+  }, [])
 
   // Fetch users
   const fetchUsers = useCallback(async () => {
-    const token = getToken();
+    const token = getToken()
     if (!token) {
-      navigate("/login", { replace: true });
-      return;
+      navigate("/login", { replace: true })
+      return
     }
-    setLoading(true);
+    setLoading(true)
     try {
       const response = await fetch("http://localhost:7092/api/Admin/GetAllUsers", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}`, Accept: "*/*" },
-      });
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const data = await response.json();
-      if (data.success) setUsers(data.data || []);
+      })
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
+      const data = await response.json()
+      if (data.success) setUsers(data.data || [])
     } catch (error) {
-      console.error("Error fetching users:", error.message);
+      console.error("Error fetching users:", error.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [getToken, navigate]);
+  }, [getToken, navigate])
 
   // Fetch appointments
   const fetchAppointments = useCallback(async () => {
-    const token = getToken();
+    const token = getToken()
     if (!token) {
-      navigate("/login", { replace: true });
-      return;
+      navigate("/login", { replace: true })
+      return
     }
-    setLoading(true);
+    setLoading(true)
     try {
       const response = await fetch("http://localhost:7092/api/Admin/GetAllAppointments", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}`, Accept: "*/*" },
-      });
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const data = await response.json();
-      if (data.success) setAppointments(data.data || []);
+      })
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
+      const data = await response.json()
+      if (data.success) setAppointments(data.data || [])
     } catch (error) {
-      console.error("Error fetching appointments:", error.message);
+      console.error("Error fetching appointments:", error.message)
     } finally {
-      setLoading(false);
-      setLastUpdated(new Date());
+      setLoading(false)
+      setLastUpdated(new Date())
     }
-  }, [getToken, navigate]);
+  }, [getToken, navigate])
 
   // Fetch courses
   const fetchCourses = useCallback(async () => {
-    const token = getToken();
+    const token = getToken()
     if (!token) {
-      navigate("/login", { replace: true });
-      return;
+      navigate("/login", { replace: true })
+      return
     }
-    setLoading(true);
+    setLoading(true)
     try {
       const response = await fetch("http://localhost:7092/api/Course/GetAllCourse", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}`, Accept: "*/*" },
-      });
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const data = await response.json();
-      if (data.success) setCourses(data.data || []);
+      })
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
+      const data = await response.json()
+      if (data.success) setCourses(data.data || [])
     } catch (error) {
-      console.error("Error fetching courses:", error.message);
+      console.error("Error fetching courses:", error.message)
     } finally {
-      setLoading(false);
-      setLastUpdated(new Date());
+      setLoading(false)
+      setLastUpdated(new Date())
     }
-  }, [getToken, navigate]);
+  }, [getToken, navigate])
 
   // Fetch assessments
   const fetchAssessments = useCallback(async () => {
-    const token = getToken();
+    const token = getToken()
     if (!token) {
-      navigate("/login", { replace: true });
-      return;
+      navigate("/login", { replace: true })
+      return
     }
-    setLoading(true);
+    setLoading(true)
     try {
-      // Fetch total assessments
       const totalResponse = await fetch("http://localhost:7092/api/AssessmentStatistics/total", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}`, Accept: "*/*" },
-      });
-      if (!totalResponse.ok) throw new Error(`HTTP error! Status: ${totalResponse.status}`);
-      const totalData = await totalResponse.json();
+      })
+      if (!totalResponse.ok) throw new Error(`HTTP error! Status: ${totalResponse.status}`)
+      const totalData = await totalResponse.json()
 
-      // Fetch score summary
       const summaryResponse = await fetch("http://localhost:7092/api/AssessmentStatistics/score-summary", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}`, Accept: "*/*" },
-      });
-      if (!summaryResponse.ok) throw new Error(`HTTP error! Status: ${summaryResponse.status}`);
-      const summaryData = await summaryResponse.json();
+      })
+      if (!summaryResponse.ok) throw new Error(`HTTP error! Status: ${summaryResponse.status}`)
+      const summaryData = await summaryResponse.json()
 
       if (totalData.success && summaryData.success) {
         setAssessments({
           totalAssessments: totalData.totalAssessments || 0,
           scoreSummary: summaryData.data || null,
-        });
+        })
       }
     } catch (error) {
-      console.error("Error fetching assessments:", error.message);
+      console.error("Error fetching assessments:", error.message)
     } finally {
-      setLoading(false);
-      setLastUpdated(new Date());
+      setLoading(false)
+      setLastUpdated(new Date())
     }
-  }, [getToken, navigate]);
+  }, [getToken, navigate])
+
+  // Fetch payment statistics
+  const fetchPaymentStatistics = useCallback(async () => {
+    const token = getToken()
+    if (!token) {
+      navigate("/login", { replace: true })
+      return
+    }
+    setLoading(true)
+    try {
+      const { startDate, endDate } = getCurrentMonthDateRange()
+      const response = await fetch(
+        `http://localhost:7092/api/Admin/payment-statistics?startDate=${startDate}&endDate=${endDate}`,
+        {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}`, Accept: "*/*" },
+        },
+      )
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
+      const data = await response.json()
+      if (data.success) {
+        setPaymentStats(
+          data.data || {
+            totalPayments: 0,
+            totalSuccessfulPayments: 0,
+            totalAmountPaid: 0,
+            totalPendingPayments: 0,
+          },
+        )
+      }
+    } catch (error) {
+      console.error("Error fetching payment statistics:", error.message)
+    } finally {
+      setLoading(false)
+      setLastUpdated(new Date())
+    }
+  }, [getToken, navigate])
 
   // Fetch all data on mount and refresh every 30 seconds
   useEffect(() => {
     if (activeTab === "overview") {
-      fetchUsers();
-      fetchAppointments();
-      fetchCourses();
-      fetchAssessments();
+      fetchUsers()
+      fetchAppointments()
+      fetchCourses()
+      fetchAssessments()
+      fetchPaymentStatistics()
       const interval = setInterval(() => {
-        fetchUsers();
-        fetchAppointments();
-        fetchCourses();
-        fetchAssessments();
-      }, 30000);
-      return () => clearInterval(interval);
+        fetchUsers()
+        fetchAppointments()
+        fetchCourses()
+        fetchAssessments()
+        fetchPaymentStatistics()
+      }, 30000)
+      return () => clearInterval(interval)
     }
-  }, [activeTab, fetchUsers, fetchAppointments, fetchCourses, fetchAssessments]);
+  }, [activeTab, fetchUsers, fetchAppointments, fetchCourses, fetchAssessments, fetchPaymentStatistics])
 
   // Authentication check
   useEffect(() => {
-    const localToken = localStorage.getItem("token");
-    const sessionToken = sessionStorage.getItem("tempToken");
+    const localToken = localStorage.getItem("token")
+    const sessionToken = sessionStorage.getItem("tempToken")
     if (localToken || sessionToken) {
-      let userData = localToken
+      const userData = localToken
         ? {
             userName: localStorage.getItem("userName") || "",
             email: localStorage.getItem("email") || "",
@@ -191,36 +245,42 @@ const Dashboard = () => {
             expiresAt: sessionStorage.getItem("expiresAt") || new Date().toISOString(),
             roleId: sessionStorage.getItem("roleId") || "0",
             roleName: sessionStorage.getItem("roleName") || "",
-          };
-      const currentTime = new Date();
-      const expirationTime = new Date(userData.expiresAt);
+          }
+      const currentTime = new Date()
+      const expirationTime = new Date(userData.expiresAt)
       if (currentTime > expirationTime) {
-        alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
-        localStorage.clear();
-        sessionStorage.clear();
-        navigate("/login", { replace: true });
-        return;
+        alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!")
+        localStorage.clear()
+        sessionStorage.clear()
+        navigate("/login", { replace: true })
+        return
       }
-      const roleId = userData.roleId;
-      const roleRoutes = { 1: "/", 2: "/member-dashboard", 3: "/staff-dashboard", 4: "/consultant-dashboard", 5: "/manager-dashboard" };
+      const roleId = userData.roleId
+      const roleRoutes = {
+        1: "/",
+        2: "/member-dashboard",
+        3: "/staff-dashboard",
+        4: "/consultant-dashboard",
+        5: "/manager-dashboard",
+      }
       if (roleId !== "6" && activeTab !== "overview") {
-        const targetRoute = roleRoutes[roleId] || "/login";
-        alert("Bạn không có quyền truy cập trang này!");
-        navigate(targetRoute, { replace: true });
-        return;
+        const targetRoute = roleRoutes[roleId] || "/login"
+        alert("Bạn không có quyền truy cập trang này!")
+        navigate(targetRoute, { replace: true })
+        return
       }
-      setUserInfo(userData);
+      setUserInfo(userData)
     } else {
-      alert("Vui lòng đăng nhập để truy cập trang quản lý!");
-      navigate("/login", { replace: true });
+      alert("Vui lòng đăng nhập để truy cập trang quản lý!")
+      navigate("/login", { replace: true })
     }
-  }, [navigate, activeTab]);
+  }, [navigate, activeTab])
 
   const handleLogout = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    navigate("/login", { replace: true });
-  };
+    localStorage.clear()
+    sessionStorage.clear()
+    navigate("/login", { replace: true })
+  }
 
   const menuItems = [
     { id: "overview", label: "Tổng quan", icon: <BarChart2 className="h-5 w-5" /> },
@@ -228,7 +288,7 @@ const Dashboard = () => {
     { id: "courses", label: "Quản lý khóa học", icon: <BookOpen className="h-5 w-5" /> },
     { id: "appointments", label: "Quản lý lịch hẹn", icon: <Calendar className="h-5 w-5" /> },
     { id: "assessments", label: "Đánh giá rủi ro", icon: <FileText className="h-5 w-5" /> },
-  ];
+  ]
 
   const overviewChartData = {
     labels: ["Tài khoản", "Khóa học", "Lịch hẹn", "Đánh giá"],
@@ -236,11 +296,16 @@ const Dashboard = () => {
       {
         label: "Tổng số",
         data: [users.length, courses.length, appointments.length, assessments.totalAssessments],
-        backgroundColor: ["rgba(99, 102, 241, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(245, 158, 11, 0.8)", "rgba(239, 68, 68, 0.8)"],
+        backgroundColor: [
+          "rgba(99, 102, 241, 0.8)",
+          "rgba(16, 185, 129, 0.8)",
+          "rgba(245, 158, 11, 0.8)",
+          "rgba(239, 68, 68, 0.8)",
+        ],
         borderWidth: 0,
       },
     ],
-  };
+  }
 
   if (!userInfo) {
     return (
@@ -250,7 +315,7 @@ const Dashboard = () => {
           <p className="text-slate-600 font-medium">Đang tải...</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -263,7 +328,9 @@ const Dashboard = () => {
               <BarChart2 className="h-7 w-7 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">EduManage Pro</h2>
+              <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                EduManage Pro
+              </h2>
               <p className="text-xs text-slate-500 font-medium">Admin Dashboard</p>
             </div>
           </div>
@@ -278,7 +345,11 @@ const Dashboard = () => {
                     : "hover:bg-slate-100 text-slate-600 hover:text-slate-900 hover:transform hover:scale-[1.01]"
                 }`}
               >
-                <div className={`p-1 rounded-lg ${activeTab === item.id ? "bg-white/20" : "bg-slate-100 group-hover:bg-slate-200"}`}>{item.icon}</div>
+                <div
+                  className={`p-1 rounded-lg ${activeTab === item.id ? "bg-white/20" : "bg-slate-100 group-hover:bg-slate-200"}`}
+                >
+                  {item.icon}
+                </div>
                 <span className="font-medium">{item.label}</span>
                 {activeTab === item.id && <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>}
               </button>
@@ -320,18 +391,23 @@ const Dashboard = () => {
             <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">Tổng quan hệ thống</h1>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+                    Tổng quan hệ thống
+                  </h1>
                   <p className="text-slate-600 mt-2 font-medium">Theo dõi và quản lý toàn bộ hoạt động</p>
                   {lastUpdated && (
-                    <p className="text-xs text-slate-500 mt-1">Cập nhật lần cuối: {lastUpdated.toLocaleTimeString("vi-VN")}</p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Cập nhật lần cuối: {lastUpdated.toLocaleTimeString("vi-VN")}
+                    </p>
                   )}
                 </div>
                 <button
                   onClick={() => {
-                    fetchUsers();
-                    fetchAppointments();
-                    fetchCourses();
-                    fetchAssessments();
+                    fetchUsers()
+                    fetchAppointments()
+                    fetchCourses()
+                    fetchAssessments()
+                    fetchPaymentStatistics()
                   }}
                   disabled={loading}
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -342,7 +418,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
                 <div className="flex items-center justify-between mb-4">
                   <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg">
@@ -368,7 +444,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="flex items-center text-green-600 text-sm font-medium">
-                  <span>{courses.filter(c => !c.courseRegistrations.length).length} hoàn thành</span>
+                  <span>{courses.filter((c) => !c.courseRegistrations?.length).length} hoàn thành</span>
                 </div>
               </div>
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
@@ -382,7 +458,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="flex items-center text-green-600 text-sm font-medium">
-                  <span>{appointments.filter(a => a.status === "CONFIRMED").length} đã xác nhận</span>
+                  <span>{appointments.filter((a) => a.status === "CONFIRMED").length} đã xác nhận</span>
                 </div>
               </div>
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
@@ -397,6 +473,20 @@ const Dashboard = () => {
                 </div>
                 <div className="flex items-center text-green-600 text-sm font-medium">
                   <span>Đã phân tích</span>
+                </div>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl shadow-lg">
+                    <DollarSign className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-slate-900">{paymentStats.totalPayments}</div>
+                    <div className="text-xs text-slate-500 font-medium">Tổng giao dịch</div>
+                  </div>
+                </div>
+                <div className="flex items-center text-green-600 text-sm font-medium">
+                  <span>{paymentStats.totalSuccessfulPayments} thành công</span>
                 </div>
               </div>
             </div>
@@ -420,11 +510,11 @@ const Dashboard = () => {
                           {
                             label: "Số lượng",
                             data: [
-                              users.filter(u => u.roleName === "Admin").length,
-                              users.filter(u => u.roleName === "Member").length,
-                              users.filter(u => u.roleName === "Consultant").length,
-                              users.filter(u => u.roleName === "Staff").length,
-                              users.filter(u => u.roleName === "Manager").length,
+                              users.filter((u) => u.roleName === "Admin").length,
+                              users.filter((u) => u.roleName === "Member").length,
+                              users.filter((u) => u.roleName === "Consultant").length,
+                              users.filter((u) => u.roleName === "Staff").length,
+                              users.filter((u) => u.roleName === "Manager").length,
                             ],
                             backgroundColor: [
                               "rgba(99, 102, 241, 0.8)",
@@ -432,6 +522,41 @@ const Dashboard = () => {
                               "rgba(245, 158, 11, 0.8)",
                               "rgba(239, 68, 68, 0.8)",
                               "rgba(100, 116, 139, 0.8)",
+                            ],
+                            borderWidth: 0,
+                          },
+                        ],
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900">Thống kê thanh toán</h3>
+                </div>
+                <div className="h-80 flex items-center justify-center">
+                  {loading ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  ) : (
+                    <Bar
+                      data={{
+                        labels: ["Tổng giao dịch", "Thành công", "Chờ xử lý"],
+                        datasets: [
+                          {
+                            label: "Số lượng",
+                            data: [
+                              paymentStats.totalPayments,
+                              paymentStats.totalSuccessfulPayments,
+                              paymentStats.totalPendingPayments,
+                            ],
+                            backgroundColor: [
+                              "rgba(99, 102, 241, 0.8)",
+                              "rgba(16, 185, 129, 0.8)",
+                              "rgba(245, 158, 11, 0.8)",
                             ],
                             borderWidth: 0,
                           },
@@ -459,11 +584,15 @@ const Dashboard = () => {
                           {
                             label: "Số lượng",
                             data: [
-                              appointments.filter(a => a.status === "CONFIRMED").length,
-                              appointments.filter(a => a.status === "PENDING_PAYMENT").length,
-                              appointments.filter(a => a.status === "CANCELED").length,
+                              appointments.filter((a) => a.status === "CONFIRMED").length,
+                              appointments.filter((a) => a.status === "PENDING_PAYMENT").length,
+                              appointments.filter((a) => a.status === "CANCELED").length,
                             ],
-                            backgroundColor: ["rgba(16, 185, 129, 0.8)", "rgba(245, 158, 11, 0.8)", "rgba(239, 68, 68, 0.8)"],
+                            backgroundColor: [
+                              "rgba(16, 185, 129, 0.8)",
+                              "rgba(245, 158, 11, 0.8)",
+                              "rgba(239, 68, 68, 0.8)",
+                            ],
                             borderWidth: 0,
                           },
                         ],
@@ -488,13 +617,17 @@ const Dashboard = () => {
                         labels: ["Điểm trung bình", "Điểm tối đa", "Điểm tối thiểu"],
                         datasets: [
                           {
-                            label: ["Điểm",],
+                            label: "Điểm",
                             data: [
                               assessments.scoreSummary.averageScore,
                               assessments.scoreSummary.maxScore,
                               assessments.scoreSummary.minScore,
                             ],
-                            backgroundColor: ["rgba(99, 102, 241, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(239, 68, 68, 0.8)"],
+                            backgroundColor: [
+                              "rgba(99, 102, 241, 0.8)",
+                              "rgba(16, 185, 129, 0.8)",
+                              "rgba(239, 68, 68, 0.8)",
+                            ],
                             borderWidth: 0,
                           },
                         ],
@@ -511,6 +644,40 @@ const Dashboard = () => {
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Payment Statistics Table */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="p-2 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg">
+                  <DollarSign className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">Thống kê doanh thu</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left text-slate-700">
+                  <thead className="bg-slate-100">
+                    <tr>
+                      <th className="px-4 py-2">Tổng số giao dịch</th>
+                      <th className="px-4 py-2">Giao dịch thành công</th>
+                      <th className="px-4 py-2">Tổng doanh thu</th>
+                      <th className="px-4 py-2">Giao dịch chờ xử lý</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-t">
+                      <td className="px-4 py-2">{paymentStats.totalPayments}</td>
+                      <td className="px-4 py-2">{paymentStats.totalSuccessfulPayments}</td>
+                      <td className="px-4 py-2">{paymentStats.totalAmountPaid.toLocaleString("vi-VN")} VND</td>
+                      <td className="px-4 py-2">{paymentStats.totalPendingPayments}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-slate-500 mt-4">
+                Thống kê tháng {new Date().getMonth() + 1}/{new Date().getFullYear()}
+                (từ {getCurrentMonthDateRange().startDate} đến {getCurrentMonthDateRange().endDate})
+              </p>
             </div>
 
             {/* User Table */}
@@ -579,7 +746,7 @@ const Dashboard = () => {
         {activeTab === "assessments" && <RiskAssessmentManagement assessments={assessments} />}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard
