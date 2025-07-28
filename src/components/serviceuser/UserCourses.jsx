@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import {
   Shield,
   Heart,
@@ -21,6 +21,7 @@ import {
 
 const UserCourses = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const [search, setSearch] = useState("")
   const [allCourses, setAllCourses] = useState([])
   const [purchasedCourses, setPurchasedCourses] = useState([])
@@ -31,11 +32,40 @@ const UserCourses = () => {
 
   const token = localStorage.getItem("token") || sessionStorage.getItem("tempToken")
 
+  // VNPay response code mapping
+  const vnPayErrorMessages = {
+    "24": "Bạn đã hủy thanh toán khóa học.",
+    // Add more VNPay error codes here if available
+  }
+
   // Show notification function
   const showNotification = (message, type = "success") => {
     setNotification({ show: true, message, type })
     setTimeout(() => setNotification({ show: false, message: "", type: "" }), 3000)
   }
+
+  // Parse query parameters and show notifications
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const status = params.get("status")
+    const code = params.get("code")
+
+    if (status === "success") {
+      showNotification("Thanh toán khóa học thành công!", "success")
+      fetchPurchasedCourses()
+    } else if (status === "error") {
+      if (code === "24") {
+        showNotification(vnPayErrorMessages["24"], "error")
+      } else {
+        showNotification(`Thanh toán khóa học thất bại! Mã lỗi: ${code || "Không xác định"}`, "error")
+      }
+    }
+
+    // Clear query parameters to prevent repeated notifications
+    if (status) {
+      navigate(location.pathname, { replace: true })
+    }
+  }, [location, navigate])
 
   // Check login and fetch profile
   useEffect(() => {
@@ -98,29 +128,29 @@ const UserCourses = () => {
   }, [token, userAge])
 
   // Fetch purchased courses
+  const fetchPurchasedCourses = async () => {
+    try {
+      const response = await fetch("http://localhost:7092/api/CourseRegistration/user", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await response.json()
+      if (data.success) {
+        setPurchasedCourses(
+          data.data.map((p) => ({
+            id: p.courseID,
+            name: p.courseName,
+            status: p.status || "FREE",
+            progress: p.status === "CONFIRMED" ? "Chưa bắt đầu" : p.paymentStatus || "Hoàn tất",
+          })),
+        )
+      }
+    } catch (error) {
+      showNotification("Lỗi tải khóa học đã mua.", "error")
+    }
+  }
+
   useEffect(() => {
     if (token) {
-      const fetchPurchasedCourses = async () => {
-        try {
-          const response = await fetch("http://localhost:7092/api/CourseRegistration/user", {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          const data = await response.json()
-          if (data.success) {
-            setPurchasedCourses(
-              data.data.map((p) => ({
-                id: p.courseID,
-                name: p.courseName,
-                status: p.status || "FREE",
-                progress: p.status === "CONFIRMED" ? "Chưa bắt đầu" : p.paymentStatus || "Hoàn tất",
-              })),
-            )
-          }
-        } catch (error) {
-          showNotification("Lỗi tải khóa học đã mua.", "error")
-        }
-      }
-
       fetchPurchasedCourses()
     }
   }, [token])
@@ -147,15 +177,7 @@ const UserCourses = () => {
           window.location.href = data.paymentUrl
         } else {
           showNotification("Đăng ký khóa học miễn phí thành công!")
-          setPurchasedCourses((prev) => [
-            ...prev,
-            {
-              id: courseId,
-              name: allCourses.find((c) => c.id === courseId)?.name || "Khóa học",
-              status: "FREE",
-              progress: "Chưa bắt đầu",
-            },
-          ])
+          fetchPurchasedCourses()
         }
       } else {
         showNotification(data.message || "Đăng ký thất bại.", "error")
@@ -220,7 +242,6 @@ const UserCourses = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50 relative overflow-hidden">
-      {/* Notification */}
       {notification.show && (
         <div
           className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 ${
@@ -231,7 +252,6 @@ const UserCourses = () => {
         </div>
       )}
 
-      {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-200 to-indigo-200 rounded-full opacity-20 blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-200 to-blue-200 rounded-full opacity-20 blur-3xl animate-pulse"></div>
@@ -239,11 +259,10 @@ const UserCourses = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
-        {/* Header */}
         <div className="flex flex-col lg:flex-row items-center justify-between mb-8 gap-4">
           <button
             onClick={handleGoHome}
-            className="group flex items-center space-x-3 px-6 py-3 bg-white/90 backdrop-blur-sm text-gray-700 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-blue-300"
+            className="group flex items-center space-x-3 px-6 py-3 bg-white/90 backdrop-blur-sm text-gray-7 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-blue-300"
           >
             <Home className="w-5 h-5 text-blue-600" />
             <span className="font-medium group-hover:text-blue-600 transition-colors">Về trang chủ</span>
@@ -261,7 +280,6 @@ const UserCourses = () => {
           </div>
         </div>
 
-        {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center space-x-3 px-8 py-4 bg-gradient-to-r from-red-500 via-pink-500 to-purple-500 text-white rounded-full shadow-2xl mb-6 transform hover:scale-105 transition-transform duration-300">
             <Shield className="w-7 h-7" />
@@ -282,7 +300,6 @@ const UserCourses = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
           <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-xl border-2 border-emerald-100 hover:border-emerald-300 transition-all duration-300 transform hover:-translate-y-1">
             <div className="flex items-center space-x-4">
@@ -330,7 +347,6 @@ const UserCourses = () => {
           </div>
         </div>
 
-        {/* Purchased Courses Section */}
         <section className="bg-white/95 backdrop-blur-sm p-8 rounded-3xl shadow-2xl border-2 border-emerald-100 mb-12">
           <div className="flex items-center space-x-4 mb-8">
             <div className="p-4 bg-gradient-to-r from-emerald-500 to-green-500 rounded-2xl shadow-xl">
@@ -363,8 +379,8 @@ const UserCourses = () => {
                             course.status === "CONFIRMED"
                               ? "bg-green-100 text-green-700 border-2 border-green-200"
                               : course.status === "FREE"
-                                ? "bg-emerald-100 text-emerald-700 border-2 border-emerald-200"
-                                : "bg-yellow-100 text-yellow-700 border-2 border-yellow-200"
+                              ? "bg-emerald-100 text-emerald-700 border-2 border-emerald-200"
+                              : "bg-yellow-100 text-yellow-700 border-2 border-yellow-200"
                           }`}
                         >
                           {course.status === "FREE" ? "Miễn phí" : course.status}
@@ -409,7 +425,6 @@ const UserCourses = () => {
           )}
         </section>
 
-        {/* All Courses Section */}
         <section
           id="all-courses"
           className="bg-white/95 backdrop-blur-sm p-8 rounded-3xl shadow-2xl border-2 border-blue-100"
@@ -424,7 +439,6 @@ const UserCourses = () => {
             </div>
           </div>
 
-          {/* Search and Filters */}
           <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-6 rounded-2xl mb-8 border-2 border-gray-200 shadow-lg">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               <div className="lg:col-span-3 relative">
@@ -451,7 +465,6 @@ const UserCourses = () => {
             </div>
           </div>
 
-          {/* Course Results */}
           {filteredAllCourses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredAllCourses.map((course) => {
@@ -552,33 +565,10 @@ const UserCourses = () => {
               <div className="w-48 h-48 mx-auto mb-8 bg-gradient-to-br from-gray-100 via-slate-100 to-zinc-100 rounded-full flex items-center justify-center shadow-xl">
                 <Search className="w-20 h-20 text-gray-400" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-700 mb-4">
-                {search ? `Không tìm thấy khóa học phù hợp với từ khóa "${search}"` : "Chưa có khóa học nào"}
-              </h3>
+              <h3 className="text-2xl font-bold text-gray-700 mb-4">Không tìm thấy khóa học</h3>
               <p className="text-gray-500 text-lg mb-8 max-w-2xl mx-auto">
-                {search
-                  ? "Hãy thử tìm kiếm với từ khóa khác hoặc xem tất cả khóa học có sẵn."
-                  : "Hiện tại chưa có khóa học nào phù hợp với độ tuổi của bạn."}
+                Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc giá để tìm các khóa học phù hợp.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button
-                  onClick={() => setSearch("")}
-                  className="inline-flex items-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-2xl hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 font-semibold"
-                >
-                  <BookOpen className="w-5 h-5" />
-                  <span>Xem tất cả khóa học</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setFilterPrice("free")
-                    setSearch("")
-                  }}
-                  className="inline-flex items-center space-x-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-2xl hover:from-emerald-600 hover:to-green-600 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 font-semibold"
-                >
-                  <Heart className="w-5 h-5" />
-                  <span>Khóa học miễn phí</span>
-                </button>
-              </div>
             </div>
           )}
         </section>

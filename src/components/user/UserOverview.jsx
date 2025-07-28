@@ -27,6 +27,7 @@ import {
   Clock,
   Target,
 } from "lucide-react";
+import { jwtDecode } from "jwt-decode";
 
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
@@ -79,7 +80,13 @@ const StatCard = ({ icon: Icon, gradient, title, value, subtitle, statusIcon: St
   </div>
 );
 
-const UserOverview = ({ userId = 5 }) => {
+const getUserIdFromStorage = () => {
+  // Lấy trực tiếp từ localStorage (key: "userId")
+  return localStorage.getItem("userId") || sessionStorage.getItem("userId") || null;
+};
+
+const UserOverview = () => {
+  const userId = getUserIdFromStorage();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -98,6 +105,7 @@ const UserOverview = ({ userId = 5 }) => {
     try {
       const token = getToken();
       if (!token) throw new Error("Không tìm thấy token xác thực");
+      if (!userId) throw new Error("Không tìm thấy userId trong token");
 
       const response = await fetch(
         `http://localhost:7092/api/Users/GetMemberProfileWithFullOption?userId=${userId}`,
