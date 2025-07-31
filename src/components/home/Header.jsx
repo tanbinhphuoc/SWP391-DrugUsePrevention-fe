@@ -416,7 +416,7 @@ const NavLinks = ({ handleSmoothScroll, handleNavigation, activeSection }) => {
           >
             💬 Tư vấn
           </button>
-          <button
+          {/* <button
             onClick={() => {
               closeDropdown();
               handleNavigation('/community-programs', 'Chương trình cộng đồng');
@@ -424,11 +424,11 @@ const NavLinks = ({ handleSmoothScroll, handleNavigation, activeSection }) => {
             className="block w-full text-left px-4 py-3 text-sky-800 hover:bg-gradient-to-r hover:from-sky-50 hover:to-emerald-50 hover:text-orange-500 transition-all duration-200 text-sm font-medium"
           >
             🤝 Chương trình cộng đồng
-          </button>
+          </button> */}
         </div>
       </div>
 
-      <button 
+      {/* <button 
         onClick={() => handleNavigation('/resources', 'Tài nguyên')}
         className="text-sky-700 hover:text-orange-500 transition-all duration-300 text-sm font-medium px-3 py-2 rounded-lg hover:bg-sky-50 group relative"
       >
@@ -445,7 +445,7 @@ const NavLinks = ({ handleSmoothScroll, handleNavigation, activeSection }) => {
         <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-orange-400 to-orange-600 transform transition-transform duration-300 ${
           activeSection === 'contact' ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
         }`}></span>
-      </a>
+      </a> */}
     </>
   )
 }

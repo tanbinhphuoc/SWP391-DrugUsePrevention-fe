@@ -58,7 +58,15 @@ const AccountManagement = () => {
     googleMeetLink: '',
   })
 
-  // Fetch users
+  // Danh sách chuyên môn hợp lệ
+  const validSpecialties = [
+    "Tâm lý học lâm sàng",
+    "Tư vấn gia đình",
+    "Cai nghiện",
+    "Hỗ trợ tâm lý",
+  ]
+
+  // Fetch users and consultants
   const fetchUsers = async () => {
     setLoading(true)
     setError(null)
@@ -71,7 +79,7 @@ const AccountManagement = () => {
       try {
         const tokenData = JSON.parse(atob(token.split('.')[1]))
         const expiresAt = tokenData.exp ? new Date(tokenData.exp * 1000) : null
-        const now = new Date() 
+        const now = new Date()
         if (expiresAt && now > expiresAt) {
           throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
         }
@@ -84,7 +92,89 @@ const AccountManagement = () => {
         throw new Error("Token xác thực không hợp lệ. Vui lòng đăng nhập lại.")
       }
 
-      const response = await fetch("http://localhost:7092/api/Admin/GetAllUsers", {
+      // Fetch all users
+      const usersResponse = await fetch("http://localhost:7092/api/Admin/GetAllUsers", {
+        method: "GET",
+        headers: {
+          "Accept": "*/*",
+          "Authorization": `Bearer ${token}`,
+        },
+      })
+
+      if (!usersResponse.ok) {
+        const errorText = await usersResponse.text()
+        console.error("Users API Error:", usersResponse.status, errorText)
+        throw new Error(`Lấy danh sách người dùng thất bại. Mã lỗi: ${usersResponse.status} - ${errorText}`)
+      }
+
+      const usersData = await usersResponse.json()
+      if (!usersData.success || !Array.isArray(usersData.data)) {
+        console.error("Users API Response:", usersData)
+        throw new Error(usersData.message || "Dữ liệu API không hợp lệ.")
+      }
+
+      // Fetch all consultants
+      const consultantsResponse = await fetch("http://localhost:7092/api/Appointments/GetAllConsultant", {
+        method: "GET",
+        headers: {
+          "Accept": "*/*",
+          "Authorization": `Bearer ${token}`,
+        },
+      })
+
+      if (!consultantsResponse.ok) {
+        const errorText = await consultantsResponse.text()
+        console.error("Consultants API Error:", consultantsResponse.status, errorText)
+        throw new Error(`Lấy danh sách Consultant thất bại. Mã lỗi: ${consultantsResponse.status} - ${errorText}`)
+      }
+
+      const consultantsData = await consultantsResponse.json()
+      if (!consultantsData.success || !Array.isArray(consultantsData.data)) {
+        console.error("Consultants API Response:", consultantsData)
+        throw new Error(consultantsData.message || "Dữ liệu API Consultant không hợp lệ.")
+      }
+
+      // Map users and merge with consultant data
+      const mappedUsers = usersData.data.map((user) => {
+        const consultant = consultantsData.data.find(c => c.userId === user.userID)
+        return {
+          id: user.userID,
+          userName: user.userName || '',
+          fullName: user.fullName || '',
+          email: user.email || "Không có email",
+          role: user.roleName || "Unknown",
+          status: user.status || "Inactive",
+          createdAt: user.createdDate ? new Date(user.createdDate) : new Date(),
+          updatedAt: user.updatedDate ? new Date(user.updatedDate) : null,
+          dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split("T")[0] : '',
+          phone: user.phone || '',
+          address: user.address || '',
+          consultantId: consultant ? consultant.consultantID : null,
+          degree: consultant ? consultant.degree : '',
+          hourlyRate: consultant ? consultant.hourlyRate.toString() : '',
+          specialty: consultant ? consultant.specialty : '',
+          experience: consultant ? consultant.experience : '',
+          certificateName: consultant ? consultant.certificateName : '',
+          dateAcquired: consultant ? new Date(consultant.dateAcquired).toISOString().split("T")[0] : '',
+          googleMeetLink: consultant ? consultant.googleMeetLink : '',
+        }
+      })
+
+      setUsers(mappedUsers)
+    } catch (err) {
+      console.error("Fetch Error:", err)
+      setError(err.message || "Đã xảy ra lỗi khi tải dữ liệu.")
+      toast.error(err.message || "Đã xảy ra lỗi khi tải dữ liệu.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Fetch user details
+  const fetchUserDetails = async (userId) => {
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`http://localhost:7092/api/Users/${userId}GetAllUser`, {
         method: "GET",
         headers: {
           "Accept": "*/*",
@@ -94,31 +184,25 @@ const AccountManagement = () => {
 
       if (!response.ok) {
         const errorText = await response.text()
-        console.error("API Error:", response.status, errorText)
-        throw new Error(`Lấy danh sách người dùng thất bại. Mã lỗi: ${response.status} - ${errorText}`)
+        throw new Error(`Lấy thông tin người dùng thất bại. Mã lỗi: ${response.status} - ${errorText}`)
       }
 
       const data = await response.json()
-      if (!data.success || !Array.isArray(data.data)) {
-        console.error("API Response:", data)
-        throw new Error(data.message || "Dữ liệu API không hợp lệ.")
+      return {
+        userName: data.userName || '',
+        fullName: data.fullName || '',
+        email: data.email || '',
+        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split("T")[0] : '',
+        phone: data.phone || '',
+        address: data.address || '',
+        role: data.roleName || 'Unknown',
+        status: data.status || 'Inactive',
+        createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+        updatedAt: data.updatedAt ? new Date(data.updatedAt) : null,
       }
-
-      setUsers(data.data.map((user) => ({
-        id: user.userID,
-        userName: user.userName || '',
-        fullName: user.fullName || '',
-        email: user.email || "Không có email",
-        role: user.roleName || "Unknown",
-        status: user.status || "Inactive",
-        createdAt: user.createdDate ? new Date(user.createdDate) : new Date(), // Assume createdDate exists; fallback to current date
-      })))
     } catch (err) {
-      console.error("Fetch Error:", err)
-      setError(err.message || "Đã xảy ra lỗi khi tải dữ liệu.")
-      toast.error(err.message || "Đã xảy ra lỗi khi tải dữ liệu.")
-    } finally {
-      setLoading(false)
+      console.error("Fetch User Details Error:", err)
+      throw err
     }
   }
 
@@ -144,10 +228,8 @@ const AccountManagement = () => {
             (statusFilter ? user.status === statusFilter : true)
         )
         .sort((a, b) => {
-          // Prioritize Active status
           if (a.status === "Active" && b.status !== "Active") return -1
           if (a.status !== "Active" && b.status === "Active") return 1
-          // Within same status, sort by createdAt descending (newest first)
           return b.createdAt - a.createdAt
         })
     : []
@@ -157,21 +239,51 @@ const AccountManagement = () => {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const validateFormData = (data) => {
-    if (!data.email?.includes('@')) {
+  const validateFormData = (data, isConsultant) => {
+    if (!data.email?.includes('@') && !isConsultant) {
       toast.error('Email không hợp lệ')
       return false
     }
-    if (data.roleName === 'Consultant' && !data.hourlyRate) {
-      toast.error('Vui lòng nhập giá tư vấn')
+    if (!data.fullName) {
+      toast.error('Vui lòng nhập họ và tên')
       return false
+    }
+    if (isConsultant) {
+      if (!data.hourlyRate || isNaN(parseFloat(data.hourlyRate)) || parseFloat(data.hourlyRate) <= 0) {
+        toast.error('Vui lòng nhập giá tư vấn hợp lệ (số dương)')
+        return false
+      }
+      if (!data.degree) {
+        toast.error('Vui lòng nhập bằng cấp')
+        return false
+      }
+      if (!data.specialty || !validSpecialties.includes(data.specialty)) {
+        toast.error('Vui lòng chọn chuyên môn hợp lệ')
+        return false
+      }
+      if (!data.experience) {
+        toast.error('Vui lòng nhập kinh nghiệm')
+        return false
+      }
+      if (!data.certificateName) {
+        toast.error('Vui lòng nhập tên chứng chỉ')
+        return false
+      }
+      if (!data.dateAcquired) {
+        toast.error('Vui lòng nhập ngày cấp chứng chỉ')
+        return false
+      }
+      if (data.googleMeetLink && !data.googleMeetLink.startsWith('https://meet.google.com/')) {
+        toast.error('Link Google Meet không hợp lệ')
+        return false
+      }
     }
     return true
   }
 
   const handleCreate = async (e) => {
     e.preventDefault()
-    if (!validateFormData(formData)) return
+    if (!validateFormData(formData, formData.roleName === "Consultant")) return
     try {
       const token = localStorage.getItem("token")
       if (!token) {
@@ -192,7 +304,8 @@ const AccountManagement = () => {
           specialty: formData.specialty,
           experience: formData.experience,
           certificateName: formData.certificateName,
-          dateAcquired: formData.dateAcquired ? `${formData.dateAcquired}T00:00:00Z` : null,
+          dateAcquired: formData.dateAcquired ? `${formData.dateAcquired}T00:00:00` : null,
+          googleMeetLink: formData.googleMeetLink || null,
         }
       } else {
         url = "http://localhost:7092/api/Auth/admin/create-user"
@@ -201,13 +314,14 @@ const AccountManagement = () => {
           password: formData.password,
           email: formData.email,
           fullName: formData.fullName,
-          dateOfBirth: formData.dateOfBirth ? `${formData.dateOfBirth}T00:00:00Z` : null,
+          dateOfBirth: formData.dateOfBirth ? `${formData.dateOfBirth}T00:00:00` : null,
           phone: formData.phone,
           address: formData.address,
           roleName: formData.roleName,
         }
       }
 
+      console.log("Create Request Body:", JSON.stringify(body, null, 2))
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -219,13 +333,33 @@ const AccountManagement = () => {
       })
 
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error("Create API Error:", response.status, errorText)
-        throw new Error(`Tạo tài khoản thất bại. Mã lỗi: ${response.status} - ${errorText}`)
+        const errorData = await response.json()
+        console.error("Create API Error:", response.status, errorData)
+        if (response.status === 400 && errorData.message?.includes("duplicate")) {
+          throw new Error("Tên đăng nhập hoặc email đã tồn tại.")
+        }
+        throw new Error(errorData.message || `Tạo tài khoản thất bại. Mã lỗi: ${response.status}`)
       }
 
       toast.success("Tạo tài khoản thành công!")
       setShowCreateModal(false)
+      setFormData({
+        userName: '',
+        password: '',
+        email: '',
+        fullName: '',
+        dateOfBirth: '',
+        phone: '',
+        address: '',
+        roleName: 'Member',
+        degree: '',
+        hourlyRate: '',
+        specialty: '',
+        experience: '',
+        certificateName: '',
+        dateAcquired: '',
+        googleMeetLink: '',
+      })
       fetchUsers()
     } catch (err) {
       console.error("Create Error:", err)
@@ -235,7 +369,7 @@ const AccountManagement = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault()
-    if (!validateFormData(formData)) return
+    if (!validateFormData(formData, selectedUser.role === "Consultant")) return
     try {
       const token = localStorage.getItem("token")
       if (!token) {
@@ -245,33 +379,34 @@ const AccountManagement = () => {
       let url
       let body
       if (selectedUser.role === "Consultant") {
-        url = `http://localhost:7092/api/Consultant/${selectedUser.id}UpdateConsultant`
+        url = `http://localhost:7092/api/Consultant/${selectedUser.consultantId}`
         body = {
-          userName: formData.userName,
-          password: formData.password,
-          email: formData.email,
-          fullName: formData.fullName,
-          degree: formData.degree,
+          fullName: formData.fullName || '',
+          password: formData.password || null,
+          degree: formData.degree || '',
           hourlyRate: parseFloat(formData.hourlyRate) || 0,
-          specialty: formData.specialty,
-          experience: formData.experience,
-          certificateName: formData.certificateName,
-          dateAcquired: formData.dateAcquired ? `${formData.dateAcquired}T00:00:00Z` : null,
+          specialty: formData.specialty || '',
+          experience: formData.experience || '',
+          certificateName: formData.certificateName || '',
+          dateAcquired: formData.dateAcquired ? `${formData.dateAcquired}T00:00:00` : null,
           googleMeetLink: formData.googleMeetLink || null,
         }
       } else {
         url = `http://localhost:7092/api/Users/${selectedUser.id}/AdminUpdateProfileUser`
         body = {
-          fullName: formData.fullName,
-          phone: formData.phone,
-          address: formData.address,
-          dateOfBirth: formData.dateOfBirth ? `${formData.dateOfBirth}T00:00:00Z` : null,
+          userName: formData.userName,
+          password: formData.password || null,
           email: formData.email,
+          fullName: formData.fullName,
+          dateOfBirth: formData.dateOfBirth ? `${formData.dateOfBirth}T00:00:00` : null,
+          phone: formData.phone || null,
+          address: formData.address || null,
         }
       }
 
+      console.log("Update Request Body:", JSON.stringify(body, null, 2))
       const response = await fetch(url, {
-        method: "PUT",
+        method: selectedUser.role === "Consultant" ? "PATCH" : "PUT",
         headers: {
           "Accept": "*/*",
           "Authorization": `Bearer ${token}`,
@@ -281,13 +416,42 @@ const AccountManagement = () => {
       })
 
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error("Update API Error:", response.status, errorText)
-        throw new Error(`Cập nhật tài khoản thất bại. Mã lỗi: ${response.status} - ${errorText}`)
+        const errorData = await response.json()
+        console.error("Update API Error:", response.status, errorData)
+        if (response.status === 400) {
+          throw new Error(errorData.message || "Dữ liệu gửi không hợp lệ. Vui lòng kiểm tra lại thông tin.")
+        }
+        if (response.status === 404) {
+          throw new Error("Không tìm thấy tài khoản.")
+        }
+        if (response.status === 401) {
+          localStorage.removeItem("token")
+          toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.")
+          window.location.href = "/login"
+          return
+        }
+        throw new Error(errorData.message || `Cập nhật tài khoản thất bại. Mã lỗi: ${response.status}`)
       }
 
       toast.success("Cập nhật tài khoản thành công!")
       setShowEditModal(false)
+      setFormData({
+        userName: '',
+        password: '',
+        email: '',
+        fullName: '',
+        dateOfBirth: '',
+        phone: '',
+        address: '',
+        roleName: 'Member',
+        degree: '',
+        hourlyRate: '',
+        specialty: '',
+        experience: '',
+        certificateName: '',
+        dateAcquired: '',
+        googleMeetLink: '',
+      })
       fetchUsers()
     } catch (err) {
       console.error("Update Error:", err)
@@ -309,6 +473,7 @@ const AccountManagement = () => {
 
       const url = `http://localhost:7092/api/Admin/users/${user.id}/SetStatusForUser`
 
+      console.log("Toggle Status Request Body:", JSON.stringify(newStatus))
       const response = await fetch(url, {
         method: "PUT",
         headers: {
@@ -320,14 +485,9 @@ const AccountManagement = () => {
       })
 
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error("Toggle Status API Error:", response.status, errorText)
-        throw new Error(`Cập nhật trạng thái thất bại. Mã lỗi: ${response.status} - ${errorText}`)
-      }
-
-      const data = await response.json()
-      if (!data.success) {
-        throw new Error(data.message || "Cập nhật trạng thái không thành công.")
+        const errorData = await response.json()
+        console.error("Toggle Status API Error:", response.status, errorData)
+        throw new Error(errorData.message || `Cập nhật trạng thái thất bại. Mã lỗi: ${response.status}`)
       }
 
       toast.success(`Đã ${actionMessage} tài khoản thành công!`)
@@ -338,23 +498,33 @@ const AccountManagement = () => {
     }
   }
 
-  const handleEditClick = (user) => {
+  const handleEditClick = async (user) => {
     setSelectedUser(user)
+    let userDetails = {}
+    if (user.role !== "Consultant") {
+      try {
+        userDetails = await fetchUserDetails(user.id)
+      } catch (err) {
+        toast.error("Không thể tải thông tin người dùng: " + err.message)
+        return
+      }
+    }
     setFormData({
       userName: user.userName,
       password: '',
       email: user.email,
       fullName: user.fullName,
-      dateOfBirth: '',
-      phone: '',
-      address: '',
-      degree: '',
-      hourlyRate: '',
-      specialty: '',
-      experience: '',
-      certificateName: '',
-      dateAcquired: '',
-      googleMeetLink: '',
+      dateOfBirth: userDetails.dateOfBirth || user.dateOfBirth || '',
+      phone: userDetails.phone || user.phone || '',
+      address: userDetails.address || user.address || '',
+      roleName: user.role,
+      degree: user.degree || '',
+      hourlyRate: user.hourlyRate || '',
+      specialty: user.specialty || '',
+      experience: user.experience || '',
+      certificateName: user.certificateName || '',
+      dateAcquired: user.dateAcquired || '',
+      googleMeetLink: user.googleMeetLink || '',
     })
     setShowEditModal(true)
   }
@@ -485,6 +655,9 @@ const AccountManagement = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Trạng thái
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Chuyên môn
+                    </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Thao tác
                     </th>
@@ -524,6 +697,9 @@ const AccountManagement = () => {
                         >
                           {user.status === "Active" ? "Đang hoạt động" : user.status === "Inactive" ? "Không hoạt động" : "Không xác định"}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">{user.specialty || 'N/A'}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
@@ -663,18 +839,24 @@ const AccountManagement = () => {
                           value={formData.hourlyRate}
                           onChange={handleFormChange}
                           required
+                          min="1"
                           className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Chuyên môn</label>
-                        <input
+                        <select
                           name="specialty"
                           value={formData.specialty}
                           onChange={handleFormChange}
                           required
                           className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
+                        >
+                          <option value="">Chọn chuyên môn</option>
+                          {validSpecialties.map((spec) => (
+                            <option key={spec} value={spec}>{spec}</option>
+                          ))}
+                        </select>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Kinh nghiệm</label>
@@ -707,6 +889,15 @@ const AccountManagement = () => {
                           className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Link Google Meet</label>
+                        <input
+                          name="googleMeetLink"
+                          value={formData.googleMeetLink}
+                          onChange={handleFormChange}
+                          className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
                     </>
                   )}
                   <div className="flex justify-end gap-3">
@@ -734,15 +925,20 @@ const AccountManagement = () => {
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
               <div className="bg-white p-6 rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">Sửa thông tin tài khoản</h2>
+                <p className="text-sm text-gray-500 mb-4">
+                  {selectedUser.role === 'Consultant' && "Lưu ý: Tên đăng nhập và email không thể thay đổi khi chỉnh sửa Consultant."}
+                </p>
                 <form onSubmit={handleUpdate} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Họ và tên</label>
+                    <label className="block text-sm font-medium text-gray-700">Tên đăng nhập</label>
                     <input
-                      name="fullName"
-                      value={formData.fullName}
+                      name="userName"
+                      value={formData.userName}
                       onChange={handleFormChange}
-                      required
-                      className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      disabled={selectedUser.role === 'Consultant'}
+                      className={`mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                        selectedUser.role === 'Consultant' ? 'bg-gray-100 text-gray-500' : ''
+                      }`}
                     />
                   </div>
                   <div>
@@ -751,6 +947,28 @@ const AccountManagement = () => {
                       name="email"
                       type="email"
                       value={formData.email}
+                      onChange={handleFormChange}
+                      disabled={selectedUser.role === 'Consultant'}
+                      className={`mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                        selectedUser.role === 'Consultant' ? 'bg-gray-100 text-gray-500' : ''
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Mật khẩu (tùy chọn)</label>
+                    <input
+                      name="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={handleFormChange}
+                      className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Họ và tên</label>
+                    <input
+                      name="fullName"
+                      value={formData.fullName}
                       onChange={handleFormChange}
                       required
                       className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -791,26 +1009,6 @@ const AccountManagement = () => {
                   {selectedUser.role === 'Consultant' && (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Tên đăng nhập</label>
-                        <input
-                          name="userName"
-                          value={formData.userName}
-                          onChange={handleFormChange}
-                          required
-                          className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Mật khẩu (tùy chọn)</label>
-                        <input
-                          name="password"
-                          type="password"
-                          value={formData.password}
-                          onChange={handleFormChange}
-                          className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
                         <label className="block text-sm font-medium text-gray-700">Bằng cấp</label>
                         <input
                           name="degree"
@@ -828,18 +1026,24 @@ const AccountManagement = () => {
                           value={formData.hourlyRate}
                           onChange={handleFormChange}
                           required
+                          min="1"
                           className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Chuyên môn</label>
-                        <input
+                        <select
                           name="specialty"
                           value={formData.specialty}
                           onChange={handleFormChange}
                           required
                           className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
+                        >
+                          <option value="">Chọn chuyên môn</option>
+                          {validSpecialties.map((spec) => (
+                            <option key={spec} value={spec}>{spec}</option>
+                          ))}
+                        </select>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Kinh nghiệm</label>
@@ -916,7 +1120,7 @@ const AccountManagement = () => {
             error: {
               duration: 3000,
               style: {
-                background: '#ef4444', 
+                background: '#ef4444',
                 color: 'white',
               },
             },

@@ -215,6 +215,14 @@ const UserOverview = () => {
         })
       : "Chưa cập nhật";
 
+  // Tính độ tuổi tại thời điểm thực hiện bài kiểm tra
+  const calculateAgeAtAssessment = (assessmentDate) => {
+    if (!profileData?.age || !assessmentDate) return "N/A";
+    const currentYear = new Date().getFullYear();
+    const assessmentYear = new Date(assessmentDate).getFullYear();
+    return profileData.age - (currentYear - assessmentYear);
+  };
+
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage error={error} onRetry={fetchProfileData} />;
 
@@ -477,7 +485,7 @@ const UserOverview = () => {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-slate-900">Lịch sử đánh giá</h3>
-                <p className="text-sm text-slate-600">Chi tiết các lần đánh giá rủi ro</p>
+                <p className="text-sm text-slate-600">Chi tiết các lần đánh giá rủi ro (đầu vào theo độ tuổi, đầu ra liên kết khóa học)</p>
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -488,6 +496,8 @@ const UserOverview = () => {
                     <th className="text-left py-3 px-4 font-semibold text-slate-900">Giai đoạn</th>
                     <th className="text-left py-3 px-4 font-semibold text-slate-900">Điểm số</th>
                     <th className="text-left py-3 px-4 font-semibold text-slate-900">Thời gian</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-900">Thông tin liên kết</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-900">Loại đánh giá</th>
                     <th className="text-left py-3 px-4 font-semibold text-slate-900">Mức độ</th>
                   </tr>
                 </thead>
@@ -500,12 +510,26 @@ const UserOverview = () => {
                         <tr key={index} className="border-b border-slate-100 hover:bg-slate-50">
                           <td className="py-3 px-4">{profileData.assessmentResults.length - index}</td>
                           <td className="py-3 px-4">
-                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                              {result.stage || "Chưa xác định"}
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                result.stage === "Input"
+                                  ? "bg-indigo-100 text-indigo-800"
+                                  : "bg-blue-100 text-blue-800"
+                              }`}
+                            >
+                              {result.stage === "Input" ? "Input" : result.stage || "Chưa xác định"}
                             </span>
                           </td>
                           <td className="py-3 px-4 font-semibold">{result.score ?? "N/A"}</td>
                           <td className="py-3 px-4 text-slate-600">{formatDateTime(result.takeTime)}</td>
+                          <td className="py-3 px-4 text-slate-600">
+                            {result.stage === "Input"
+                              ? `${calculateAgeAtAssessment(result.takeTime)} tuổi`
+                              : result.courseName || "Không liên kết khóa học"}
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">
+                            {result.assessmentType || "Chưa xác định"}
+                          </td>
                           <td className="py-3 px-4">
                             <span
                               className={`px-2 py-1 rounded-full text-xs font-medium ${riskLevel.bgColor} text-${riskLevel.color}-800`}
