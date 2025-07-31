@@ -89,11 +89,10 @@ const AppointmentManagement = () => {
 
   const mapStatus = (status, paymentStatus) => {
     if (status === "CANCELED") return "Đã hủy";
-    if (status === "PENDING_PAYMENT") {
+    if (status === "PENDING_PAYMENT") return "Chờ xác nhận";
       if (paymentStatus === "PENDING") return "Chờ xác nhận";
       if (paymentStatus === "SUCCESS") return "Đã xác nhận";
       if (paymentStatus === "FAILED") return "Thất bại";
-    }
     return "Không xác định";
   };
 

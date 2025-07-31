@@ -4,13 +4,6 @@ import { useState, useCallback, useEffect } from "react"
 import { User, Lock, Eye, EyeOff, ArrowLeft, Shield, Sparkles, Users, CheckCircle, Heart, BookOpen, HandHeart } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
-const demoAccounts = {
-  demo_member: { role: "Member", roleId: 2 },
-  demo_staff: { role: "Staff", roleId: 3 },
-  demo_consult: { role: "Consultant", roleId: 4 },
-  demo_manager: { role: "Manager", roleId: 5 },
-  demo_admin: { role: "Admin", roleId: 6 },
-}
 
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -434,37 +427,7 @@ const SignIn = () => {
                   </button>
                 </p>
 
-                {/* Demo Accounts */}
-                {useDemo && (
-                  <div className="mt-8 p-6 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 animate-in slide-in-from-bottom-4 duration-500">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-6 h-6 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full flex items-center justify-center">
-                        <Sparkles className="w-3 h-3 text-white" />
-                      </div>
-                      <h3 className="font-semibold text-slate-800">Tài khoản demo có sẵn:</h3>
-                    </div>
-                    <div className="space-y-2">
-                      {Object.entries(demoAccounts).map(([username, info], index) => (
-                        <button
-                          key={username}
-                          onClick={() => handleSelectDemo(username)}
-                          className="w-full p-3 bg-white/70 hover:bg-white border border-emerald-200 rounded-lg transition-all duration-200 hover:shadow-md group animate-in slide-in-from-right-4"
-                          style={{ animationDelay: `${index * 100}ms` }}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="text-left">
-                              <div className="font-medium text-slate-800 text-sm">{username}</div>
-                              <div className="text-slate-500 text-xs">Mật khẩu: 123456</div>
-                            </div>
-                            <div className="text-xs bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 px-2 py-1 rounded-full">
-                              {info.role}
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+               
               </div>
             </div>
           </div>
