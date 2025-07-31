@@ -419,8 +419,6 @@ const UserSurveys = () => {
                   className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors font-medium"
                   onClick={() => navigate("/UserAppointments")}
                 >
-                  <span>📋 Xem chi tiết & đề xuất</span>
-                  <ArrowLeft className="w-4 h-4 rotate-180" />
                 </button>
               </div>
             </div>
