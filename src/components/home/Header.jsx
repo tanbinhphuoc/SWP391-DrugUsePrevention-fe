@@ -174,7 +174,7 @@ const Header = () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-sky-500/20 to-emerald-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
                 <span className="ml-3 font-bold text-xl text-sky-700 group-hover:text-sky-600 transition-colors duration-300">
-                  PreventionSupport
+                  DrugPreventionSupport
                 </span>
               </a>
             </div>
