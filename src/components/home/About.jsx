@@ -176,7 +176,7 @@ const About = () => {
             className={`inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-6 py-3 rounded-full shadow-lg mb-8 transform transition-all duration-1000 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
           >
             <Shield className="h-5 w-5 text-white" />
-            <span className="text-white font-semibold">PreventionSupport</span>
+            <span className="text-white font-semibold">DrugPreventionSupport</span>
           </div>
 
           {/* Main Title matching website style */}
@@ -225,42 +225,7 @@ const About = () => {
         </div>
 
         {/* Values Grid matching website services */}
-        <div ref={valuesRef} className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-          {values.map((item, idx) => (
-            <div
-              key={idx}
-              className={`group relative transform transition-all duration-1000 hover:scale-105 ${
-                scrollAnimations.values ? "translate-y-0 opacity-100 scale-100" : "translate-y-12 opacity-0 scale-95"
-              }`}
-              style={{ transitionDelay: `${idx * 150 + 200}ms` }}
-              onMouseEnter={() => setActiveCard(idx)}
-              onMouseLeave={() => setActiveCard(null)}
-            >
-              <div className="group relative bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:transform hover:scale-105 hover:shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-sky-400/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                {/* Background icon */}
-                <div className="absolute -top-6 -right-6 text-white/5 transform rotate-12 group-hover:rotate-0 group-hover:scale-110 transition-all duration-500">
-                  {item.bgIcon}
-                </div>
-
-                <div className="relative z-10">
-                  <div className="bg-white/20 rounded-xl p-3 w-fit mb-4 group-hover:bg-emerald-400/30 transition-colors duration-300">
-                    {React.cloneElement(item.icon, { className: "w-6 h-6 text-white" })}
-                  </div>
-
-                  <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-
-                  <p className="text-sky-100 text-sm leading-relaxed">{item.description}</p>
-
-                  <div className="mt-6 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                    <ArrowRight className="h-5 w-5 text-emerald-200 animate-pulse" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
 
         {/* Story Section */}
         <div
@@ -333,14 +298,6 @@ const About = () => {
             scrollAnimations.cta ? "scale-100 opacity-100 translate-y-0" : "scale-90 opacity-0 translate-y-8"
           }`}
         >
-          <div className="group relative bg-white text-sky-700 font-semibold px-8 py-4 rounded-full overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl inline-flex items-center gap-3 cursor-pointer">
-            <span className="relative z-10 flex items-center gap-2">
-              Khám Phá Khóa Học
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-sky-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="absolute inset-0 bg-white group-hover:opacity-0 transition-opacity duration-300"></div>
-          </div>
 
           <p className="text-sky-100 text-sm mt-4 font-medium">
             Tham gia cùng chúng tôi trong việc xây dựng cộng đồng khỏe mạnh
