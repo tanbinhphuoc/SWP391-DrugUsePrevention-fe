@@ -1,26 +1,26 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Search, Edit2, Trash2, Plus, FileText, X, Eye, Save, Calendar, Target } from "lucide-react"
-import { toast, ToastContainer } from "react-toastify"
-import "./RiskAssessmentManagement.css"
+import { useState, useEffect } from "react";
+import { Search, Edit2, Trash2, Plus, FileText, X, Eye, Save, Calendar, Target } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
+import "./RiskAssessmentManagement.css";
 
 const RiskAssessmentManagement = () => {
-  const [assessments, setAssessments] = useState([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("")
-  const [token] = useState(localStorage.getItem("token") || "")
-  const [showAssessmentModal, setShowAssessmentModal] = useState(false)
-  const [showQuestionModal, setShowQuestionModal] = useState(false)
-  const [showViewModal, setShowViewModal] = useState(false)
-  const [assessmentType, setAssessmentType] = useState("Input")
-  const [newAssessmentID, setNewAssessmentID] = useState(null)
+  const [assessments, setAssessments] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [token] = useState(localStorage.getItem("token") || "");
+  const [showAssessmentModal, setShowAssessmentModal] = useState(false);
+  const [showQuestionModal, setShowQuestionModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [assessmentType, setAssessmentType] = useState("Input");
+  const [newAssessmentID, setNewAssessmentID] = useState(null);
   const [formData, setFormData] = useState({
     assessmentName: "",
     description: "",
     assessmentType: "Crafft",
     courseID: "",
-  })
+  });
   const [questions, setQuestions] = useState([
     {
       questionText: "",
@@ -30,130 +30,130 @@ const RiskAssessmentManagement = () => {
         { optionText: "no", scoreValue: 0 },
       ],
     },
-  ])
-  const [viewQuestions, setViewQuestions] = useState([])
-  const [selectedAssessmentId, setSelectedAssessmentId] = useState(null)
-  const [showAddQuestionForm, setShowAddQuestionForm] = useState(false)
-  const [newQuestions, setNewQuestions] = useState([])
-  const [courses, setCourses] = useState([])
-  const [isEditing, setIsEditing] = useState(false)
-  const [editingAssessment, setEditingAssessment] = useState(null)
-  const [editingQuestionId, setEditingQuestionId] = useState(null)
-  const [editingQuestion, setEditingQuestion] = useState({ questionText: "", questionType: "yes/no" })
+  ]);
+  const [viewQuestions, setViewQuestions] = useState([]);
+  const [selectedAssessmentId, setSelectedAssessmentId] = useState(null);
+  const [showAddQuestionForm, setShowAddQuestionForm] = useState(false);
+  const [newQuestions, setNewQuestions] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingAssessment, setEditingAssessment] = useState(null);
+  const [editingQuestionId, setEditingQuestionId] = useState(null);
+  const [editingQuestion, setEditingQuestion] = useState({ questionText: "", questionType: "yes/no" });
 
   useEffect(() => {
     const fetchAssessments = async () => {
-      if (!token) return toast.error("Vui lòng đăng nhập để tiếp tục")
+      if (!token) return toast.error("Vui lòng đăng nhập để tiếp tục");
       try {
         // Fetch Input assessments
         const inputRes = await fetch("http://localhost:7092/api/Assessment/GetAllInput", {
           headers: { Authorization: `Bearer ${token}` },
-        })
-        const inputData = await inputRes.json()
-        const inputAssessments = inputRes.ok && inputData.success 
-          ? (inputData.data || []).map(item => ({
+        });
+        const inputData = await inputRes.json();
+        const inputAssessments = inputRes.ok && inputData.success
+          ? (inputData.data || []).map((item) => ({
               ...item,
-              assessmentStage: "Input"
-            })) 
-          : []
+              assessmentStage: "Input",
+            }))
+          : [];
 
         // Fetch Output assessments
         const outputRes = await fetch("http://localhost:7092/api/Assessment/GetAllOutput", {
           headers: { Authorization: `Bearer ${token}` },
-        })
-        const outputData = await outputRes.json()
-        const outputAssessments = outputRes.ok && outputData.success 
-          ? (outputData.data || []).map(item => ({
+        });
+        const outputData = await outputRes.json();
+        const outputAssessments = outputRes.ok && outputData.success
+          ? (outputData.data || []).map((item) => ({
               ...item,
-              assessmentStage: "Output"
-            })) 
-          : []
+              assessmentStage: "Output",
+            }))
+          : [];
 
         // Combine both
-        setAssessments([...inputAssessments, ...outputAssessments])
-        
+        setAssessments([...inputAssessments, ...outputAssessments]);
+
         if (!inputRes.ok || !inputData.success || !outputRes.ok || !outputData.success) {
-          toast.error("Không thể lấy đầy đủ danh sách bài đánh giá")
+          toast.error("Không thể lấy đầy đủ danh sách bài đánh giá");
         }
       } catch (err) {
-        toast.error(err.message || "Không thể lấy danh sách bài đánh giá")
+        toast.error(err.message || "Không thể lấy danh sách bài đánh giá");
       }
-    }
+    };
 
     const fetchCourses = async () => {
       try {
         const res = await fetch("http://localhost:7092/api/Course/GetAllCourse", {
           headers: { Authorization: `Bearer ${token}` },
-        })
-        const data = await res.json()
+        });
+        const data = await res.json();
         if (res.ok && data.success) {
-          setCourses(data.data || [])
+          setCourses(data.data || []);
         } else {
-          toast.error(data.message || "Không thể lấy danh sách khóa học")
+          toast.error(data.message || "Không thể lấy danh sách khóa học");
         }
       } catch (err) {
-        toast.error(err.message || "Không thể lấy danh sách khóa học")
+        toast.error(err.message || "Không thể lấy danh sách khóa học");
       }
-    }
+    };
 
-    fetchAssessments()
-    fetchCourses()
-  }, [token])
+    fetchAssessments();
+    fetchCourses();
+  }, [token]);
 
   useEffect(() => {
     if (assessmentType === "Output") {
-      setFormData((prev) => ({ ...prev, courseID: "" }))
+      setFormData((prev) => ({ ...prev, courseID: "" }));
     }
-  }, [formData.assessmentType])
+  }, [formData.assessmentType]);
 
-  const handleSearch = (e) => setSearchTerm(e.target.value)
-  const handleStatusFilter = (e) => setStatusFilter(e.target.value)
+  const handleSearch = (e) => setSearchTerm(e.target.value);
+  const handleStatusFilter = (e) => setStatusFilter(e.target.value);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa bài đánh giá này?")) return
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bài đánh giá này?")) return;
     try {
       const res = await fetch(`http://localhost:7092/api/Assessment/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (data.success) {
-        setAssessments(assessments.filter((item) => item.assessmentID !== id))
-        toast.success("Xóa bài đánh giá thành công")
+        setAssessments(assessments.filter((item) => item.assessmentID !== id));
+        toast.success("Xóa bài đánh giá thành công");
       } else {
-        toast.error(data.message || "Không thể xóa bài đánh giá")
+        toast.error(data.message || "Không thể xóa bài đánh giá");
       }
     } catch (err) {
-      toast.error(err.message || "Không thể xóa bài đánh giá")
+      toast.error(err.message || "Không thể xóa bài đánh giá");
     }
-  }
+  };
 
   const handleEdit = (id) => {
-    const assessment = assessments.find((item) => item.assessmentID === id)
-    setEditingAssessment(assessment)
-    setIsEditing(true)
-    setAssessmentType(assessment.assessmentStage)
+    const assessment = assessments.find((item) => item.assessmentID === id);
+    setEditingAssessment(assessment);
+    setIsEditing(true);
+    setAssessmentType(assessment.assessmentStage);
     setFormData({
       assessmentName: assessment.assessmentName,
       description: assessment.description || "",
       assessmentType: assessment.assessmentType,
       courseID: assessment.courseID || "",
-    })
-    setShowAssessmentModal(true)
-  }
+    });
+    setShowAssessmentModal(true);
+  };
 
   const handleFormChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleAssessmentSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (
       assessmentType === "Output" &&
       (!formData.courseID || isNaN(formData.courseID) || Number(formData.courseID) <= 0)
     ) {
-      return toast.error("Vui lòng chọn khóa học hợp lệ cho bài đánh giá Output")
+      return toast.error("Vui lòng chọn khóa học hợp lệ cho bài đánh giá Output");
     }
 
     const url = isEditing
@@ -162,11 +162,11 @@ const RiskAssessmentManagement = () => {
         : `http://localhost:7092/api/Assessment/UpdateOutputAssessment/${editingAssessment.assessmentID}`
       : assessmentType === "Input"
       ? "http://localhost:7092/api/Assessment/CreateInputAssessment"
-      : "http://localhost:7092/api/Assessment/CreateOutputAssessment"
+      : "http://localhost:7092/api/Assessment/CreateOutputAssessment";
 
     const payload = assessmentType === "Input"
       ? { assessmentName: formData.assessmentName, description: formData.description, assessmentType: formData.assessmentType }
-      : { assessmentName: formData.assessmentName, description: formData.description, assessmentType: formData.assessmentType, courseID: Number(formData.courseID) }
+      : { assessmentName: formData.assessmentName, description: formData.description, assessmentType: formData.assessmentType, courseID: Number(formData.courseID) };
 
     try {
       const res = await fetch(url, {
@@ -176,8 +176,8 @@ const RiskAssessmentManagement = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (data.success) {
         if (isEditing) {
           setAssessments(
@@ -186,35 +186,35 @@ const RiskAssessmentManagement = () => {
                 ? { ...payload, assessmentID: editingAssessment.assessmentID, assessmentStage: assessmentType }
                 : item,
             ),
-          )
-          setIsEditing(false)
-          setEditingAssessment(null)
-          toast.success("Cập nhật bài đánh giá thành công")
-          setShowAssessmentModal(false)
+          );
+          setIsEditing(false);
+          setEditingAssessment(null);
+          toast.success("Cập nhật bài đánh giá thành công");
+          setShowAssessmentModal(false);
         } else {
-          setAssessments([...assessments, { ...payload, assessmentID: data.assessmentId, assessmentStage: assessmentType }])
-          setNewAssessmentID(data.assessmentId)
-          setShowQuestionModal(true)
-          toast.success("Tạo bài đánh giá thành công")
-          setShowAssessmentModal(false)
+          setAssessments([...assessments, { ...payload, assessmentID: data.assessmentId, assessmentStage: assessmentType }]);
+          setNewAssessmentID(data.assessmentId);
+          setShowQuestionModal(true);
+          toast.success("Tạo bài đánh giá thành công");
+          setShowAssessmentModal(false);
         }
         setFormData({
           assessmentName: "",
           description: "",
           assessmentType: "Crafft",
           courseID: "",
-        })
+        });
       } else {
-        toast.error(data.message || "Không thể xử lý bài đánh giá")
+        toast.error(data.message || "Không thể xử lý bài đánh giá");
       }
     } catch (err) {
-      toast.error(err.message || "Không thể xử lý bài đánh giá")
+      toast.error(err.message || "Không thể xử lý bài đánh giá");
     }
-  }
+  };
 
   const handleQuestionChange = (index, field, value) => {
-    setQuestions((prev) => prev.map((q, i) => (i === index ? { ...q, [field]: value } : q)))
-  }
+    setQuestions((prev) => prev.map((q, i) => (i === index ? { ...q, [field]: value } : q)));
+  };
 
   const handleAnswerChange = (questionIndex, answerIndex, field, value) => {
     setQuestions((prev) =>
@@ -226,8 +226,8 @@ const RiskAssessmentManagement = () => {
             }
           : q,
       ),
-    )
-  }
+    );
+  };
 
   const addQuestion = () => {
     setQuestions([
@@ -240,18 +240,18 @@ const RiskAssessmentManagement = () => {
           { optionText: "no", scoreValue: 0 },
         ],
       },
-    ])
-  }
+    ]);
+  };
 
   const removeQuestion = (index) => {
-    setQuestions(questions.filter((_, i) => i !== index))
-  }
+    setQuestions(questions.filter((_, i) => i !== index));
+  };
 
   const handleQuestionSubmit = async (e) => {
-    e.preventDefault()
-    if (!newAssessmentID) return toast.error("Vui lòng tạo bài đánh giá trước khi thêm câu hỏi")
+    e.preventDefault();
+    if (!newAssessmentID) return toast.error("Vui lòng tạo bài đánh giá trước khi thêm câu hỏi");
     if (!questions.every((q) => q.questionText && q.answers.every((a) => a.optionText && a.scoreValue !== undefined))) {
-      return toast.error("Vui lòng nhập đầy đủ nội dung câu hỏi và đáp án")
+      return toast.error("Vui lòng nhập đầy đủ nội dung câu hỏi và đáp án");
     }
 
     const payload = questions.map((q) => ({
@@ -259,7 +259,7 @@ const RiskAssessmentManagement = () => {
       questionText: q.questionText,
       questionType: q.questionType,
       answers: q.answers.filter((a) => a.optionText && a.scoreValue !== undefined),
-    }))
+    }));
 
     try {
       const res = await fetch("http://localhost:7092/api/Question/CreateMultipleQuestionsWithAnswers", {
@@ -269,11 +269,11 @@ const RiskAssessmentManagement = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (data.success) {
-        toast.success("Tạo câu hỏi và đáp án thành công")
-        setShowQuestionModal(false)
+        toast.success("Tạo câu hỏi và đáp án thành công");
+        setShowQuestionModal(false);
         setQuestions([
           {
             questionText: "",
@@ -283,68 +283,73 @@ const RiskAssessmentManagement = () => {
               { optionText: "no", scoreValue: 0 },
             ],
           },
-        ])
+        ]);
       } else {
-        toast.error(data.message || "Tạo câu hỏi thất bại")
+        toast.error(data.message || "Tạo câu hỏi thất bại");
       }
     } catch (err) {
-      toast.error(err.message || "Không thể tạo câu hỏi")
+      toast.error(err.message || "Không thể tạo câu hỏi");
     }
-  }
+  };
 
   const handleViewQuestions = async (id) => {
     try {
       const res = await fetch(`http://localhost:7092/api/Question/GetQuestionsByAssessmentId/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (data.success) {
-        setViewQuestions(data.data || [])
-        setSelectedAssessmentId(id)
-        setShowViewModal(true)
+        setViewQuestions(data.data || []);
+        setSelectedAssessmentId(id);
+        setShowViewModal(true);
       } else {
-        toast.error(data.message || "Không thể lấy danh sách câu hỏi")
+        toast.error(data.message || "Không thể lấy danh sách câu hỏi");
       }
     } catch (err) {
-      toast.error(err.message || "Không thể lấy danh sách câu hỏi")
+      toast.error(err.message || "Không thể lấy danh sách câu hỏi");
     }
-  }
+  };
 
   const handleDeleteQuestion = async (questionId) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này?")) return
+    if (!window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này?")) return;
     try {
       const res = await fetch(`http://localhost:7092/api/Question/DeleteQuestionForAssessment?id=${questionId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (data.success) {
-        setViewQuestions(viewQuestions.filter((q) => q.questionId !== questionId))
-        toast.success("Xóa câu hỏi thành công")
+      });
+      const data = await res.json();
+      console.log("API Response for Delete Question:", { status: res.status, data }); // Debug chi tiết
+
+      if (res.ok && (data.success || data.message === "Xóa Question Thành Công.")) {
+        setViewQuestions(viewQuestions.filter((q) => q.questionId !== questionId));
+        toast.success("Xóa câu hỏi thành công");
       } else {
-        toast.error(data.message || "Không thể xóa câu hỏi")
+        const errorMessage = data.message || `Lỗi xóa câu hỏi (Mã trạng thái: ${res.status})`;
+        toast.error(errorMessage);
+        console.error("Delete failed:", errorMessage);
       }
     } catch (err) {
-      toast.error(err.message || "Không thể xóa câu hỏi")
+      console.error("Error deleting question:", err);
+      toast.error("Không thể xóa câu hỏi do lỗi kết nối");
     }
-  }
+  };
 
   const handleEditQuestion = (question) => {
-    setEditingQuestionId(question.questionId)
+    setEditingQuestionId(question.questionId);
     setEditingQuestion({
       questionText: question.questionText,
       questionType: question.questionType,
-    })
-  }
+    });
+  };
 
   const handleEditQuestionChange = (e) => {
-    const { name, value } = e.target
-    setEditingQuestion((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setEditingQuestion((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleEditQuestionSubmit = async (questionId) => {
     if (!editingQuestion.questionText || !selectedAssessmentId) {
-      return toast.error("Vui lòng nhập nội dung câu hỏi và đảm bảo đã chọn bài đánh giá")
+      return toast.error("Vui lòng nhập nội dung câu hỏi và đảm bảo đã chọn bài đánh giá");
     }
 
     try {
@@ -359,8 +364,8 @@ const RiskAssessmentManagement = () => {
           questionText: editingQuestion.questionText,
           questionType: editingQuestion.questionType,
         }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (data.success) {
         setViewQuestions(
           viewQuestions.map((q) =>
@@ -368,21 +373,21 @@ const RiskAssessmentManagement = () => {
               ? { ...q, questionText: editingQuestion.questionText, questionType: editingQuestion.questionType }
               : q,
           ),
-        )
-        setEditingQuestionId(null)
-        setEditingQuestion({ questionText: "", questionType: "yes/no" })
-        toast.success("Cập nhật câu hỏi thành công")
+        );
+        setEditingQuestionId(null);
+        setEditingQuestion({ questionText: "", questionType: "yes/no" });
+        toast.success("Cập nhật câu hỏi thành công");
       } else {
-        toast.error(data.message || "Cập nhật câu hỏi thất bại")
+        toast.error(data.message || "Cập nhật câu hỏi thất bại");
       }
     } catch (err) {
-      toast.error(err.message || "Không thể cập nhật câu hỏi")
+      toast.error(err.message || "Không thể cập nhật câu hỏi");
     }
-  }
+  };
 
   const handleNewQuestionChange = (index, field, value) => {
-    setNewQuestions((prev) => prev.map((q, i) => (i === index ? { ...q, [field]: value } : q)))
-  }
+    setNewQuestions((prev) => prev.map((q, i) => (i === index ? { ...q, [field]: value } : q)));
+  };
 
   const handleNewAnswerChange = (questionIndex, answerIndex, field, value) => {
     setNewQuestions((prev) =>
@@ -394,8 +399,8 @@ const RiskAssessmentManagement = () => {
             }
           : q,
       ),
-    )
-  }
+    );
+  };
 
   const addNewQuestion = () => {
     setNewQuestions([
@@ -408,21 +413,21 @@ const RiskAssessmentManagement = () => {
           { optionText: "no", scoreValue: 0 },
         ],
       },
-    ])
-    setShowAddQuestionForm(true)
-  }
+    ]);
+    setShowAddQuestionForm(true);
+  };
 
   const removeNewQuestion = (index) => {
-    setNewQuestions(newQuestions.filter((_, i) => i !== index))
-    if (newQuestions.length === 1) setShowAddQuestionForm(false)
-  }
+    setNewQuestions(newQuestions.filter((_, i) => i !== index));
+    if (newQuestions.length === 1) setShowAddQuestionForm(false);
+  };
 
   const handleAddQuestionsSubmit = async (e) => {
-    e.preventDefault()
-    if (!selectedAssessmentId) return toast.error("Vui lòng chọn bài đánh giá trước khi tạo câu hỏi")
-    if (newQuestions.length === 0) return toast.error("Vui lòng thêm ít nhất một câu hỏi")
+    e.preventDefault();
+    if (!selectedAssessmentId) return toast.error("Vui lòng chọn bài đánh giá trước khi tạo câu hỏi");
+    if (newQuestions.length === 0) return toast.error("Vui lòng thêm ít nhất một câu hỏi");
     if (!newQuestions.every((q) => q.questionText && q.answers.every((a) => a.optionText && a.scoreValue !== undefined))) {
-      return toast.error("Vui lòng nhập đầy đủ nội dung câu hỏi và đáp án")
+      return toast.error("Vui lòng nhập đầy đủ nội dung câu hỏi và đáp án");
     }
 
     const payload = newQuestions.map((q) => ({
@@ -430,7 +435,7 @@ const RiskAssessmentManagement = () => {
       questionText: q.questionText,
       questionType: q.questionType,
       answers: q.answers.filter((a) => a.optionText && a.scoreValue !== undefined),
-    }))
+    }));
 
     try {
       const res = await fetch("http://localhost:7092/api/Question/CreateMultipleQuestionsWithAnswers", {
@@ -440,38 +445,38 @@ const RiskAssessmentManagement = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (data.success) {
-        toast.success("Tạo câu hỏi và đáp án thành công")
-        setNewQuestions([])
-        setShowAddQuestionForm(false)
-        handleViewQuestions(selectedAssessmentId)
+        toast.success("Tạo câu hỏi và đáp án thành công");
+        setNewQuestions([]);
+        setShowAddQuestionForm(false);
+        handleViewQuestions(selectedAssessmentId);
       } else {
-        toast.error(data.message || "Tạo câu hỏi thất bại")
+        toast.error(data.message || "Tạo câu hỏi thất bại");
       }
     } catch (err) {
-      toast.error(err.message || "Không thể tạo câu hỏi")
+      toast.error(err.message || "Không thể tạo câu hỏi");
     }
-  }
+  };
 
   const filteredAssessments = assessments.filter(
     (assessment) =>
       assessment.assessmentName.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (statusFilter ? assessment.assessmentStage === statusFilter : true),
-  )
+  );
 
   const filteredCourses = courses.filter((course) => {
     const courseType = course.type.trim();
     const matchesType = formData.assessmentType === "Crafft"
       ? courseType === "HocSinh"
-      : (courseType === "SinhVien" || courseType === "PhuHuynh");
+      : courseType === "SinhVien" || courseType === "PhuHuynh";
     if (!matchesType) return false;
     const isUsed = assessments.some(
       (a) =>
         a.assessmentStage === "Output" &&
         a.courseID === course.courseID &&
-        (!isEditing || a.assessmentID !== editingAssessment?.assessmentID)
+        (!isEditing || a.assessmentID !== editingAssessment?.assessmentID),
     );
     return !isUsed;
   });
@@ -581,15 +586,15 @@ const RiskAssessmentManagement = () => {
               <h3 className="modal-title">{isEditing ? "Chỉnh sửa bài đánh giá" : "Tạo bài đánh giá mới"}</h3>
               <button
                 onClick={() => {
-                  setShowAssessmentModal(false)
-                  setIsEditing(false)
-                  setEditingAssessment(null)
+                  setShowAssessmentModal(false);
+                  setIsEditing(false);
+                  setEditingAssessment(null);
                   setFormData({
                     assessmentName: "",
                     description: "",
                     assessmentType: "Crafft",
                     courseID: "",
-                  })
+                  });
                 }}
                 className="close-button"
               >
@@ -785,13 +790,6 @@ const RiskAssessmentManagement = () => {
                         {editingQuestionId === question.questionId ? (
                           <>
                             <button
-                              onClick={() => handleEditQuestionSubmit(question.questionId)}
-                              className="action-button save-button"
-                              title="Lưu"
-                            >
-                              <Save className="w-4 h-4" />
-                            </button>
-                            <button
                               onClick={() => setEditingQuestionId(null)}
                               className="action-button cancel-button"
                               title="Hủy"
@@ -801,13 +799,6 @@ const RiskAssessmentManagement = () => {
                           </>
                         ) : (
                           <>
-                            <button
-                              onClick={() => handleEditQuestion(question)}
-                              className="action-button edit-button"
-                              title="Chỉnh sửa"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
                             <button
                               onClick={() => handleDeleteQuestion(question.questionId)}
                               className="action-button delete-button"
@@ -871,8 +862,8 @@ const RiskAssessmentManagement = () => {
               {!showAddQuestionForm && (
                 <button
                   onClick={() => {
-                    setShowAddQuestionForm(true)
-                    addNewQuestion()
+                    setShowAddQuestionForm(true);
+                    addNewQuestion();
                   }}
                   className="add-new-question-button"
                 >
@@ -970,7 +961,7 @@ const RiskAssessmentManagement = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default RiskAssessmentManagement
+export default RiskAssessmentManagement;
