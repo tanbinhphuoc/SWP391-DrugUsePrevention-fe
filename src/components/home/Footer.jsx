@@ -203,22 +203,7 @@ const Footer = () => {
                 Đăng ký nhận bản tin để cập nhật thông tin mới nhất, tài nguyên và mẹo phòng ngừa.
               </p>
               <div className="relative group">
-                <div className="flex rounded-xl overflow-hidden shadow-2xl border border-slate-700/50 backdrop-blur-sm bg-slate-800/30 transition-all duration-300 hover:border-slate-600 hover:shadow-emerald-500/10">
-                  <input
-                    type="email"
-                    placeholder="Email của bạn"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="flex-1 px-4 py-3 bg-transparent focus:outline-none text-sm text-white placeholder-slate-400 transition-all duration-300 focus:placeholder-slate-500"
-                  />
-                  <button className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-400 hover:to-emerald-500 transition-all duration-300 text-sm font-medium relative overflow-hidden group">
-                    <span className="relative z-10 flex items-center space-x-2">
-                      <span>Gửi</span>
-                      <Send className="h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                    </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-emerald-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-                  </button>
-                </div>
+                
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
               </div>
             </div>

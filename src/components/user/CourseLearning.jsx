@@ -230,8 +230,8 @@ const CourseLearning = () => {
               <div className="flex items-center gap-3">
                 <Award className="w-8 h-8 text-purple-500" />
                 <div>
-                  <div className="text-2xl font-bold text-gray-900">Chứng chỉ</div>
-                  <div className="text-sm text-gray-600">Sau khi hoàn thành</div>
+                  <div className="text-2xl font-bold text-gray-900">Đánh giá</div>
+                  <div className="text-sm text-gray-600">kiểm tra sau học</div>
                 </div>
               </div>
             </div>
