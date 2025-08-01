@@ -782,10 +782,6 @@ const UserAppointments = ({ appointmentId }) => {
                 </div>
                 <p className="text-white/80 text-sm mb-4">{expert.bio}</p>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1">
-                    <Star className="text-yellow-400 fill-current" size={16} />
-                    <span className="text-white text-sm">{expert.rating}</span>
-                  </div>
                   <span className="text-emerald-300 font-semibold">
                     {expert.hourlyRate === 0 ? "Miễn phí" : formatPrice(expert.hourlyRate) + "/h"}
                   </span>

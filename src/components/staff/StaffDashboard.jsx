@@ -92,8 +92,7 @@ const StaffDashboard = () => {
     { id: "accounts", label: "Quản lý tài khoản", icon: <Users className="h-5 w-5" /> },
     { id: "courses", label: "Quản lý khóa học", icon: <BookOpen className="h-5 w-5" /> },
     { id: "appointments", label: "Quản lý lịch hẹn", icon: <Calendar className="h-5 w-5" /> },
-    { id: "assessments", label: "Đánh giá rủi ro", icon: <FileText className="h-5 w-5" /> },
-    { id: "blogs", label: "Quản lý Blogs", icon: <FileText className="h-5 w-5" /> }
+    { id: "assessments", label: "Đánh giá rủi ro", icon: <FileText className="h-5 w-5" /> }
   ];
 
   return (
@@ -179,7 +178,6 @@ const StaffDashboard = () => {
           {activeTab === "courses" && <StaffCourseManagement />}
           {activeTab === "appointments" && <StaffAppointmentManagement />}
           {activeTab === "assessments" && <StaffAssessmentManagement />}
-          {activeTab === "blogs" && <StaffBlogManagement />}
         </div>
       </div>
   );
