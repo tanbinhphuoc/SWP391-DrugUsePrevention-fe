@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect } from "react"
-import { Search, Edit2, Power, RefreshCw, Users, UserPlus } from "lucide-react"
-import toast, { Toaster } from 'react-hot-toast'
+import React, { useState, useEffect } from "react";
+import { Search, Edit2, Power, RefreshCw, Users, UserPlus } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 
 class ErrorBoundary extends React.Component {
-  state = { hasError: false, error: null }
+  state = { hasError: false, error: null };
 
   static getDerivedStateFromError(error) {
-    return { hasError: true, error }
+    return { hasError: true, error };
   }
 
   render() {
@@ -24,39 +24,39 @@ class ErrorBoundary extends React.Component {
             Thử lại
           </button>
         </div>
-      )
+      );
     }
-    return this.props.children
+    return this.props.children;
   }
 }
 
 const AccountManagement = () => {
-  const [users, setUsers] = useState([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [roleFilter, setRoleFilter] = useState("")
-  const [statusFilter, setStatusFilter] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [selectedUser, setSelectedUser] = useState(null)
+  const [users, setUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [formData, setFormData] = useState({
-    userName: '',
-    password: '',
-    email: '',
-    fullName: '',
-    dateOfBirth: '',
-    phone: '',
-    address: '',
-    roleName: 'Member',
-    degree: '',
-    hourlyRate: '',
-    specialty: '',
-    experience: '',
-    certificateName: '',
-    dateAcquired: '',
-    googleMeetLink: '',
-  })
+    userName: "",
+    password: "",
+    email: "",
+    fullName: "",
+    dateOfBirth: "",
+    phone: "",
+    address: "",
+    roleName: "Member",
+    degree: "",
+    hourlyRate: "",
+    specialty: "",
+    experience: "",
+    certificateName: "",
+    dateAcquired: "",
+    googleMeetLink: "",
+  });
 
   // Danh sách chuyên môn hợp lệ
   const validSpecialties = [
@@ -64,236 +64,234 @@ const AccountManagement = () => {
     "Tư vấn gia đình",
     "Cai nghiện",
     "Hỗ trợ tâm lý",
-  ]
+  ];
 
   // Fetch users and consultants
   const fetchUsers = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("Vui lòng đăng nhập với vai trò Admin để tiếp tục.")
+        throw new Error("Vui lòng đăng nhập với vai trò Admin để tiếp tục.");
       }
 
       try {
-        const tokenData = JSON.parse(atob(token.split('.')[1]))
-        const expiresAt = tokenData.exp ? new Date(tokenData.exp * 1000) : null
-        const now = new Date()
+        const tokenData = JSON.parse(atob(token.split(".")[1]));
+        const expiresAt = tokenData.exp ? new Date(tokenData.exp * 1000) : null;
+        const now = new Date();
         if (expiresAt && now > expiresAt) {
-          throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
+          throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
         }
 
         if (!tokenData.role || tokenData.role !== "Admin") {
-          throw new Error("Bạn không có quyền Admin để truy cập.")
+          throw new Error("Bạn không có quyền Admin để truy cập.");
         }
       } catch (e) {
-        console.warn("Không thể giải mã token", e)
-        throw new Error("Token xác thực không hợp lệ. Vui lòng đăng nhập lại.")
+        console.warn("Không thể giải mã token", e);
+        throw new Error("Token xác thực không hợp lệ. Vui lòng đăng nhập lại.");
       }
 
       // Fetch all users
       const usersResponse = await fetch("http://localhost:7092/api/Admin/GetAllUsers", {
         method: "GET",
         headers: {
-          "Accept": "*/*",
-          "Authorization": `Bearer ${token}`,
+          Accept: "*/*",
+          Authorization: `Bearer ${token}`,
         },
-      })
+      });
 
       if (!usersResponse.ok) {
-        const errorText = await usersResponse.text()
-        console.error("Users API Error:", usersResponse.status, errorText)
-        throw new Error(`Lấy danh sách người dùng thất bại. Mã lỗi: ${usersResponse.status} - ${errorText}`)
+        const errorText = await usersResponse.text();
+        console.error("Users API Error:", usersResponse.status, errorText);
+        throw new Error(`Lấy danh sách người dùng thất bại. Mã lỗi: ${usersResponse.status} - ${errorText}`);
       }
 
-      const usersData = await usersResponse.json()
+      const usersData = await usersResponse.json();
       if (!usersData.success || !Array.isArray(usersData.data)) {
-        console.error("Users API Response:", usersData)
-        throw new Error(usersData.message || "Dữ liệu API không hợp lệ.")
+        console.error("Users API Response:", usersData);
+        throw new Error(usersData.message || "Dữ liệu API không hợp lệ.");
       }
 
       // Fetch all consultants
       const consultantsResponse = await fetch("http://localhost:7092/api/Appointments/GetAllConsultant", {
         method: "GET",
         headers: {
-          "Accept": "*/*",
-          "Authorization": `Bearer ${token}`,
+          Accept: "*/*",
+          Authorization: `Bearer ${token}`,
         },
-      })
+      });
 
       if (!consultantsResponse.ok) {
-        const errorText = await consultantsResponse.text()
-        console.error("Consultants API Error:", consultantsResponse.status, errorText)
-        throw new Error(`Lấy danh sách Consultant thất bại. Mã lỗi: ${consultantsResponse.status} - ${errorText}`)
+        const errorText = await consultantsResponse.text();
+        console.error("Consultants API Error:", consultantsResponse.status, errorText);
+        throw new Error(`Lấy danh sách Consultant thất bại. Mã lỗi: ${consultantsResponse.status} - ${errorText}`);
       }
 
-      const consultantsData = await consultantsResponse.json()
+      const consultantsData = await consultantsResponse.json();
       if (!consultantsData.success || !Array.isArray(consultantsData.data)) {
-        console.error("Consultants API Response:", consultantsData)
-        throw new Error(consultantsData.message || "Dữ liệu API Consultant không hợp lệ.")
+        console.error("Consultants API Response:", consultantsData);
+        throw new Error(consultantsData.message || "Dữ liệu API Consultant không hợp lệ.");
       }
 
       // Map users and merge with consultant data
       const mappedUsers = usersData.data.map((user) => {
-        const consultant = consultantsData.data.find(c => c.userId === user.userID)
+        const consultant = consultantsData.data.find((c) => c.userId === user.userID);
         return {
           id: user.userID,
-          userName: user.userName || '',
-          fullName: user.fullName || '',
+          userName: user.userName || "",
+          fullName: user.fullName || "",
           email: user.email || "Không có email",
           role: user.roleName || "Unknown",
           status: user.status || "Inactive",
           createdAt: user.createdDate ? new Date(user.createdDate) : new Date(),
           updatedAt: user.updatedDate ? new Date(user.updatedDate) : null,
-          dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split("T")[0] : '',
-          phone: user.phone || '',
-          address: user.address || '',
+          dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split("T")[0] : "",
+          phone: user.phone || "",
+          address: user.address || "",
           consultantId: consultant ? consultant.consultantID : null,
-          degree: consultant ? consultant.degree : '',
-          hourlyRate: consultant ? consultant.hourlyRate.toString() : '',
-          specialty: consultant ? consultant.specialty : '',
-          experience: consultant ? consultant.experience : '',
-          certificateName: consultant ? consultant.certificateName : '',
-          dateAcquired: consultant ? new Date(consultant.dateAcquired).toISOString().split("T")[0] : '',
-          googleMeetLink: consultant ? consultant.googleMeetLink : '',
-        }
-      })
+          degree: consultant ? consultant.degree : "",
+          hourlyRate: consultant ? consultant.hourlyRate.toString() : "",
+          specialty: consultant ? consultant.specialty : "",
+          experience: consultant ? consultant.experience : "",
+          certificateName: consultant ? consultant.certificateName : "",
+          dateAcquired: consultant ? new Date(consultant.dateAcquired).toISOString().split("T")[0] : "",
+          googleMeetLink: consultant ? consultant.googleMeetLink : "",
+        };
+      });
 
-      setUsers(mappedUsers)
+      setUsers(mappedUsers);
     } catch (err) {
-      console.error("Fetch Error:", err)
-      setError(err.message || "Đã xảy ra lỗi khi tải dữ liệu.")
-      toast.error(err.message || "Đã xảy ra lỗi khi tải dữ liệu.")
+      console.error("Fetch Error:", err);
+      setError(err.message || "Đã xảy ra lỗi khi tải dữ liệu.");
+      toast.error(err.message || "Đã xảy ra lỗi khi tải dữ liệu.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Fetch user details
   const fetchUserDetails = async (userId) => {
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       const response = await fetch(`http://localhost:7092/api/Users/${userId}GetAllUser`, {
         method: "GET",
         headers: {
-          "Accept": "*/*",
-          "Authorization": `Bearer ${token}`,
+          Accept: "*/*",
+          Authorization: `Bearer ${token}`,
         },
-      })
+      });
 
       if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Lấy thông tin người dùng thất bại. Mã lỗi: ${response.status} - ${errorText}`)
+        const errorText = await response.text();
+        throw new Error(`Lấy thông tin người dùng thất bại. Mã lỗi: ${response.status} - ${errorText}`);
       }
 
-      const data = await response.json()
+      const data = await response.json();
       return {
-        userName: data.userName || '',
-        fullName: data.fullName || '',
-        email: data.email || '',
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split("T")[0] : '',
-        phone: data.phone || '',
-        address: data.address || '',
-        role: data.roleName || 'Unknown',
-        status: data.status || 'Inactive',
+        userName: data.userName || "",
+        fullName: data.fullName || "",
+        email: data.email || "",
+        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split("T")[0] : "",
+        phone: data.phone || "",
+        address: data.address || "",
+        role: data.roleName || "Unknown",
+        status: data.status || "Inactive",
         createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
         updatedAt: data.updatedAt ? new Date(data.updatedAt) : null,
-      }
+      };
     } catch (err) {
-      console.error("Fetch User Details Error:", err)
-      throw err
+      console.error("Fetch User Details Error:", err);
+      throw err;
     }
-  }
+  };
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    fetchUsers();
+  }, []);
 
-  const handleSearch = (e) => setSearchTerm(e.target.value)
-  const handleRoleFilter = (e) => setRoleFilter(e.target.value)
-  const handleStatusFilter = (e) => setStatusFilter(e.target.value)
+  const handleSearch = (e) => setSearchTerm(e.target.value);
+  const handleRoleFilter = (e) => setRoleFilter(e.target.value);
+  const handleStatusFilter = (e) => setStatusFilter(e.target.value);
 
   const filteredUsers = Array.isArray(users)
     ? users
         .filter(
           (user) =>
             user &&
-            (
-              user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
               user.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-            ) &&
+              user.email?.toLowerCase().includes(searchTerm.toLowerCase())) &&
             (roleFilter ? user.role === roleFilter : true) &&
             (statusFilter ? user.status === statusFilter : true)
         )
         .sort((a, b) => {
-          if (a.status === "Active" && b.status !== "Active") return -1
-          if (a.status !== "Active" && b.status === "Active") return 1
-          return b.createdAt - a.createdAt
+          if (a.status === "Active" && b.status !== "Active") return -1;
+          if (a.status !== "Active" && b.status === "Active") return 1;
+          return b.createdAt - a.createdAt;
         })
-    : []
+    : [];
 
   const handleFormChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const validateFormData = (data, isConsultant) => {
-    if (!data.email?.includes('@') && !isConsultant) {
-      toast.error('Email không hợp lệ')
-      return false
+    if (!data.email?.includes("@") && !isConsultant) {
+      toast.error("Email không hợp lệ");
+      return false;
     }
     if (!data.fullName) {
-      toast.error('Vui lòng nhập họ và tên')
-      return false
+      toast.error("Vui lòng nhập họ và tên");
+      return false;
     }
     if (isConsultant) {
       if (!data.hourlyRate || isNaN(parseFloat(data.hourlyRate)) || parseFloat(data.hourlyRate) <= 0) {
-        toast.error('Vui lòng nhập giá tư vấn hợp lệ (số dương)')
-        return false
+        toast.error("Vui lòng nhập giá tư vấn hợp lệ (số dương)");
+        return false;
       }
       if (!data.degree) {
-        toast.error('Vui lòng nhập bằng cấp')
-        return false
+        toast.error("Vui lòng nhập bằng cấp");
+        return false;
       }
       if (!data.specialty || !validSpecialties.includes(data.specialty)) {
-        toast.error('Vui lòng chọn chuyên môn hợp lệ')
-        return false
+        toast.error("Vui lòng chọn chuyên môn hợp lệ");
+        return false;
       }
       if (!data.experience) {
-        toast.error('Vui lòng nhập kinh nghiệm')
-        return false
+        toast.error("Vui lòng nhập kinh nghiệm");
+        return false;
       }
       if (!data.certificateName) {
-        toast.error('Vui lòng nhập tên chứng chỉ')
-        return false
+        toast.error("Vui lòng nhập tên chứng chỉ");
+        return false;
       }
       if (!data.dateAcquired) {
-        toast.error('Vui lòng nhập ngày cấp chứng chỉ')
-        return false
+        toast.error("Vui lòng nhập ngày cấp chứng chỉ");
+        return false;
       }
-      if (data.googleMeetLink && !data.googleMeetLink.startsWith('https://meet.google.com/')) {
-        toast.error('Link Google Meet không hợp lệ')
-        return false
+      if (data.googleMeetLink && !data.googleMeetLink.startsWith("https://meet.google.com/")) {
+        toast.error("Link Google Meet không hợp lệ");
+        return false;
       }
     }
-    return true
-  }
+    return true;
+  };
 
   const handleCreate = async (e) => {
-    e.preventDefault()
-    if (!validateFormData(formData, formData.roleName === "Consultant")) return
+    e.preventDefault();
+    if (!validateFormData(formData, formData.roleName === "Consultant")) return;
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("Vui lòng đăng nhập với vai trò Admin để tiếp tục.")
+        throw new Error("Vui lòng đăng nhập với vai trò Admin để tiếp tục.");
       }
 
-      let url
-      let body
+      let url;
+      let body;
       if (formData.roleName === "Consultant") {
-        url = "http://localhost:7092/api/Consultant/createConsultant(Admin)"
+        url = "http://localhost:7092/api/Consultant/createConsultant(Admin)";
         body = {
           userName: formData.userName,
           password: formData.password,
@@ -306,9 +304,9 @@ const AccountManagement = () => {
           certificateName: formData.certificateName,
           dateAcquired: formData.dateAcquired ? `${formData.dateAcquired}T00:00:00` : null,
           googleMeetLink: formData.googleMeetLink || null,
-        }
+        };
       } else {
-        url = "http://localhost:7092/api/Auth/admin/create-user"
+        url = "http://localhost:7092/api/Auth/admin/create-user";
         body = {
           userName: formData.userName,
           password: formData.password,
@@ -318,81 +316,83 @@ const AccountManagement = () => {
           phone: formData.phone,
           address: formData.address,
           roleName: formData.roleName,
-        }
+        };
       }
 
-      console.log("Create Request Body:", JSON.stringify(body, null, 2))
+      console.log("Create Request Body:", JSON.stringify(body, null, 2));
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          "Accept": "*/*",
-          "Authorization": `Bearer ${token}`,
+          Accept: "*/*",
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        console.error("Create API Error:", response.status, errorData)
+        const errorData = await response.json();
+        console.error("Create API Error:", response.status, errorData);
         if (response.status === 400 && errorData.message?.includes("duplicate")) {
-          throw new Error("Tên đăng nhập hoặc email đã tồn tại.")
+          throw new Error("Tên đăng nhập hoặc email đã tồn tại.");
         }
-        throw new Error(errorData.message || `Tạo tài khoản thất bại. Mã lỗi: ${response.status}`)
+        throw new Error(errorData.message || `Tạo tài khoản thất bại. Mã lỗi: ${response.status}`);
       }
 
-      toast.success("Tạo tài khoản thành công!")
-      setShowCreateModal(false)
+      toast.success("Tạo tài khoản thành công!");
+      setShowCreateModal(false);
       setFormData({
-        userName: '',
-        password: '',
-        email: '',
-        fullName: '',
-        dateOfBirth: '',
-        phone: '',
-        address: '',
-        roleName: 'Member',
-        degree: '',
-        hourlyRate: '',
-        specialty: '',
-        experience: '',
-        certificateName: '',
-        dateAcquired: '',
-        googleMeetLink: '',
-      })
-      fetchUsers()
+        userName: "",
+        password: "",
+        email: "",
+        fullName: "",
+        dateOfBirth: "",
+        phone: "",
+        address: "",
+        roleName: "Member",
+        degree: "",
+        hourlyRate: "",
+        specialty: "",
+        experience: "",
+        certificateName: "",
+        dateAcquired: "",
+        googleMeetLink: "",
+      });
+      fetchUsers();
     } catch (err) {
-      console.error("Create Error:", err)
-      toast.error(err.message || "Đã xảy ra lỗi khi tạo tài khoản.")
+      console.error("Create Error:", err);
+      toast.error(err.message || "Đã xảy ra lỗi khi tạo tài khoản.");
     }
-  }
+  };
 
   const handleUpdate = async (e) => {
-    e.preventDefault()
-    if (!validateFormData(formData, selectedUser.role === "Consultant")) return
+    e.preventDefault();
+    if (!validateFormData(formData, selectedUser.role === "Consultant")) return;
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("Vui lòng đăng nhập với vai trò Admin để tiếp tục.")
+        throw new Error("Vui lòng đăng nhập với vai trò Admin để tiếp tục.");
       }
 
-      let url
-      let body
+      let url;
+      let body;
       if (selectedUser.role === "Consultant") {
-        url = `http://localhost:7092/api/Consultant/${selectedUser.consultantId}`
+        url = `http://localhost:7092/api/Admin/update-by-user/${selectedUser.id}UpdateConsultantByUserID`;
         body = {
-          fullName: formData.fullName || '',
+          userName: formData.userName,
           password: formData.password || null,
-          degree: formData.degree || '',
+          email: formData.email,
+          fullName: formData.fullName,
+          degree: formData.degree,
           hourlyRate: parseFloat(formData.hourlyRate) || 0,
-          specialty: formData.specialty || '',
-          experience: formData.experience || '',
-          certificateName: formData.certificateName || '',
+          specialty: formData.specialty,
+          experience: formData.experience,
+          certificateName: formData.certificateName,
           dateAcquired: formData.dateAcquired ? `${formData.dateAcquired}T00:00:00` : null,
           googleMeetLink: formData.googleMeetLink || null,
-        }
+        };
       } else {
-        url = `http://localhost:7092/api/Users/${selectedUser.id}/AdminUpdateProfileUser`
+        url = `http://localhost:7092/api/Users/${selectedUser.id}/AdminUpdateProfileUser`;
         body = {
           userName: formData.userName,
           password: formData.password || null,
@@ -401,133 +401,133 @@ const AccountManagement = () => {
           dateOfBirth: formData.dateOfBirth ? `${formData.dateOfBirth}T00:00:00` : null,
           phone: formData.phone || null,
           address: formData.address || null,
-        }
+        };
       }
 
-      console.log("Update Request Body:", JSON.stringify(body, null, 2))
+      console.log("Update Request Body:", JSON.stringify(body, null, 2));
       const response = await fetch(url, {
         method: selectedUser.role === "Consultant" ? "PATCH" : "PUT",
         headers: {
-          "Accept": "*/*",
-          "Authorization": `Bearer ${token}`,
+          Accept: "*/*",
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        console.error("Update API Error:", response.status, errorData)
+        const errorData = await response.json();
+        console.error("Update API Error:", response.status, errorData);
         if (response.status === 400) {
-          throw new Error(errorData.message || "Dữ liệu gửi không hợp lệ. Vui lòng kiểm tra lại thông tin.")
+          throw new Error(errorData.message || "Dữ liệu gửi không hợp lệ. Vui lòng kiểm tra lại thông tin.");
         }
         if (response.status === 404) {
-          throw new Error("Không tìm thấy tài khoản.")
+          throw new Error("Không tìm thấy tài khoản.");
         }
         if (response.status === 401) {
-          localStorage.removeItem("token")
-          toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.")
-          window.location.href = "/login"
-          return
+          localStorage.removeItem("token");
+          toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
+          window.location.href = "/login";
+          return;
         }
-        throw new Error(errorData.message || `Cập nhật tài khoản thất bại. Mã lỗi: ${response.status}`)
+        throw new Error(errorData.message || `Cập nhật tài khoản thất bại. Mã lỗi: ${response.status}`);
       }
 
-      toast.success("Cập nhật tài khoản thành công!")
-      setShowEditModal(false)
+      toast.success("Cập nhật tài khoản thành công!");
+      setShowEditModal(false);
       setFormData({
-        userName: '',
-        password: '',
-        email: '',
-        fullName: '',
-        dateOfBirth: '',
-        phone: '',
-        address: '',
-        roleName: 'Member',
-        degree: '',
-        hourlyRate: '',
-        specialty: '',
-        experience: '',
-        certificateName: '',
-        dateAcquired: '',
-        googleMeetLink: '',
-      })
-      fetchUsers()
+        userName: "",
+        password: "",
+        email: "",
+        fullName: "",
+        dateOfBirth: "",
+        phone: "",
+        address: "",
+        roleName: "Member",
+        degree: "",
+        hourlyRate: "",
+        specialty: "",
+        experience: "",
+        certificateName: "",
+        dateAcquired: "",
+        googleMeetLink: "",
+      });
+      fetchUsers();
     } catch (err) {
-      console.error("Update Error:", err)
-      toast.error(err.message || "Đã xảy ra lỗi khi cập nhật tài khoản.")
+      console.error("Update Error:", err);
+      toast.error(err.message || "Đã xảy ra lỗi khi cập nhật tài khoản.");
     }
-  }
+  };
 
   const handleToggleStatus = async (user) => {
-    const newStatus = user.status === "Active" ? "Inactive" : "Active"
-    const actionMessage = newStatus === "Inactive" ? "vô hiệu hóa" : "kích hoạt"
+    const newStatus = user.status === "Active" ? "Inactive" : "Active";
+    const actionMessage = newStatus === "Inactive" ? "vô hiệu hóa" : "kích hoạt";
 
-    if (!window.confirm(`Bạn có chắc chắn muốn ${actionMessage} tài khoản này?`)) return
+    if (!window.confirm(`Bạn có chắc chắn muốn ${actionMessage} tài khoản này?`)) return;
 
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("Vui lòng đăng nhập với vai trò Admin để tiếp tục.")
+        throw new Error("Vui lòng đăng nhập với vai trò Admin để tiếp tục.");
       }
 
-      const url = `http://localhost:7092/api/Admin/users/${user.id}/SetStatusForUser`
+      const url = `http://localhost:7092/api/Admin/users/${user.id}/SetStatusForUser`;
 
-      console.log("Toggle Status Request Body:", JSON.stringify(newStatus))
+      console.log("Toggle Status Request Body:", JSON.stringify(newStatus));
       const response = await fetch(url, {
         method: "PUT",
         headers: {
-          "Accept": "*/*",
-          "Authorization": `Bearer ${token}`,
+          Accept: "*/*",
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newStatus),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        console.error("Toggle Status API Error:", response.status, errorData)
-        throw new Error(errorData.message || `Cập nhật trạng thái thất bại. Mã lỗi: ${response.status}`)
+        const errorData = await response.json();
+        console.error("Toggle Status API Error:", response.status, errorData);
+        throw new Error(errorData.message || `Cập nhật trạng thái thất bại. Mã lỗi: ${response.status}`);
       }
 
-      toast.success(`Đã ${actionMessage} tài khoản thành công!`)
-      fetchUsers()
+      toast.success(`Đã ${actionMessage} tài khoản thành công!`);
+      fetchUsers();
     } catch (err) {
-      console.error("Toggle Status Error:", err)
-      toast.error(err.message || "Đã xảy ra lỗi khi cập nhật trạng thái.")
+      console.error("Toggle Status Error:", err);
+      toast.error(err.message || "Đã xảy ra lỗi khi cập nhật trạng thái.");
     }
-  }
+  };
 
   const handleEditClick = async (user) => {
-    setSelectedUser(user)
-    let userDetails = {}
+    setSelectedUser(user);
+    let userDetails = {};
     if (user.role !== "Consultant") {
       try {
-        userDetails = await fetchUserDetails(user.id)
+        userDetails = await fetchUserDetails(user.id);
       } catch (err) {
-        toast.error("Không thể tải thông tin người dùng: " + err.message)
-        return
+        toast.error("Không thể tải thông tin người dùng: " + err.message);
+        return;
       }
     }
     setFormData({
       userName: user.userName,
-      password: '',
+      password: "",
       email: user.email,
       fullName: user.fullName,
-      dateOfBirth: userDetails.dateOfBirth || user.dateOfBirth || '',
-      phone: userDetails.phone || user.phone || '',
-      address: userDetails.address || user.address || '',
+      dateOfBirth: userDetails.dateOfBirth || user.dateOfBirth || "",
+      phone: userDetails.phone || user.phone || "",
+      address: userDetails.address || user.address || "",
       roleName: user.role,
-      degree: user.degree || '',
-      hourlyRate: user.hourlyRate || '',
-      specialty: user.specialty || '',
-      experience: user.experience || '',
-      certificateName: user.certificateName || '',
-      dateAcquired: user.dateAcquired || '',
-      googleMeetLink: user.googleMeetLink || '',
-    })
-    setShowEditModal(true)
-  }
+      degree: user.degree || "",
+      hourlyRate: user.hourlyRate || "",
+      specialty: user.specialty || "",
+      experience: user.experience || "",
+      certificateName: user.certificateName || "",
+      dateAcquired: user.dateAcquired || "",
+      googleMeetLink: user.googleMeetLink || "",
+    });
+    setShowEditModal(true);
+  };
 
   return (
     <ErrorBoundary>
@@ -578,9 +578,13 @@ const AccountManagement = () => {
                   className="w-48 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white"
                 >
                   <option value="">Tất cả vai trò</option>
-                  {Array.from(new Set(users.map(user => user.role))).sort().map(role => (
-                    <option key={role} value={role}>{role}</option>
-                  ))}
+                  {Array.from(new Set(users.map((user) => user.role)))
+                    .sort()
+                    .map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
                 </select>
                 <select
                   value={statusFilter}
@@ -588,9 +592,13 @@ const AccountManagement = () => {
                   className="w-48 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white"
                 >
                   <option value="">Tất cả trạng thái</option>
-                  {Array.from(new Set(users.map(user => user.status))).sort().map(status => (
-                    <option key={status} value={status}>{status === "Active" ? "Đang hoạt động" : status === "Inactive" ? "Không hoạt động" : "Không xác định"}</option>
-                  ))}
+                  {Array.from(new Set(users.map((user) => user.status)))
+                    .sort()
+                    .map((status) => (
+                      <option key={status} value={status}>
+                        {status === "Active" ? "Đang hoạt động" : status === "Inactive" ? "Không hoạt động" : "Không xác định"}
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>
@@ -699,7 +707,7 @@ const AccountManagement = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{user.specialty || 'N/A'}</div>
+                        <div className="text-sm text-gray-500">{user.specialty || "N/A"}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
@@ -787,7 +795,7 @@ const AccountManagement = () => {
                       <option value="Admin">Admin</option>
                     </select>
                   </div>
-                  {formData.roleName !== 'Consultant' && (
+                  {formData.roleName !== "Consultant" && (
                     <>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Ngày sinh</label>
@@ -819,7 +827,7 @@ const AccountManagement = () => {
                       </div>
                     </>
                   )}
-                  {formData.roleName === 'Consultant' && (
+                  {formData.roleName === "Consultant" && (
                     <>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Bằng cấp</label>
@@ -854,7 +862,9 @@ const AccountManagement = () => {
                         >
                           <option value="">Chọn chuyên môn</option>
                           {validSpecialties.map((spec) => (
-                            <option key={spec} value={spec}>{spec}</option>
+                            <option key={spec} value={spec}>
+                              {spec}
+                            </option>
                           ))}
                         </select>
                       </div>
@@ -926,7 +936,7 @@ const AccountManagement = () => {
               <div className="bg-white p-6 rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">Sửa thông tin tài khoản</h2>
                 <p className="text-sm text-gray-500 mb-4">
-                  {selectedUser.role === 'Consultant' && "Lưu ý: Tên đăng nhập và email không thể thay đổi khi chỉnh sửa Consultant."}
+                  {selectedUser.role === "Consultant" && "Lưu ý: Tên đăng nhập và email không thể thay đổi khi chỉnh sửa Consultant."}
                 </p>
                 <form onSubmit={handleUpdate} className="space-y-4">
                   <div>
@@ -935,9 +945,9 @@ const AccountManagement = () => {
                       name="userName"
                       value={formData.userName}
                       onChange={handleFormChange}
-                      disabled={selectedUser.role === 'Consultant'}
+                      disabled={selectedUser.role === "Consultant"}
                       className={`mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                        selectedUser.role === 'Consultant' ? 'bg-gray-100 text-gray-500' : ''
+                        selectedUser.role === "Consultant" ? "bg-gray-100 text-gray-500" : ""
                       }`}
                     />
                   </div>
@@ -948,9 +958,9 @@ const AccountManagement = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleFormChange}
-                      disabled={selectedUser.role === 'Consultant'}
+                      disabled={selectedUser.role === "Consultant"}
                       className={`mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                        selectedUser.role === 'Consultant' ? 'bg-gray-100 text-gray-500' : ''
+                        selectedUser.role === "Consultant" ? "bg-gray-100 text-gray-500" : ""
                       }`}
                     />
                   </div>
@@ -974,7 +984,7 @@ const AccountManagement = () => {
                       className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  {selectedUser.role !== 'Consultant' && (
+                  {selectedUser.role !== "Consultant" && (
                     <>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Ngày sinh</label>
@@ -1006,7 +1016,7 @@ const AccountManagement = () => {
                       </div>
                     </>
                   )}
-                  {selectedUser.role === 'Consultant' && (
+                  {selectedUser.role === "Consultant" && (
                     <>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Bằng cấp</label>
@@ -1041,7 +1051,9 @@ const AccountManagement = () => {
                         >
                           <option value="">Chọn chuyên môn</option>
                           {validSpecialties.map((spec) => (
-                            <option key={spec} value={spec}>{spec}</option>
+                            <option key={spec} value={spec}>
+                              {spec}
+                            </option>
                           ))}
                         </select>
                       </div>
@@ -1113,22 +1125,22 @@ const AccountManagement = () => {
             success: {
               duration: 3000,
               style: {
-                background: '#22c55e',
-                color: 'white',
+                background: "#22c55e",
+                color: "white",
               },
             },
             error: {
               duration: 3000,
               style: {
-                background: '#ef4444',
-                color: 'white',
+                background: "#ef4444",
+                color: "white",
               },
             },
           }}
         />
       </div>
     </ErrorBoundary>
-  )
-}
+  );
+};
 
-export default AccountManagement
+export default AccountManagement;
